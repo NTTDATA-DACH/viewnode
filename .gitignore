@@ -15,4 +15,4 @@
 .idea
 *.iml
 dist/
-kubectl-*
+kubectl-*dist/
