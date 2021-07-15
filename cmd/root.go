@@ -32,6 +32,13 @@ var rootCmd = &cobra.Command{
 		if !allNamespacesFlag {
 			fmt.Printf("namespace: %s\n", setup.Namespace)
 		}
+		nodes, err := srv.GetNodes(setup.Clientset)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, n := range nodes.Items {
+			fmt.Println(n.Name, n.Namespace, n.ClusterName)
+		}
 	},
 }
 
