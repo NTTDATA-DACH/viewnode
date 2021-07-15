@@ -1,2 +1,2 @@
-# kubectl-view-node
-kubectl-view-node is a kubectl plugin showing nodes with running pods and containers.
+# kubectl-viewnode
+kubectl-viewnode is a kubectl plugin showing nodes with running pods and containers.

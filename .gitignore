@@ -16,3 +16,4 @@
 *.iml
 dist/
 kubectl-*dist/
+kubectl-viewnode
