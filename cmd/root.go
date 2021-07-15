@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/tools/clientcmd"
+	"kubectl-viewnode/srv"
 )
 
 var debugFlag bool
@@ -16,24 +16,22 @@ var rootCmd = &cobra.Command{
 	Short: "kubectl-viewnode shows nodes with their pods and containers.",
 	Long:  `kubectl-viewnode shows nodes with their pods and containers.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		lr := clientcmd.NewDefaultClientConfigLoadingRules()
-		if namespace == "" && !allNamespacesFlag {
-			clientCfg, err := lr.Load()
-			if err != nil {
-				panic(err.Error())
-			}
-			if debugFlag {
-				spew.Dump(clientCfg)
-			}
-			namespace = clientCfg.Contexts[clientCfg.CurrentContext].Namespace
-			if namespace == "" {
-				namespace = "default"
-			}
+		setup, err := srv.GetCurrentNamespaceAndClientset()
+		if err != nil {
+			panic(err.Error())
+		}
+		if debugFlag {
+			spew.Dump(setup)
+		}
+		if namespace != "" {
+			setup.Namespace = namespace
 		}
 		if allNamespacesFlag {
-			namespace = ""
+			setup.Namespace = ""
 		}
-		fmt.Printf("namespace: %s\n", namespace)
+		if !allNamespacesFlag {
+			fmt.Printf("namespace: %s\n", setup.Namespace)
+		}
 	},
 }
 
