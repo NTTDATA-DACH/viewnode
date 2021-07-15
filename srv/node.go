@@ -5,6 +5,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 func GetNodes(clientset *kubernetes.Clientset) (*v1.NodeList, error) {
