@@ -10,6 +10,7 @@ import (
 var debugFlag bool
 var namespace string
 var allNamespacesFlag bool
+var nodeFilter string
 
 var rootCmd = &cobra.Command{
 	Use:   "kubectl-viewnode",
@@ -36,7 +37,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			panic(err.Error())
 		}
-		vnd := srv.GetViewNodeData(nodes, "")
+		vnd := srv.GetViewNodeData(nodes, nodeFilter)
 		srv.PrintNodes(vnd)
 	},
 }
@@ -52,7 +53,8 @@ func init() {
 
 	rootCmd.Flags().BoolVarP(&debugFlag, "debug", "d", false, "run in debug mode (shows more output)")
 	rootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
-	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "all namespaces to use")
+	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
+	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes containing filter in node name")
 }
 
 func initConfig() {
