@@ -36,9 +36,8 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			panic(err.Error())
 		}
-		for _, n := range nodes.Items {
-			fmt.Println(n.Name, n.Namespace, n.ClusterName)
-		}
+		vnd := srv.GetViewNodeData(nodes, "")
+		srv.PrintNodes(vnd)
 	},
 }
 
