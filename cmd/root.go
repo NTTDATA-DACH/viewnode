@@ -16,6 +16,7 @@ var rootCmd = &cobra.Command{
 	Use:   "kubectl-viewnode",
 	Short: "kubectl-viewnode shows nodes with their pods and containers.",
 	Long:  `kubectl-viewnode shows nodes with their pods and containers.`,
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		setup, err := srv.GetCurrentNamespaceAndClientset()
 		if err != nil {
@@ -37,8 +38,19 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			panic(err.Error())
 		}
-		vnd := srv.GetViewNodeData(nodes, nodeFilter)
-		srv.PrintNodes(vnd)
+		vf := srv.NodeFilter{
+			SearchText: nodeFilter,
+			Source:     nodes,
+		}
+		vnt, err := vf.Transform()
+		if err != nil {
+			panic(err.Error())
+		}
+		vnf, err := vf.Filter(vnt)
+		if err != nil {
+			panic(err.Error())
+		}
+		srv.PrintNodes(vnf)
 	},
 }
 
