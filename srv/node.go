@@ -42,7 +42,7 @@ func (nf NodeFilter) Filter(vns []ViewNode) (result []ViewNode, err error) {
 	if nf.SearchText == "" {
 		return vns, nil
 	}
-	res := []ViewNode{} // create an empty slice, not a nil slice when using var
+	res := make([]ViewNode, 0, len(vns))
 	for _, vn := range vns {
 		if strings.Contains(vn.Name, nf.SearchText) {
 			res = append(res, vn)
