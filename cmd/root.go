@@ -50,7 +50,10 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			panic(err.Error())
 		}
-		err = srv.PrintNodes(vnf)
+		vnd := srv.ViewNodeData{
+			Nodes: vnf,
+		}
+		err = vnd.Printout()
 		if err != nil {
 			panic(err.Error())
 		}
