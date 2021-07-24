@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	Long:  `kubectl-viewnode shows nodes with their pods and containers.`,
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		setup, err := srv.GetCurrentNamespaceAndClientset()
+		setup, err := srv.InitSetup()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -34,7 +34,10 @@ var rootCmd = &cobra.Command{
 		if !allNamespacesFlag {
 			fmt.Printf("namespace: %s\n", setup.Namespace)
 		}
-		nodes, err := srv.GetNodes(setup.Clientset)
+		api := srv.KubernetesApi{
+			Setup: setup,
+		}
+		nodes, err := api.RetrieveNodeList()
 		if err != nil {
 			panic(err.Error())
 		}

@@ -10,7 +10,7 @@ type Setup struct {
 	Clientset *kubernetes.Clientset
 }
 
-func GetCurrentNamespaceAndClientset() (*Setup, error) {
+func InitSetup() (*Setup, error) {
 	cclr := clientcmd.NewDefaultClientConfigLoadingRules()
 	co := clientcmd.ConfigOverrides{}
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(cclr, &co)
