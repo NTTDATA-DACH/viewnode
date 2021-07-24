@@ -2,22 +2,22 @@ package srv
 
 import (
 	"errors"
-	v1 "k8s.io/api/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"strings"
 )
 
 type NodeFilter struct {
 	SearchText string
-	Source     *v1.NodeList
+	Api        Api
 }
 
 func (nf NodeFilter) Transform() (result []ViewNode, err error) {
-	if nf.Source == nil {
-		return nil, errors.New("node list must not be nil")
+	list, err := nf.Api.RetrieveNodeList()
+	if err != nil {
+		return nil, err
 	}
-	vns := make([]ViewNode, len(nf.Source.Items))
-	for i, n := range nf.Source.Items {
+	vns := make([]ViewNode, len(list.Items))
+	for i, n := range list.Items {
 		vn := ViewNode{
 			Name: n.Name,
 			Os:   n.Status.NodeInfo.OperatingSystem,

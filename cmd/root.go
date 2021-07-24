@@ -37,13 +37,9 @@ var rootCmd = &cobra.Command{
 		api := srv.KubernetesApi{
 			Setup: setup,
 		}
-		nodes, err := api.RetrieveNodeList()
-		if err != nil {
-			panic(err.Error())
-		}
 		vf := srv.NodeFilter{
 			SearchText: nodeFilter,
-			Source:     nodes,
+			Api:        api,
 		}
 		vnt, err := vf.Transform()
 		if err != nil {
