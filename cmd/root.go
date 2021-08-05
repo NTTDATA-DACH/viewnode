@@ -41,16 +41,12 @@ var rootCmd = &cobra.Command{
 			SearchText: nodeFilter,
 			Api:        api,
 		}
-		vnt, err := vf.Transform()
-		if err != nil {
-			panic(err.Error())
-		}
-		vnf, err := vf.Filter(vnt)
+		vns, err := vf.LoadAndFilter()
 		if err != nil {
 			panic(err.Error())
 		}
 		vnd := srv.ViewNodeData{
-			Nodes: vnf,
+			Nodes: vns,
 		}
 		err = vnd.Printout()
 		if err != nil {

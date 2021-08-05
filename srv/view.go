@@ -9,6 +9,11 @@ type ViewNode struct {
 	Name string
 	Os   string
 	Arch string
+	Pods []ViewPod
+}
+
+type ViewPod struct {
+	Name string
 }
 
 type ViewNodeData struct {

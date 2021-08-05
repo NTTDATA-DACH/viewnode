@@ -9,6 +9,7 @@ import (
 
 type Api interface {
 	RetrieveNodeList() (*v1.NodeList, error)
+	RetrievePodList(namespace string) (*v1.PodList, error)
 }
 
 type KubernetesApi struct {
@@ -17,4 +18,8 @@ type KubernetesApi struct {
 
 func (k KubernetesApi) RetrieveNodeList() (*v1.NodeList, error) {
 	return k.Setup.Clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+}
+
+func (k KubernetesApi) RetrievePodList(namespace string) (*v1.PodList, error) {
+	return k.Setup.Clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 }
