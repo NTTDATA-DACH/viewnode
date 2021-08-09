@@ -37,7 +37,7 @@ func (vnd ViewNodeData) Printout() error {
 	for _, n := range vnd.Nodes {
 		fmt.Printf("%s (%s/%s)\n", n.Name, n.Os, n.Arch)
 		for _, p := range n.Pods {
-			fmt.Printf("* %s", p.Name)
+			fmt.Printf("* %s\n", p.Name)
 		}
 	}
 	return nil

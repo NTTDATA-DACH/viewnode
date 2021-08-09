@@ -19,16 +19,16 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 	if err != nil {
 		return nil, err
 	}
-	for _, n := range vns {
+	for i := range vns {
 		for _, p := range list.Items {
-			if strings.Contains(p.Name, pf.SearchText) && n.Name == p.Spec.NodeName {
-				if n.Pods == nil {
-					n.Pods = make([]ViewPod, 0)
+			if strings.Contains(p.Name, pf.SearchText) && vns[i].Name == p.Spec.NodeName {
+				if vns[i].Pods == nil {
+					vns[i].Pods = make([]ViewPod, 0)
 				}
 				pn := ViewPod{
 					Name: p.Name,
 				}
-				n.Pods = append(n.Pods, pn)
+				vns[i].Pods = append(vns[i].Pods, pn)
 			}
 		}
 	}
