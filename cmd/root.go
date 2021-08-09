@@ -46,6 +46,12 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			panic(err.Error())
 		}
+		pf := srv.PodFilter{
+			Namespace:  setup.Namespace,
+			SearchText: "",
+			Api:        api,
+		}
+		vns, err = pf.LoadAndFilter(vns)
 		vnd := srv.ViewNodeData{
 			Nodes: vns,
 		}

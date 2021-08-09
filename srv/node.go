@@ -28,5 +28,5 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 			vns = append(vns, vn)
 		}
 	}
-	return vns, err
+	return vns, nil
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type MockApi struct {}
+type MockApi struct{}
 
 const NodesCount = 10
 const NodeName1 = "Node 1"
