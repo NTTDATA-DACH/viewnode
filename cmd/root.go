@@ -41,7 +41,8 @@ var rootCmd = &cobra.Command{
 			SearchText: nodeFilter,
 			Api:        api,
 		}
-		vns, err := vf.LoadAndFilter()
+		var vns []srv.ViewNode
+		vns, err = vf.LoadAndFilter(vns)
 		if err != nil {
 			panic(err.Error())
 		}

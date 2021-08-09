@@ -32,7 +32,7 @@ func TestNodeTransform(t *testing.T) {
 	nf := srv.NodeFilter{
 		Api: api,
 	}
-	vns, err := nf.LoadAndFilter()
+	vns, err := nf.LoadAndFilter(nil)
 	if err != nil {
 		t.Error(err.Error())
 	}

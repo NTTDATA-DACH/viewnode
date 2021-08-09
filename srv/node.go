@@ -10,12 +10,14 @@ type NodeFilter struct {
 	Api        Api
 }
 
-func (nf NodeFilter) LoadAndFilter() (result []ViewNode, err error) {
+func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error) {
 	list, err := nf.Api.RetrieveNodeList()
 	if err != nil {
 		return nil, err
 	}
-	vns := make([]ViewNode, 0, len(list.Items))
+	if vns == nil {
+		vns = make([]ViewNode, 0, len(list.Items))
+	}
 	for _, n := range list.Items {
 		if strings.Contains(n.Name, nf.SearchText) {
 			vn := ViewNode{

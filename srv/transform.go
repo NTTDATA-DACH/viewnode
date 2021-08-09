@@ -1,5 +1,5 @@
 package srv
 
 type LoadAndFilter interface {
-	LoadAndFilter() (result []ViewNode, err error)
+	LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 }
