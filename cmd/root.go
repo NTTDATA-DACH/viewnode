@@ -11,6 +11,7 @@ var debugFlag bool
 var namespace string
 var allNamespacesFlag bool
 var nodeFilter string
+var podFilter string
 
 var rootCmd = &cobra.Command{
 	Use:   "kubectl-viewnode",
@@ -48,7 +49,7 @@ var rootCmd = &cobra.Command{
 		}
 		pf := srv.PodFilter{
 			Namespace:  setup.Namespace,
-			SearchText: "",
+			SearchText: podFilter,
 			Api:        api,
 		}
 		vns, err = pf.LoadAndFilter(vns)
@@ -74,7 +75,8 @@ func init() {
 	rootCmd.Flags().BoolVarP(&debugFlag, "debug", "d", false, "run in debug mode (shows more output)")
 	rootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
 	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
-	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes containing filter in node name")
+	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
+	rootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
 }
 
 func initConfig() {
