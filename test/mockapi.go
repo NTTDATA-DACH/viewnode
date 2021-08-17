@@ -31,4 +31,3 @@ func (m MockApi) RetrievePodList(namespace string) (*v1.PodList, error) {
 	pl.Items[2].Spec.NodeName = NodeName1
 	return &pl, nil
 }
-

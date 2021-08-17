@@ -15,9 +15,9 @@ func TestPodLoadAndFilter(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	pf := srv.PodFilter{
-		Namespace: "",
+		Namespace:  "",
 		SearchText: PodName2,
-		Api: api,
+		Api:        api,
 	}
 	vns, err = pf.LoadAndFilter(vns)
 	if err != nil {

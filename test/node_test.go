@@ -9,7 +9,7 @@ func TestNodeLoadAndFilter(t *testing.T) {
 	var api MockApi
 	nf := srv.NodeFilter{
 		SearchText: NodeName1,
-		Api: api,
+		Api:        api,
 	}
 	vns, err := nf.LoadAndFilter(nil)
 	if err != nil {

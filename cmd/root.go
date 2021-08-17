@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"kubectl-viewnode/srv"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
-	"kubectl-viewnode/srv"
 )
 
 var debugFlag bool
