@@ -26,7 +26,8 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 					vns[i].Pods = make([]ViewPod, 0)
 				}
 				pn := ViewPod{
-					Name: p.Name,
+					Name:  p.Name,
+					Phase: string(p.Status.Phase),
 				}
 				vns[i].Pods = append(vns[i].Pods, pn)
 			}

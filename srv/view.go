@@ -13,7 +13,8 @@ type ViewNode struct {
 }
 
 type ViewPod struct {
-	Name string
+	Name  string
+	Phase string
 }
 
 type ViewNodeData struct {
@@ -35,9 +36,9 @@ func (vnd ViewNodeData) Printout() error {
 	}
 	fmt.Printf("viewing %d node(s):\n", l)
 	for _, n := range vnd.Nodes {
-		fmt.Printf("%s running %d pod(s) (%s/%s)\n", n.Name, len(n.Pods), n.Os, n.Arch)
+		fmt.Printf("- %s running %d pod(s) (%s/%s)\n", n.Name, len(n.Pods), n.Os, n.Arch)
 		for _, p := range n.Pods {
-			fmt.Printf("* %s\n", p.Name)
+			fmt.Printf("  * %s (%s)\n", p.Name, p.Phase)
 		}
 	}
 	return nil
