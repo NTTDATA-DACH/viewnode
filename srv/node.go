@@ -17,7 +17,8 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 		return nil, err
 	}
 	if vns == nil {
-		vns = make([]ViewNode, 0, len(list.Items))
+		vns = make([]ViewNode, 1, len(list.Items)+1)
+		vns[0].Name = ""
 	}
 	for _, n := range list.Items {
 		if strings.Contains(n.Name, nf.SearchText) {
