@@ -25,12 +25,25 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 				if vns[i].Pods == nil {
 					vns[i].Pods = make([]ViewPod, 0)
 				}
-				pn := ViewPod{
+				vp := ViewPod{
 					Name:      p.Name,
 					Phase:     string(p.Status.Phase),
 					Namespace: p.Namespace,
 				}
-				vns[i].Pods = append(vns[i].Pods, pn)
+				vp.Containers = make([]ViewContainer, len(p.Status.ContainerStatuses))
+				for j, cs := range p.Status.ContainerStatuses {
+					vp.Containers[j].Name = cs.Name
+					if cs.State.Waiting != nil {
+						vp.Containers[j].State = "Waiting"
+					}
+					if cs.State.Running != nil {
+						vp.Containers[j].State = "Running"
+					}
+					if cs.State.Terminated != nil {
+						vp.Containers[j].State = "Terminated"
+					}
+				}
+				vns[i].Pods = append(vns[i].Pods, vp)
 			}
 		}
 	}

@@ -14,6 +14,7 @@ var namespace string
 var allNamespacesFlag bool
 var nodeFilter string
 var podFilter string
+var showContainersFlag bool
 
 var rootCmd = &cobra.Command{
 	Use:   "kubectl-viewnode",
@@ -63,6 +64,7 @@ var rootCmd = &cobra.Command{
 			Nodes: vns,
 		}
 		vnd.Config.CanShowNamespaces = allNamespacesFlag
+		vnd.Config.CanShowContainers = showContainersFlag
 		err = vnd.Printout()
 		if err != nil {
 			panic(err.Error())
@@ -84,6 +86,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
 	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
 	rootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
+	rootCmd.Flags().BoolVarP(&showContainersFlag, "show-containers", "c", false, "show containers in pod")
 }
 
 func initConfig() {
