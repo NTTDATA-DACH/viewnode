@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"kubectl-viewnode/srv"
+	"os"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
@@ -46,6 +47,10 @@ var rootCmd = &cobra.Command{
 		var vns []srv.ViewNode
 		vns, err = vf.LoadAndFilter(vns)
 		if err != nil {
+			if err.Error() == "Unauthorized" {
+				fmt.Println("warning: you are NOT authorized; please login to the cloud/cluster before continuing...")
+				os.Exit(1)
+			}
 			panic(err.Error())
 		}
 		pf := srv.PodFilter{
