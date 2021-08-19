@@ -57,6 +57,7 @@ var rootCmd = &cobra.Command{
 		vnd := srv.ViewNodeData{
 			Nodes: vns,
 		}
+		vnd.Config.CanShowNamespaces = allNamespacesFlag
 		err = vnd.Printout()
 		if err != nil {
 			panic(err.Error())
