@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type ViewNode struct {
@@ -17,6 +18,7 @@ type ViewPod struct {
 	Name       string
 	Phase      string
 	Namespace  string
+	StartTime  time.Time
 	Containers []ViewContainer
 }
 
@@ -33,6 +35,7 @@ type ViewNodeData struct {
 type ViewNodeDataConfig struct {
 	CanShowNamespaces bool
 	CanShowContainers bool
+	CanShowTimes      bool
 }
 
 type View interface {
@@ -68,6 +71,9 @@ func (vnd ViewNodeData) Printout() error {
 					fmt.Printf("  * %s: %s (%s)", p.Namespace, p.Name, strings.ToLower(p.Phase))
 				} else {
 					fmt.Printf("  * %s (%s)", p.Name, strings.ToLower(p.Phase))
+				}
+				if vnd.Config.CanShowTimes {
+					fmt.Printf(" (since %s)", p.StartTime.Format(time.UnixDate))
 				}
 				if vnd.Config.CanShowContainers {
 					fmt.Printf(" (%d:", len(p.Containers))

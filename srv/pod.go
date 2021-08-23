@@ -29,6 +29,7 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 					Name:      p.Name,
 					Phase:     string(p.Status.Phase),
 					Namespace: p.Namespace,
+					StartTime: p.Status.StartTime.Time,
 				}
 				vp.Containers = make([]ViewContainer, len(p.Status.ContainerStatuses))
 				for j, cs := range p.Status.ContainerStatuses {

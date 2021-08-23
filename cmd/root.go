@@ -15,12 +15,15 @@ var allNamespacesFlag bool
 var nodeFilter string
 var podFilter string
 var showContainersFlag bool
+var showTimesFlag bool
 
 var rootCmd = &cobra.Command{
 	Use:   "kubectl-viewnode",
 	Short: "kubectl-viewnode shows nodes with their pods and containers.",
-	Long:  `kubectl-viewnode shows nodes with their pods and containers.`,
-	Args:  cobra.MaximumNArgs(1),
+	Long: `
+The kubectl-viewnode shows nodes with their pods and containers.
+You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/kubectl-viewnode.`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		setup, err := srv.InitSetup()
 		if err != nil {
@@ -64,6 +67,7 @@ var rootCmd = &cobra.Command{
 		}
 		vnd.Config.CanShowNamespaces = allNamespacesFlag
 		vnd.Config.CanShowContainers = showContainersFlag
+		vnd.Config.CanShowTimes = showTimesFlag
 		err = vnd.Printout()
 		if err != nil {
 			tools.LogErrorAndExit(errors.Wrap(err, "error -> printing failed"), debugFlag)
@@ -80,12 +84,13 @@ func init() {
 
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
-	rootCmd.Flags().BoolVarP(&debugFlag, "debug", "d", false, "run in debug mode (shows more output)")
+	rootCmd.Flags().BoolVarP(&debugFlag, "debug", "d", false, "run in debug mode (shows stack trace in case of errors)")
 	rootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
 	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
 	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
 	rootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
 	rootCmd.Flags().BoolVarP(&showContainersFlag, "show-containers", "c", false, "show containers in pod")
+	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
 }
 
 func initConfig() {
