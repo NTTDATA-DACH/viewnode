@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 	"kubectl-viewnode/srv"
+	"kubectl-viewnode/tools"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -24,10 +25,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		setup, err := srv.InitSetup()
 		if err != nil {
-			panic(err.Error())
-		}
-		if debugFlag {
-			spew.Dump(setup)
+			tools.LogErrorAndExit(errors.Wrap(err, "error -> init setup failed"), debugFlag)
 		}
 		if namespace != "" {
 			setup.Namespace = namespace
@@ -52,7 +50,7 @@ var rootCmd = &cobra.Command{
 				fmt.Println("warning: you are NOT authorized; please login to the cloud/cluster before continuing...")
 				os.Exit(1)
 			}
-			panic(err.Error())
+			tools.LogErrorAndExit(errors.Wrap(err, "error -> loading of nodes failed"), debugFlag)
 		}
 		pf := srv.PodFilter{
 			Namespace:  setup.Namespace,
@@ -60,6 +58,9 @@ var rootCmd = &cobra.Command{
 			Api:        api,
 		}
 		vns, err = pf.LoadAndFilter(vns)
+		if err != nil {
+			tools.LogErrorAndExit(errors.Wrap(err, "error -> loading of pods failed"), debugFlag)
+		}
 		vnd := srv.ViewNodeData{
 			Nodes: vns,
 		}
@@ -67,7 +68,7 @@ var rootCmd = &cobra.Command{
 		vnd.Config.CanShowContainers = showContainersFlag
 		err = vnd.Printout()
 		if err != nil {
-			panic(err.Error())
+			tools.LogErrorAndExit(errors.Wrap(err, "error -> printing failed"), debugFlag)
 		}
 	},
 }

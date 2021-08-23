@@ -17,3 +17,6 @@
 dist/
 kubectl-*dist/
 kubectl-viewnode
+
+# VSCode
+.vscode
