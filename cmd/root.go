@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"kubectl-viewnode/srv"
 	"kubectl-viewnode/tools"
-	"os"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -47,8 +46,7 @@ var rootCmd = &cobra.Command{
 		vns, err = vf.LoadAndFilter(vns)
 		if err != nil {
 			if err.Error() == "Unauthorized" {
-				fmt.Println("warning: you are NOT authorized; please login to the cloud/cluster before continuing...")
-				os.Exit(1)
+				tools.LogErrorAndExit(errors.Wrap(err, "warning -> you are NOT authorized; please login to the cloud/cluster before continuing"), debugFlag)
 			}
 			tools.LogErrorAndExit(errors.Wrap(err, "error -> loading of nodes failed"), debugFlag)
 		}
