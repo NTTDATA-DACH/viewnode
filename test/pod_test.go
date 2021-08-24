@@ -16,7 +16,7 @@ func TestPodLoadAndFilter(t *testing.T) {
 	}
 	pf := srv.PodFilter{
 		Namespace:  "",
-		SearchText: PodName2,
+		SearchText: PodName1,
 		Api:        api,
 	}
 	vns, err = pf.LoadAndFilter(vns)
@@ -24,7 +24,7 @@ func TestPodLoadAndFilter(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	const expectedNoPods = 1
-	l := len(vns[0].Pods)
+	l := len(vns[1].Pods)
 	if l != expectedNoPods {
 		t.Errorf("Loading and filtering of pods was not correct. Got: %d, expected %d pod.", l, expectedNoPods)
 	}

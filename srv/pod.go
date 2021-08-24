@@ -3,6 +3,7 @@ package srv
 import (
 	"errors"
 	"strings"
+	"time"
 )
 
 type PodFilter struct {
@@ -25,11 +26,15 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 				if vns[i].Pods == nil {
 					vns[i].Pods = make([]ViewPod, 0)
 				}
+				st := time.Now()
+				if p.Status.StartTime != nil {
+					st = p.Status.StartTime.Time
+				}
 				vp := ViewPod{
 					Name:      p.Name,
 					Phase:     string(p.Status.Phase),
 					Namespace: p.Namespace,
-					StartTime: p.Status.StartTime.Time,
+					StartTime: st,
 				}
 				vp.Containers = make([]ViewContainer, len(p.Status.ContainerStatuses))
 				for j, cs := range p.Status.ContainerStatuses {
