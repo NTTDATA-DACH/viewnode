@@ -68,13 +68,14 @@ func (vnd ViewNodeData) Printout() error {
 			fmt.Printf("- %s running %d pod(s) (%s/%s)\n", n.Name, len(n.Pods), n.Os, n.Arch)
 			for _, p := range n.Pods {
 				if vnd.Config.CanShowNamespaces {
-					fmt.Printf("  * %s: %s (%s)", p.Namespace, p.Name, strings.ToLower(p.Phase))
+					fmt.Printf("  * %s: %s (%s", p.Namespace, p.Name, strings.ToLower(p.Phase))
 				} else {
-					fmt.Printf("  * %s (%s)", p.Name, strings.ToLower(p.Phase))
+					fmt.Printf("  * %s (%s", p.Name, strings.ToLower(p.Phase))
 				}
 				if vnd.Config.CanShowTimes {
-					fmt.Printf(" (since %s)", p.StartTime.Format(time.UnixDate))
+					fmt.Printf("/%s", p.StartTime.Format(time.UnixDate))
 				}
+				fmt.Printf(")")
 				if vnd.Config.CanShowContainers {
 					fmt.Printf(" (%d:", len(p.Containers))
 					for _, c := range p.Containers {
