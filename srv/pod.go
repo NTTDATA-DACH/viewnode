@@ -30,9 +30,16 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 				if p.Status.StartTime != nil {
 					st = p.Status.StartTime.Time
 				}
+				cn := "unknown"
+				for _, c := range p.Status.Conditions {
+					if c.Status == "True" {
+						cn = string(c.Type)
+					}
+				}
 				vp := ViewPod{
 					Name:      p.Name,
 					Phase:     string(p.Status.Phase),
+					Condition: cn,
 					Namespace: p.Namespace,
 					StartTime: st,
 				}
