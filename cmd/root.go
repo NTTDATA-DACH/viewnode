@@ -16,6 +16,7 @@ var nodeFilter string
 var podFilter string
 var showContainersFlag bool
 var showTimesFlag bool
+var showRunningFlag bool
 
 var rootCmd = &cobra.Command{
 	Use:   "kubectl-viewnode",
@@ -54,9 +55,10 @@ You can find the source code and usage documentation at GitHub: https://github.c
 			tools.LogErrorAndExit(errors.Wrap(err, "error -> loading of nodes failed"), debugFlag)
 		}
 		pf := srv.PodFilter{
-			Namespace:  setup.Namespace,
-			SearchText: podFilter,
-			Api:        api,
+			Namespace:   setup.Namespace,
+			SearchText:  podFilter,
+			Api:         api,
+			RunningOnly: showRunningFlag,
 		}
 		vns, err = pf.LoadAndFilter(vns)
 		if err != nil {
@@ -91,6 +93,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
 	rootCmd.Flags().BoolVarP(&showContainersFlag, "show-containers", "c", false, "show containers in pod")
 	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
+	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
 }
 
 func initConfig() {
