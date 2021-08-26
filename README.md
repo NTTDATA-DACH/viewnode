@@ -25,7 +25,7 @@ Flags:
 Use "kubectl-viewnode [command] --help" for more information about a command.
 ```
 ## Installation
-The `kubectl-viewnode` is written in _go_, so just download the correct executable suitable for your platform from the releases and run it.
+The `kubectl-viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-EMEA/kubectl-viewnode/releases) and run it.
 You can also download the source code and compile it.
 
 If you copy the executable file into your PATH, you can use it like a `kubectl` command, i.e. without the hyphen:
@@ -127,6 +127,6 @@ Very popular is combining `kubectl-viewnode` with `watch` command e.g. watching 
 ```
 watch -n1 kubectl-viewnode --show-pod-start-times --show-containers
 ```
-#Compatibility
+# Compatibility
 The `kubectl-viewnode` was tested against _Google Cloud Platform_ with _Kubernetes_ v1.19.
 It should however work with all clouds supported by [client-go](https://github.com/kubernetes/client-go).
