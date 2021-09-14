@@ -3,6 +3,9 @@ The `kubectl-viewnode` shows nodes with their pods and containers.
 It is very useful when you need to monitor multiple resources such as nodes, pods or containers in a dynamic environment like a CI/CD platform.
 
 ```
+The kubectl-viewnode shows nodes with their pods and containers.
+You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/kubectl-viewnode.
+
 Usage:
   kubectl-viewnode [flags]
   kubectl-viewnode [command]
@@ -12,15 +15,16 @@ Available Commands:
   version     Plugin Version
 
 Flags:
-  -A, --all-namespaces         use all namespaces
-  -d, --debug                  run in debug mode (shows stack trace in case of errors)
-  -h, --help                   help for kubectl-viewnode
-  -n, --namespace string       namespace to use
-  -f, --node-filter string     show only nodes according to filter
-  -p, --pod-filter string      show only pods according to filter
-  -c, --show-containers        show containers in pod
-  -t, --show-pod-start-times   show start times of pods
-      --show-running-only      show running pods only
+  -A, --all-namespaces             use all namespaces
+  -d, --debug                      run in debug mode (shows stack trace in case of errors)
+  -h, --help                       help for kubectl-viewnode
+  -n, --namespace string           namespace to use
+  -f, --node-filter string         show only nodes according to filter
+  -p, --pod-filter string          show only pods according to filter
+  -c, --show-containers            show containers in pod
+  -t, --show-pod-start-times       show start times of pods
+  -r, --show-requests-and-limits   show requests and limits for containers' cpu and memory (requires -c flag)
+      --show-running-only          show running pods only
 
 Use "kubectl-viewnode [command] --help" for more information about a command.
 ```

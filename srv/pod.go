@@ -62,6 +62,17 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 					vp.Containers[j].State = "Terminated"
 				}
 			}
+			for j := range vp.Containers {
+				for _, spc := range p.Spec.Containers {
+					if vp.Containers[j].Name == spc.Name {
+						vp.Containers[j].CpuLimit = spc.Resources.Limits.Cpu().String()
+						vp.Containers[j].CpuReq = spc.Resources.Requests.Cpu().String()
+						vp.Containers[j].MemoryLimit = spc.Resources.Limits.Memory().String()
+						vp.Containers[j].MemoryReq = spc.Resources.Requests.Memory().String()
+						continue
+					}
+				}
+			}
 			vns[i].Pods = append(vns[i].Pods, vp)
 		}
 	}

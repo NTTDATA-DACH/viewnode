@@ -24,8 +24,12 @@ type ViewPod struct {
 }
 
 type ViewContainer struct {
-	Name  string
-	State string
+	Name        string
+	State       string
+	MemoryLimit string
+	MemoryReq   string
+	CpuLimit    string
+	CpuReq      string
 }
 
 type ViewNodeData struct {
@@ -34,9 +38,10 @@ type ViewNodeData struct {
 }
 
 type ViewNodeDataConfig struct {
-	CanShowNamespaces bool
-	CanShowContainers bool
-	CanShowTimes      bool
+	ShowNamespaces bool
+	ShowContainers bool
+	ShowTimes      bool
+	ShowReqLimits  bool
 }
 
 type View interface {
@@ -68,19 +73,22 @@ func (vnd ViewNodeData) Printout() error {
 		if n.Name != "" {
 			fmt.Printf("- %s running %d pod(s) (%s/%s)\n", n.Name, len(n.Pods), n.Os, n.Arch)
 			for _, p := range n.Pods {
-				if vnd.Config.CanShowNamespaces {
+				if vnd.Config.ShowNamespaces {
 					fmt.Printf("  * %s: %s (%s", p.Namespace, p.Name, strings.ToLower(p.Phase))
 				} else {
 					fmt.Printf("  * %s (%s", p.Name, strings.ToLower(p.Phase))
 				}
-				if vnd.Config.CanShowTimes {
+				if vnd.Config.ShowTimes {
 					fmt.Printf("/%s", p.StartTime.Format(time.UnixDate))
 				}
 				fmt.Printf(")")
-				if vnd.Config.CanShowContainers {
+				if vnd.Config.ShowContainers {
 					fmt.Printf(" (%d:", len(p.Containers))
 					for _, c := range p.Containers {
 						fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
+						if vnd.Config.ShowReqLimits {
+							fmt.Printf(" [C:%s M:%s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+						}
 					}
 					fmt.Printf(")")
 				}
@@ -104,4 +112,17 @@ func (vnd ViewNodeData) getNumberOfScheduledPods() int {
 		c = c + len(n.Pods)
 	}
 	return c
+}
+
+func fmtRes(req, lim string) string {
+	if req == "0" && lim == "0" {
+		return "-"
+	}
+	if req == "0" {
+		req = "-"
+	}
+	if lim == "0" {
+		lim = "-"
+	}
+	return req + "<" + lim
 }
