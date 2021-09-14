@@ -1,0 +1,35 @@
+apiVersion: krew.googlecontainertools.github.com/v1alpha2
+kind: Plugin
+metadata:
+  name: viewnode
+spec:
+  version: v0.6.0
+  homepage: https://github.com/NTTDATA-EMEA/viewnode
+  shortDescription: Shows nodes with their pods and containers
+  description: |
+    This plugin shows nodes with their pods and containers.
+    It support filtering of nodes and pods. Tt is very useful when you need
+    to monitor multiple resources such as nodes, pods or containers
+    in a dynamic environment like a CI/CD platform.
+  platforms:
+    - selector:
+        matchLabels:
+          os: darwin
+          arch: amd64
+      uri:
+      sha256:
+      bin: viewnode
+    - selector:
+        matchLabels:
+          os: linux
+          arch: amd64
+      uri:
+      sha256:
+      bin: viewnode
+    - selector:
+        matchLabels:
+          os: windows
+          arch: amd64
+      uri:
+      sha256:
+      bin: viewnode.exe
