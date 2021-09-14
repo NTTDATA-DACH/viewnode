@@ -1,4 +1,4 @@
-module kubectl-viewnode
+module viewnode
 
 go 1.17
 

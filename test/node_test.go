@@ -1,7 +1,7 @@
 package test
 
 import (
-	"kubectl-viewnode/srv"
+	"viewnode/srv"
 	"testing"
 )
 

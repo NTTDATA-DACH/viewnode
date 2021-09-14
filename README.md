@@ -1,14 +1,14 @@
-# kubectl-viewnode
-The `kubectl-viewnode` shows nodes with their pods and containers.
+# viewnode
+The `viewnode` shows nodes with their pods and containers.
 It is very useful when you need to monitor multiple resources such as nodes, pods or containers in a dynamic environment like a CI/CD platform.
 
 ```
-The kubectl-viewnode shows nodes with their pods and containers.
-You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/kubectl-viewnode.
+The viewnode shows nodes with their pods and containers.
+You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/viewnode.
 
 Usage:
-  kubectl-viewnode [flags]
-  kubectl-viewnode [command]
+  viewnode [flags]
+  viewnode [command]
 
 Available Commands:
   help        Help about any command
@@ -17,7 +17,7 @@ Available Commands:
 Flags:
   -A, --all-namespaces             use all namespaces
   -d, --debug                      run in debug mode (shows stack trace in case of errors)
-  -h, --help                       help for kubectl-viewnode
+  -h, --help                       help for viewnode
   -n, --namespace string           namespace to use
   -f, --node-filter string         show only nodes according to filter
   -p, --pod-filter string          show only pods according to filter
@@ -26,10 +26,10 @@ Flags:
   -r, --show-requests-and-limits   show requests and limits for containers' cpu and memory (requires -c flag)
       --show-running-only          show running pods only
 
-Use "kubectl-viewnode [command] --help" for more information about a command.
+Use "viewnode [command] --help" for more information about a command.
 ```
 ## Installation
-The `kubectl-viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-EMEA/kubectl-viewnode/releases) and run it.
+The `viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-EMEA/viewnode/releases) and run it.
 You can also download the source code and compile it.
 
 If you copy the executable file into your PATH, you can use it like a `kubectl` command, i.e. without the hyphen:
@@ -40,7 +40,7 @@ kubectl viewnode --show-running-only
 ## Usage examples
 Showing nodes and pods:
 ```
-$ kubectl-viewnode
+$ viewnode
 namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
@@ -59,7 +59,7 @@ namespace: jenkins-onprem
 ```
 Showing nodes, pods and containers:
 ```
-$ kubectl-viewnode --show-containers
+$ viewnode --show-containers
 namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
@@ -78,7 +78,7 @@ namespace: jenkins-onprem
 ```
 Showing nodes and pods with their start times:
 ```
-$ kubectl-viewnode --show-pod-start-times
+$ viewnode --show-pod-start-times
 namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
@@ -97,7 +97,7 @@ namespace: jenkins-onprem
 ```
 You can also combine show options:
 ```
-$ kubectl-viewnode --show-pod-start-times --show-containers
+$ viewnode --show-pod-start-times --show-containers
 namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
@@ -116,7 +116,7 @@ namespace: jenkins-onprem
 ```
 As well as filter nodes and pods:
 ```
-$ kubectl-viewnode --node-filter v1vr
+$ viewnode --node-filter v1vr
 namespace: jenkins-onprem
 4 pod(s) in total
 0 unscheduled pod(s)
@@ -127,10 +127,10 @@ namespace: jenkins-onprem
   * docker-in-the-cloud-342-r5khq-9cx2w (running)
   * liveness-test-4-boom (failed)
 ```
-Very popular is combining `kubectl-viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
+Very popular is combining `viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
 ```
-watch -n1 kubectl-viewnode --show-pod-start-times --show-containers
+watch -n1 viewnode --show-pod-start-times --show-containers
 ```
 # Compatibility
-The `kubectl-viewnode` was tested against _Google Cloud Platform_ with _Kubernetes_ v1.19.
+The `viewnode` was tested against _Google Cloud Platform_ with _Kubernetes_ v1.19.
 It should however work with all clouds supported by [client-go](https://github.com/kubernetes/client-go).

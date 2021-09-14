@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"kubectl-viewnode/srv"
-	"kubectl-viewnode/tools"
+	"viewnode/srv"
+	"viewnode/tools"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -20,11 +20,11 @@ var showRunningFlag bool
 var showReqLimitsFlag bool
 
 var rootCmd = &cobra.Command{
-	Use:   "kubectl-viewnode",
-	Short: "kubectl-viewnode shows nodes with their pods and containers.",
+	Use:   "viewnode",
+	Short: "'viewnode' shows nodes with their pods and containers.",
 	Long: `
-The kubectl-viewnode shows nodes with their pods and containers.
-You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/kubectl-viewnode.`,
+The 'viewnode' shows nodes with their pods and containers.
+You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/viewnode.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !showContainersFlag && showReqLimitsFlag {

@@ -1,6 +1,6 @@
 package main
 
-import "kubectl-viewnode/cmd"
+import "viewnode/cmd"
 
 var version string
 var commit string
