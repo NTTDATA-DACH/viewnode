@@ -46,27 +46,29 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		api := srv.KubernetesApi{
 			Setup: setup,
 		}
-		vf := srv.NodeFilter{
-			SearchText: nodeFilter,
-			Api:        api,
+		fs := []srv.LoadAndFilter{
+			srv.NodeFilter{
+				SearchText: nodeFilter,
+				Api:        api,
+			},
+			srv.PodFilter{
+				Namespace:   setup.Namespace,
+				SearchText:  podFilter,
+				Api:         api,
+				RunningOnly: showRunningFlag,
+			},
 		}
 		var vns []srv.ViewNode
-		vns, err = vf.LoadAndFilter(vns)
-		if err != nil {
-			if err.Error() == "Unauthorized" {
-				tools.LogErrorAndExit(errors.Wrap(err, "warning -> you are NOT authorized; please login to the cloud/cluster before continuing"), debugFlag)
+		for _, f := range fs {
+			tools.LogDebug(fmt.Sprintf("starting loading and filtering of %ss", f.ResourceName()), debugFlag)
+			vns, err = f.LoadAndFilter(vns)
+			if err != nil {
+				if err.Error() == "Unauthorized" {
+					tools.LogErrorAndExit(errors.Wrap(err, "warning: you are NOT authorized; please login to the cloud/cluster before continuing"), debugFlag)
+				}
+				tools.LogErrorAndExit(errors.Wrapf(err, "error: loading and filtering of %ss failed", f.ResourceName()), debugFlag)
 			}
-			tools.LogErrorAndExit(errors.Wrap(err, "error -> loading of nodes failed"), debugFlag)
-		}
-		pf := srv.PodFilter{
-			Namespace:   setup.Namespace,
-			SearchText:  podFilter,
-			Api:         api,
-			RunningOnly: showRunningFlag,
-		}
-		vns, err = pf.LoadAndFilter(vns)
-		if err != nil {
-			tools.LogErrorAndExit(errors.Wrap(err, "error -> loading of pods failed"), debugFlag)
+			tools.LogDebug(fmt.Sprintf("finished loading and filtering of %ss", f.ResourceName()), debugFlag)
 		}
 		vnd := srv.ViewNodeData{
 			Nodes: vns,

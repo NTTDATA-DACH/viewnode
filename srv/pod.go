@@ -78,3 +78,7 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 	}
 	return vns, nil
 }
+
+func (pf PodFilter) ResourceName() string {
+	return "pod"
+}

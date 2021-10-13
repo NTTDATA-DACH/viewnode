@@ -32,3 +32,7 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	}
 	return vns, nil
 }
+
+func (nf NodeFilter) ResourceName() string {
+	return "node"
+}
