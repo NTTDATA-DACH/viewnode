@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"viewnode/srv"
-	"viewnode/tools"
 
-	"github.com/pkg/errors"
+	nested "github.com/antonfisher/nested-logrus-formatter"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var debugFlag bool
 var namespace string
 var allNamespacesFlag bool
 var nodeFilter string
@@ -18,21 +19,22 @@ var showContainersFlag bool
 var showTimesFlag bool
 var showRunningFlag bool
 var showReqLimitsFlag bool
+var verbosity string
 
 var rootCmd = &cobra.Command{
 	Use:   "viewnode",
-	Short: "'viewnode' shows nodes with their pods and containers.",
+	Short: "'viewnode' displays nodes with their pods and containers.",
 	Long: `
-The 'viewnode' shows nodes with their pods and containers.
-You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/viewnode.`,
+The 'viewnode' displays nodes with their pods and containers.
+You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !showContainersFlag && showReqLimitsFlag {
-			tools.LogErrorAndExit(errors.New("error -> you must not use -r flag without -c flag"), false)
+			log.Fatalln("you must not use -r flag without -c flag")
 		}
 		setup, err := srv.InitSetup()
 		if err != nil {
-			tools.LogErrorAndExit(errors.Wrap(err, "error -> init setup failed"), debugFlag)
+			log.Fatalf("init setup failed")
 		}
 		if namespace != "" {
 			setup.Namespace = namespace
@@ -60,15 +62,15 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		}
 		var vns []srv.ViewNode
 		for _, f := range fs {
-			tools.LogDebug(fmt.Sprintf("starting loading and filtering of %ss", f.ResourceName()), debugFlag)
+			log.Tracef("starting loading and filtering of %ss", f.ResourceName())
 			vns, err = f.LoadAndFilter(vns)
 			if err != nil {
 				if err.Error() == "Unauthorized" {
-					tools.LogErrorAndExit(errors.Wrap(err, "warning: you are NOT authorized; please login to the cloud/cluster before continuing"), debugFlag)
+					log.Fatalln("you are NOT authorized; please login to the cloud/cluster before continuing")
 				}
-				tools.LogErrorAndExit(errors.Wrapf(err, "error: loading and filtering of %ss failed", f.ResourceName()), debugFlag)
+				log.Fatalf("loading and filtering of %ss failed (%s)", f.ResourceName(), err.Error())
 			}
-			tools.LogDebug(fmt.Sprintf("finished loading and filtering of %ss", f.ResourceName()), debugFlag)
+			log.Tracef("finished loading and filtering of %ss", f.ResourceName())
 		}
 		vnd := srv.ViewNodeData{
 			Nodes: vns,
@@ -79,7 +81,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		vnd.Config.ShowReqLimits = showReqLimitsFlag
 		err = vnd.Printout()
 		if err != nil {
-			tools.LogErrorAndExit(errors.Wrap(err, "error -> printing failed"), debugFlag)
+			log.Fatalln("displaying failed")
 		}
 	},
 }
@@ -90,10 +92,18 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		log.SetFormatter(&nested.Formatter{
+			ShowFullLevel: true,
+			HideKeys:    true,
+			FieldsOrder: []string{"component", "category"},
+		})
+		if err := initLog(os.Stdout, verbosity); err != nil {
+			return err
+		}
+		return nil
+	}
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-
-	rootCmd.Flags().BoolVarP(&debugFlag, "debug", "d", false, "run in debug mode (shows stack trace in case of errors)")
 	rootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
 	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
 	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
@@ -102,7 +112,18 @@ func init() {
 	rootCmd.Flags().BoolVarP(&showReqLimitsFlag, "show-requests-and-limits", "r", false, "show requests and limits for containers' cpu and memory (requires -c flag)")
 	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
 	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
+	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 }
 
 func initConfig() {
+}
+
+func initLog(out io.Writer, verbosity string) error {
+	log.SetOutput(out)
+	level, err := log.ParseLevel(verbosity)
+	if err != nil {
+		return err
+	}
+	log.SetLevel(level)
+	return nil
 }

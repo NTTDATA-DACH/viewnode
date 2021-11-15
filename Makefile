@@ -1,6 +1,6 @@
-VERSION = v0.1.0
+VERSION = v0.7.0
 
-.PHONY: build
+.PHONY: clean build run install all release
 
 clean:
 	@go clean
