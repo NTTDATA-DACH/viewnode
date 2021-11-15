@@ -3,8 +3,8 @@ The `viewnode` shows Kubernetes cluster nodes with their pods and containers.
 It is very useful when you need to monitor multiple resources such as nodes, pods or containers in a dynamic environment like a CI/CD platform.
 
 ```
-The viewnode shows nodes with their pods and containers.
-You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-EMEA/viewnode.
+The 'viewnode' displays nodes with their pods and containers.
+You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.
 
 Usage:
   viewnode [flags]
@@ -16,7 +16,6 @@ Available Commands:
 
 Flags:
   -A, --all-namespaces             use all namespaces
-  -d, --debug                      run in debug mode (shows stack trace in case of errors)
   -h, --help                       help for viewnode
   -n, --namespace string           namespace to use
   -f, --node-filter string         show only nodes according to filter
@@ -25,6 +24,7 @@ Flags:
   -t, --show-pod-start-times       show start times of pods
   -r, --show-requests-and-limits   show requests and limits for containers' cpu and memory (requires -c flag)
       --show-running-only          show running pods only
+  -v, --verbosity string           defines log level (debug, info, warn, error, fatal, panic) (default "warning")
 
 Use "viewnode [command] --help" for more information about a command.
 ```
