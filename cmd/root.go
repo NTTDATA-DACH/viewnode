@@ -34,7 +34,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		}
 		setup, err := srv.InitSetup()
 		if err != nil {
-			log.Fatalf("init setup failed")
+			log.Fatalf("init setup failed (%s)", err.Error())
 		}
 		if namespace != "" {
 			setup.Namespace = namespace
@@ -67,6 +67,11 @@ You can find the source code and usage documentation at GitHub: https://github.c
 			if err != nil {
 				if err.Error() == "Unauthorized" {
 					log.Fatalln("you are NOT authorized; please login to the cloud/cluster before continuing")
+				}
+				if f.ResourceName() == "node" {
+					log.Warn("cannot load nodes; node names will be extracted from the pod specification if possible")
+					log.Debugf("ERROR: %s", err.Error())
+					continue
 				}
 				log.Fatalf("loading and filtering of %ss failed (%s)", f.ResourceName(), err.Error())
 			}
