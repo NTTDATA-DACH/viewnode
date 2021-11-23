@@ -1,11 +1,10 @@
 # viewnode
-The `viewnode` shows Kubernetes cluster nodes with their pods and containers.
+The `viewnode` displays Kubernetes cluster nodes with their pods and containers.
 It is very useful when you need to monitor multiple resources such as nodes, pods or containers in a dynamic environment like a CI/CD platform.
 
-```
-The 'viewnode' displays nodes with their pods and containers.
-You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.
+## Usage
 
+```
 Usage:
   viewnode [flags]
   viewnode [command]
@@ -29,12 +28,20 @@ Flags:
 Use "viewnode [command] --help" for more information about a command.
 ```
 ## Installation
-The `viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-EMEA/viewnode/releases) and run it.
-You can also download the source code and compile it.
-
-If you copy the executable file into your PATH, you can use it like a `kubectl` command, i.e. without the hyphen:
+### As a Krew Plugin
+Follow the instructions to [install](https://krew.sigs.k8s.io/docs/user-guide/setup/install/) krew and then run the following command:
 ```
-kubectl viewnode --show-running-only
+kubectl krew install viewnode
+```
+The plugin will be available as `kubectl viewnode`.
+
+### Standalone
+The `viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-EMEA/viewnode/releases) and run it.
+
+### Build It
+You can also download the source code from [GitHub](https://github.com/NTTDATA-DACH/viewnode) and compile it by running the following command:
+```
+make build
 ```
 
 ## Usage examples
@@ -132,5 +139,5 @@ Very popular is combining `viewnode` with `watch` command e.g. watching all node
 watch -n1 viewnode --show-pod-start-times --show-containers
 ```
 # Compatibility
-The `viewnode` was tested against _Google Cloud Platform_ with _Kubernetes_ v1.19.
-It should however work with all clouds supported by [client-go](https://github.com/kubernetes/client-go).
+The `viewnode` was tested against _Google Cloud Platform_ and _Amazon EKS_ with _Kubernetes_ v1.19 and v1.20.
+It should however work with any cloud platform supported by the [client-go](https://github.com/kubernetes/client-go).
