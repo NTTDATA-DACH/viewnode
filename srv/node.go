@@ -18,7 +18,7 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	}
 	if vns == nil {
 		vns = make([]ViewNode, 1, len(list.Items)+1)
-		vns[0].Name = ""
+		vns[0].Name = "" // create placeholder for unscheduled pods// create placeholder for unscheduled pods
 	}
 	for _, n := range list.Items {
 		if strings.Contains(n.Name, nf.SearchText) {

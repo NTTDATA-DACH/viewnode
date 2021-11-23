@@ -1,7 +1,7 @@
 package srv
 
 import (
-	"errors"
+	v1 "k8s.io/api/core/v1"
 	"strings"
 	"time"
 )
@@ -14,12 +14,12 @@ type PodFilter struct {
 }
 
 func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error) {
-	if vns == nil {
-		return nil, errors.New("list of view nodes must not be nil")
-	}
 	list, err := pf.Api.RetrievePodList(pf.Namespace)
 	if err != nil {
 		return nil, err
+	}
+	if vns == nil {
+		vns = createNodeListFromPodSpec(*list)
 	}
 	for i := range vns {
 		for _, p := range list.Items {
@@ -81,4 +81,24 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 
 func (pf PodFilter) ResourceName() string {
 	return "pod"
+}
+
+func createNodeListFromPodSpec(list v1.PodList) []ViewNode {
+	vns := make([]ViewNode, 1)
+	vns[0].Name = "" // create placeholder for unscheduled pods
+outer:
+	for _, p := range list.Items {
+		for _, n := range vns {
+			if n.Name == p.Spec.NodeName {
+				continue outer
+			}
+		}
+		vn := ViewNode{
+			Name: p.Spec.NodeName,
+			Os: "na",
+			Arch: "na",
+		}
+		vns = append(vns, vn)
+	}
+	return vns
 }
