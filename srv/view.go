@@ -37,11 +37,20 @@ type ViewNodeData struct {
 	Nodes  []ViewNode
 }
 
+type ViewType int
+
+const (
+	Inline ViewType = iota
+	Block
+)
+
 type ViewNodeDataConfig struct {
 	ShowNamespaces bool
 	ShowContainers bool
 	ShowTimes      bool
 	ShowReqLimits  bool
+
+	ContainerViewType ViewType
 }
 
 type View interface {
