@@ -30,8 +30,8 @@ The 'viewnode' displays nodes with their pods and containers.
 You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !showContainersFlag && showReqLimitsFlag {
-			log.Fatalln("you must not use -r flag without -c flag")
+		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeBlockFlag) {
+			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-block-view) flag without -c (--show-containers) flag")
 		}
 		setup, err := srv.InitSetup()
 		if err != nil {
@@ -116,7 +116,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
 	rootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
 	rootCmd.Flags().BoolVarP(&showContainersFlag, "show-containers", "c", false, "show containers in pod")
-	rootCmd.Flags().BoolVar(&containerViewTypeBlockFlag, "block-view", false, "format view of containers as a block, instead of inline")
+	rootCmd.Flags().BoolVarP(&containerViewTypeBlockFlag, "container-block-view", "b", false, "format view of containers as a text block, otherwise inline")
 	rootCmd.Flags().BoolVarP(&showReqLimitsFlag, "show-requests-and-limits", "r", false, "show requests and limits for containers' cpu and memory (requires -c flag)")
 	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
 	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
