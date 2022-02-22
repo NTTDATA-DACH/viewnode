@@ -37,11 +37,20 @@ type ViewNodeData struct {
 	Nodes  []ViewNode
 }
 
+type ViewType int
+
+const (
+	Inline ViewType = iota
+	Block
+)
+
 type ViewNodeDataConfig struct {
 	ShowNamespaces bool
 	ShowContainers bool
 	ShowTimes      bool
 	ShowReqLimits  bool
+
+	ContainerViewType ViewType
 }
 
 type View interface {
@@ -83,14 +92,27 @@ func (vnd ViewNodeData) Printout() error {
 				}
 				fmt.Printf(")")
 				if vnd.Config.ShowContainers {
-					fmt.Printf(" (%d:", len(p.Containers))
-					for _, c := range p.Containers {
-						fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
-						if vnd.Config.ShowReqLimits {
-							fmt.Printf(" [C:%s M:%s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+					switch vnd.Config.ContainerViewType {
+					case Inline:
+						fmt.Printf(" (%d:", len(p.Containers))
+						for _, c := range p.Containers {
+							fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
+							if vnd.Config.ShowReqLimits {
+								fmt.Printf(" [C:%s M:%s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+							}
 						}
+						fmt.Printf(")")
+						break
+					case Block:
+						fmt.Printf(" %d container/s:", len(p.Containers))
+						for i, c := range p.Containers {
+							fmt.Printf("\n    %d: %s (%s)", i, c.Name, strings.ToLower(c.State))
+							if vnd.Config.ShowReqLimits {
+								fmt.Printf(" [Cpu: %s Memory: %s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+							}
+						}
+						break
 					}
-					fmt.Printf(")")
 				}
 				fmt.Println()
 			}

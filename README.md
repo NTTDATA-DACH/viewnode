@@ -15,6 +15,7 @@ Available Commands:
 
 Flags:
   -A, --all-namespaces             use all namespaces
+  -b, --container-block-view       format view of containers as a text block, otherwise inline
   -h, --help                       help for viewnode
   -n, --namespace string           namespace to use
   -f, --node-filter string         show only nodes according to filter
