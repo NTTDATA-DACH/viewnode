@@ -23,7 +23,7 @@ var versionCmd = &cobra.Command{
 	Long:  "Prints out the version of the plugin and the commit hash used for the build.",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("viewnode %s (%s) © 2021 NTT DATA EMEA\n", version, commit)
+		fmt.Printf("viewnode %s (%s) © 2022 NTT DATA DACH\n", version, commit)
 	},
 }
 
