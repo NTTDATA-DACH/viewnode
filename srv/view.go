@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"viewnode/utils"
 )
 
 type ViewNode struct {
-	Name string
-	Os   string
-	Arch string
-	Pods []ViewPod
+	Name    string
+	Os      string
+	Arch    string
+	Metrics ViewMetrics
+	Pods    []ViewPod
 }
 
 type ViewPod struct {
@@ -32,6 +34,10 @@ type ViewContainer struct {
 	CpuReq      string
 }
 
+type ViewMetrics struct {
+	Memory int64
+}
+
 type ViewNodeData struct {
 	Config ViewNodeDataConfig
 	Nodes  []ViewNode
@@ -49,6 +55,7 @@ type ViewNodeDataConfig struct {
 	ShowContainers bool
 	ShowTimes      bool
 	ShowReqLimits  bool
+	ShowMetrics    bool
 
 	ContainerViewType ViewType
 }
@@ -80,7 +87,11 @@ func (vnd ViewNodeData) Printout() error {
 	fmt.Printf("%d running node(s) with %d scheduled pod(s):\n", l-1, nsp)
 	for _, n := range vnd.Nodes {
 		if n.Name != "" {
-			fmt.Printf("- %s running %d pod(s) (%s/%s)\n", n.Name, len(n.Pods), n.Os, n.Arch)
+			fmt.Printf("- %s running %d pod(s) (%s/%s", n.Name, len(n.Pods), n.Os, n.Arch)
+			if vnd.Config.ShowMetrics {
+				fmt.Printf(" | mem: %s", utils.ByteCountIEC(n.Metrics.Memory))
+			}
+			fmt.Println(")")
 			for _, p := range n.Pods {
 				if vnd.Config.ShowNamespaces {
 					fmt.Printf("  * %s: %s (%s", p.Namespace, p.Name, strings.ToLower(p.Phase))

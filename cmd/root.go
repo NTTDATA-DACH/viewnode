@@ -20,6 +20,7 @@ var containerViewTypeBlockFlag bool
 var showTimesFlag bool
 var showRunningFlag bool
 var showReqLimitsFlag bool
+var showMetricsFlag bool
 var verbosity string
 
 var rootCmd = &cobra.Command{
@@ -53,6 +54,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 			srv.NodeFilter{
 				SearchText: nodeFilter,
 				Api:        api,
+				WithMetrics: showMetricsFlag,
 			},
 			srv.PodFilter{
 				Namespace:   setup.Namespace,
@@ -85,6 +87,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		vnd.Config.ShowContainers = showContainersFlag
 		vnd.Config.ShowTimes = showTimesFlag
 		vnd.Config.ShowReqLimits = showReqLimitsFlag
+		vnd.Config.ShowMetrics = showMetricsFlag
 		vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeBlockFlag)
 		err = vnd.Printout()
 		if err != nil {
@@ -120,6 +123,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&showReqLimitsFlag, "show-requests-and-limits", "r", false, "show requests and limits for containers' cpu and memory (requires -c flag)")
 	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
 	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
+	rootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
 	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 }
 
