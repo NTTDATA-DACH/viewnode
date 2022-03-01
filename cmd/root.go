@@ -61,6 +61,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 				SearchText:  podFilter,
 				Api:         api,
 				RunningOnly: showRunningFlag,
+				WithMetrics: showMetricsFlag,
 			},
 		}
 		var vns []srv.ViewNode

@@ -22,6 +22,7 @@ type ViewPod struct {
 	Condition  string
 	Namespace  string
 	StartTime  time.Time
+	Metrics    ViewMetrics
 	Containers []ViewContainer
 }
 
@@ -32,6 +33,7 @@ type ViewContainer struct {
 	MemoryReq   string
 	CpuLimit    string
 	CpuReq      string
+	Metrics     ViewMetrics
 }
 
 type ViewMetrics struct {
@@ -101,6 +103,9 @@ func (vnd ViewNodeData) Printout() error {
 				if vnd.Config.ShowTimes {
 					fmt.Printf("/%s", p.StartTime.Format(time.UnixDate))
 				}
+				if vnd.Config.ShowMetrics {
+					fmt.Printf(" | mem usage: %s", utils.ByteCountIEC(p.Metrics.Memory))
+				}
 				fmt.Printf(")")
 				if vnd.Config.ShowContainers {
 					switch vnd.Config.ContainerViewType {
@@ -109,7 +114,13 @@ func (vnd ViewNodeData) Printout() error {
 						for _, c := range p.Containers {
 							fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
 							if vnd.Config.ShowReqLimits {
-								fmt.Printf(" [C:%s M:%s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+								fmt.Printf(" [cr:%s mr:%s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+							}
+							if vnd.Config.ShowMetrics {
+								fmt.Printf(" mu:%s", utils.ByteCountIEC(c.Metrics.Memory))
+							}
+							if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
+								fmt.Printf("]")
 							}
 						}
 						fmt.Printf(")")
@@ -119,7 +130,18 @@ func (vnd ViewNodeData) Printout() error {
 						for i, c := range p.Containers {
 							fmt.Printf("\n    %d: %s (%s)", i, c.Name, strings.ToLower(c.State))
 							if vnd.Config.ShowReqLimits {
-								fmt.Printf(" [Cpu: %s Memory: %s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+								fmt.Printf(" [cpu req: %s | mem req: %s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+							}
+							if vnd.Config.ShowMetrics {
+								if vnd.Config.ShowReqLimits {
+									fmt.Printf(" | ")
+								} else {
+									fmt.Printf(" [")
+								}
+								fmt.Printf("mem usage: %s", utils.ByteCountIEC(c.Metrics.Memory))
+							}
+							if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
+								fmt.Printf("]")
 							}
 						}
 						break
