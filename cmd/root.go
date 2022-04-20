@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -52,8 +53,8 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		}
 		fs := []srv.LoadAndFilter{
 			srv.NodeFilter{
-				SearchText: nodeFilter,
-				Api:        api,
+				SearchText:  nodeFilter,
+				Api:         api,
 				WithMetrics: showMetricsFlag,
 			},
 			srv.PodFilter{
@@ -69,8 +70,9 @@ You can find the source code and usage documentation at GitHub: https://github.c
 			log.Tracef("starting loading and filtering of %ss", f.ResourceName())
 			vns, err = f.LoadAndFilter(vns)
 			if err != nil {
-				if err.Error() == "Unauthorized" {
+				if errors.As(err, &srv.UnauthorizedError{}) {
 					log.Fatalln("you are NOT authorized; please login to the cloud/cluster before continuing")
+					log.Debugf("ERROR: %s", err.Error())
 				}
 				if f.ResourceName() == "node" {
 					log.Warn("cannot load nodes; node names will be extracted from the pod specification if possible")
