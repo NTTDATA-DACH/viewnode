@@ -130,7 +130,7 @@ func (vnd ViewNodeData) Printout() error {
 						for i, c := range p.Containers {
 							fmt.Printf("\n    %d: %s (%s)", i, c.Name, strings.ToLower(c.State))
 							if vnd.Config.ShowReqLimits {
-								fmt.Printf(" [cpu req: %s | mem req: %s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+								fmt.Printf(" [cpu: %s | mem: %s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
 							}
 							if vnd.Config.ShowMetrics {
 								if vnd.Config.ShowReqLimits {
