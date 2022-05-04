@@ -51,4 +51,3 @@ func (k KubernetesApi) RetrievePodMetricses(namespace string) (*v1beta1.PodMetri
 	}
 	return pm, nil
 }
-

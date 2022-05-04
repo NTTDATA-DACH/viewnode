@@ -10,8 +10,8 @@ import (
 )
 
 type Setup struct {
-	Namespace string
-	Clientset *kubernetes.Clientset
+	Namespace        string
+	Clientset        *kubernetes.Clientset
 	MetricsClientset *metricsv.Clientset
 }
 
@@ -29,8 +29,8 @@ func InitSetup() (*Setup, error) {
 		return nil, err
 	}
 	s := Setup{
-		Namespace: ns,
-		Clientset: cs,
+		Namespace:        ns,
+		Clientset:        cs,
 		MetricsClientset: mcs,
 	}
 	return &s, nil

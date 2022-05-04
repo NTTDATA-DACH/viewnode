@@ -124,7 +124,7 @@ outer:
 		}
 		vn := ViewNode{
 			Name: p.Spec.NodeName,
-			Os: "na",
+			Os:   "na",
 			Arch: "na",
 		}
 		vns = append(vns, vn)

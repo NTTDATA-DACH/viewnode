@@ -1,8 +1,8 @@
 package test
 
 import (
-	"viewnode/srv"
 	"testing"
+	"viewnode/srv"
 )
 
 func TestPodLoadAndFilter(t *testing.T) {
