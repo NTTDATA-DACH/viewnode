@@ -17,20 +17,20 @@ spec:
         matchLabels:
           os: darwin
           arch: amd64
-      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.0-alpha/viewnode_0.8.0-alpha_darwin_amd64.tar.gz
-      sha256: f6de499fbc076b0109f2c1cb4ca2b78707a6ef6c1a3d0b430236ea4a0394e74d
+      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.0/viewnode_v0.8.0-next_darwin_amd64.tar.gz
+      sha256: 60335d96dc764056272f73a0e28398bca43489f90e0d0e3455ec2b11bebd71dd
       bin: viewnode
     - selector:
         matchLabels:
           os: linux
           arch: amd64
-      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.0-alpha/viewnode_0.8.0-alpha_linux_amd64.tar.gz
-      sha256: ff43734fecd8422f2c0b83c49bf660bbb4c1b7a97d657f76ba9b2c7666854e51
+      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.0/viewnode_v0.8.0-next_linux_amd64.tar.gz
+      sha256: 852e135e5387df5aaf2842db8808986f0f05a7d1d1c72f68a7ab0441d0a1d6fe
       bin: viewnode
     - selector:
         matchLabels:
           os: windows
           arch: amd64
-      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.0-alpha/viewnode_0.8.0-alpha_windows_amd64.tar.gz
-      sha256: 3140911b954a61b81d728564c9a00929388ed43c68e3b31c43324964284a9f0d
+      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.0/viewnode_v0.8.0-next_windows_amd64.tar.gz
+      sha256: 48307d9717a3b7239baf246284b5e9af319a26eab01f0a5351de3254745f8bd0
       bin: viewnode.exe
