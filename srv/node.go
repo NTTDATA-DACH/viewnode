@@ -7,8 +7,9 @@ import (
 )
 
 type NodeFilter struct {
-	SearchText string
-	Api        Api
+	SearchText  string
+	WithMetrics bool
+	Api         Api
 }
 
 func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error) {
@@ -18,7 +19,7 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	}
 	if vns == nil {
 		vns = make([]ViewNode, 1, len(list.Items)+1)
-		vns[0].Name = "" // create placeholder for unscheduled pods// create placeholder for unscheduled pods
+		vns[0].Name = "" // create placeholder for unscheduled pods
 	}
 	for _, n := range list.Items {
 		if strings.Contains(n.Name, nf.SearchText) {
@@ -28,6 +29,23 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 				Arch: n.Status.NodeInfo.Architecture,
 			}
 			vns = append(vns, vn)
+		}
+	}
+	if nf.WithMetrics {
+		nml, err := nf.Api.RetrieveNodeMetricses()
+		if err != nil {
+			return nil, err
+		}
+		for i := range vns {
+			if vns[i].Name == "" {
+				continue
+			}
+			for _, nm := range nml.Items {
+				if vns[i].Name == nm.Name {
+					vns[i].Metrics.Memory = nm.Usage.Memory().Value()
+					break
+				}
+			}
 		}
 	}
 	return vns, nil

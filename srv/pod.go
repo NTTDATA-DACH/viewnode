@@ -10,6 +10,7 @@ type PodFilter struct {
 	Namespace   string
 	SearchText  string
 	RunningOnly bool
+	WithMetrics bool
 	Api         Api
 }
 
@@ -76,6 +77,34 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 			vns[i].Pods = append(vns[i].Pods, vp)
 		}
 	}
+	if pf.WithMetrics {
+		pml, err := pf.Api.RetrievePodMetricses(pf.Namespace)
+		if err != nil {
+			return nil, err
+		}
+		for i := range vns {
+			if vns[i].Name == "" {
+				continue
+			}
+			for j := range vns[i].Pods {
+				for _, p := range pml.Items {
+					if vns[i].Pods[j].Name == p.Name {
+						var pm int64
+						for k := range vns[i].Pods[j].Containers {
+							for _, c := range p.Containers {
+								if vns[i].Pods[j].Containers[k].Name == c.Name {
+									vns[i].Pods[j].Containers[k].Metrics.Memory = c.Usage.Memory().Value()
+									pm = pm + c.Usage.Memory().Value()
+								}
+							}
+						}
+						vns[i].Pods[j].Metrics.Memory = pm
+						break
+					}
+				}
+			}
+		}
+	}
 	return vns, nil
 }
 
@@ -95,7 +124,7 @@ outer:
 		}
 		vn := ViewNode{
 			Name: p.Spec.NodeName,
-			Os: "na",
+			Os:   "na",
 			Arch: "na",
 		}
 		vns = append(vns, vn)

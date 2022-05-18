@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"viewnode/utils"
 )
 
 type ViewNode struct {
-	Name string
-	Os   string
-	Arch string
-	Pods []ViewPod
+	Name    string
+	Os      string
+	Arch    string
+	Metrics ViewMetrics
+	Pods    []ViewPod
 }
 
 type ViewPod struct {
@@ -20,6 +22,7 @@ type ViewPod struct {
 	Condition  string
 	Namespace  string
 	StartTime  time.Time
+	Metrics    ViewMetrics
 	Containers []ViewContainer
 }
 
@@ -30,6 +33,11 @@ type ViewContainer struct {
 	MemoryReq   string
 	CpuLimit    string
 	CpuReq      string
+	Metrics     ViewMetrics
+}
+
+type ViewMetrics struct {
+	Memory int64
 }
 
 type ViewNodeData struct {
@@ -49,6 +57,7 @@ type ViewNodeDataConfig struct {
 	ShowContainers bool
 	ShowTimes      bool
 	ShowReqLimits  bool
+	ShowMetrics    bool
 
 	ContainerViewType ViewType
 }
@@ -80,7 +89,11 @@ func (vnd ViewNodeData) Printout() error {
 	fmt.Printf("%d running node(s) with %d scheduled pod(s):\n", l-1, nsp)
 	for _, n := range vnd.Nodes {
 		if n.Name != "" {
-			fmt.Printf("- %s running %d pod(s) (%s/%s)\n", n.Name, len(n.Pods), n.Os, n.Arch)
+			fmt.Printf("- %s running %d pod(s) (%s/%s", n.Name, len(n.Pods), n.Os, n.Arch)
+			if vnd.Config.ShowMetrics {
+				fmt.Printf(" | mem: %s", utils.ByteCountIEC(n.Metrics.Memory))
+			}
+			fmt.Println(")")
 			for _, p := range n.Pods {
 				if vnd.Config.ShowNamespaces {
 					fmt.Printf("  * %s: %s (%s", p.Namespace, p.Name, strings.ToLower(p.Phase))
@@ -90,6 +103,9 @@ func (vnd ViewNodeData) Printout() error {
 				if vnd.Config.ShowTimes {
 					fmt.Printf("/%s", p.StartTime.Format(time.UnixDate))
 				}
+				if vnd.Config.ShowMetrics {
+					fmt.Printf(" | mem usage: %s", utils.ByteCountIEC(p.Metrics.Memory))
+				}
 				fmt.Printf(")")
 				if vnd.Config.ShowContainers {
 					switch vnd.Config.ContainerViewType {
@@ -98,7 +114,13 @@ func (vnd ViewNodeData) Printout() error {
 						for _, c := range p.Containers {
 							fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
 							if vnd.Config.ShowReqLimits {
-								fmt.Printf(" [C:%s M:%s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+								fmt.Printf(" [cr:%s mr:%s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+							}
+							if vnd.Config.ShowMetrics {
+								fmt.Printf(" mu:%s", utils.ByteCountIEC(c.Metrics.Memory))
+							}
+							if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
+								fmt.Printf("]")
 							}
 						}
 						fmt.Printf(")")
@@ -108,7 +130,18 @@ func (vnd ViewNodeData) Printout() error {
 						for i, c := range p.Containers {
 							fmt.Printf("\n    %d: %s (%s)", i, c.Name, strings.ToLower(c.State))
 							if vnd.Config.ShowReqLimits {
-								fmt.Printf(" [Cpu: %s Memory: %s]", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+								fmt.Printf(" [cpu: %s | mem: %s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+							}
+							if vnd.Config.ShowMetrics {
+								if vnd.Config.ShowReqLimits {
+									fmt.Printf(" | ")
+								} else {
+									fmt.Printf(" [")
+								}
+								fmt.Printf("mem usage: %s", utils.ByteCountIEC(c.Metrics.Memory))
+							}
+							if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
+								fmt.Printf("]")
 							}
 						}
 						break

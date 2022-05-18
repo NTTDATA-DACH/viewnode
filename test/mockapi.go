@@ -2,6 +2,7 @@ package test
 
 import (
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )
 
 type MockApi struct{}
@@ -32,4 +33,12 @@ func (m MockApi) RetrievePodList(namespace string) (*v1.PodList, error) {
 	pl.Items[2].Name = PodName3
 	pl.Items[2].Spec.NodeName = NodeName1
 	return &pl, nil
+}
+
+func (m MockApi) RetrieveNodeMetricses() (*v1beta1.NodeMetricsList, error) {
+	panic("implement me")
+}
+
+func (m MockApi) RetrievePodMetricses(namespace string) (*v1beta1.PodMetricsList, error) {
+	panic("implement me")
 }

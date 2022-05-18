@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -20,6 +21,7 @@ var containerViewTypeBlockFlag bool
 var showTimesFlag bool
 var showRunningFlag bool
 var showReqLimitsFlag bool
+var showMetricsFlag bool
 var verbosity string
 
 var rootCmd = &cobra.Command{
@@ -51,14 +53,16 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		}
 		fs := []srv.LoadAndFilter{
 			srv.NodeFilter{
-				SearchText: nodeFilter,
-				Api:        api,
+				SearchText:  nodeFilter,
+				Api:         api,
+				WithMetrics: showMetricsFlag,
 			},
 			srv.PodFilter{
 				Namespace:   setup.Namespace,
 				SearchText:  podFilter,
 				Api:         api,
 				RunningOnly: showRunningFlag,
+				WithMetrics: showMetricsFlag,
 			},
 		}
 		var vns []srv.ViewNode
@@ -66,15 +70,16 @@ You can find the source code and usage documentation at GitHub: https://github.c
 			log.Tracef("starting loading and filtering of %ss", f.ResourceName())
 			vns, err = f.LoadAndFilter(vns)
 			if err != nil {
-				if err.Error() == "Unauthorized" {
-					log.Fatalln("you are NOT authorized; please login to the cloud/cluster before continuing")
-				}
-				if f.ResourceName() == "node" {
-					log.Warn("cannot load nodes; node names will be extracted from the pod specification if possible")
-					log.Debugf("ERROR: %s", err.Error())
+				log.Debugf("ERROR: %s", err.Error())
+				switch {
+				case errors.As(err, &srv.UnauthorizedError{}):
+					log.Fatalln("you are not authorized; please login to the cloud/cluster before continuing")
+				case errors.As(err, &srv.NodesIsForbiddenError{}):
+					log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
 					continue
+				default:
+					log.Fatalf("loading and filtering of %ss failed due to: %s", f.ResourceName(), err.Error())
 				}
-				log.Fatalf("loading and filtering of %ss failed (%s)", f.ResourceName(), err.Error())
 			}
 			log.Tracef("finished loading and filtering of %ss", f.ResourceName())
 		}
@@ -85,6 +90,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		vnd.Config.ShowContainers = showContainersFlag
 		vnd.Config.ShowTimes = showTimesFlag
 		vnd.Config.ShowReqLimits = showReqLimitsFlag
+		vnd.Config.ShowMetrics = showMetricsFlag
 		vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeBlockFlag)
 		err = vnd.Printout()
 		if err != nil {
@@ -120,6 +126,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&showReqLimitsFlag, "show-requests-and-limits", "r", false, "show requests and limits for containers' cpu and memory (requires -c flag)")
 	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
 	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
+	rootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
 	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 }
 
