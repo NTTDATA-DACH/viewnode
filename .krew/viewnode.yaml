@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: viewnode
 spec:
-  version: v0.8.0
+  version: v0.8.1
   homepage: https://github.com/NTTDATA-DACH/viewnode
   shortDescription: Displays nodes with their pods and containers and provides metrics for resources
   description: |
