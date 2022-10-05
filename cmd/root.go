@@ -35,7 +35,8 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeBlockFlag) {
 			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-block-view) flag without -c (--show-containers) flag")
 		}
-		setup, err := srv.InitSetup()
+		setup := srv.Setup{}
+		err := setup.Initialize()
 		if err != nil {
 			log.Fatalf("init setup failed (%s)", err.Error())
 		}
@@ -44,12 +45,11 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		}
 		if allNamespacesFlag {
 			setup.Namespace = ""
-		}
-		if !allNamespacesFlag {
+		} else {
 			fmt.Printf("namespace: %s\n", setup.Namespace)
 		}
 		api := srv.KubernetesApi{
-			Setup: setup,
+			Setup: &setup,
 		}
 		fs := []srv.LoadAndFilter{
 			srv.NodeFilter{
