@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"viewnode/srv"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
@@ -23,6 +24,7 @@ var showRunningFlag bool
 var showReqLimitsFlag bool
 var showMetricsFlag bool
 var verbosity string
+var kubeconfig string
 
 var rootCmd = &cobra.Command{
 	Use:   "viewnode",
@@ -35,7 +37,8 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeBlockFlag) {
 			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-block-view) flag without -c (--show-containers) flag")
 		}
-		setup, err := srv.InitSetup()
+		setup := srv.Setup{KubeCfgPath: kubeconfig}
+		err := setup.Initialize()
 		if err != nil {
 			log.Fatalf("init setup failed (%s)", err.Error())
 		}
@@ -44,12 +47,11 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		}
 		if allNamespacesFlag {
 			setup.Namespace = ""
-		}
-		if !allNamespacesFlag {
+		} else {
 			fmt.Printf("namespace: %s\n", setup.Namespace)
 		}
 		api := srv.KubernetesApi{
-			Setup: setup,
+			Setup: &setup,
 		}
 		fs := []srv.LoadAndFilter{
 			srv.NodeFilter{
@@ -77,6 +79,8 @@ You can find the source code and usage documentation at GitHub: https://github.c
 				case errors.As(err, &srv.NodesIsForbiddenError{}):
 					log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
 					continue
+				case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
+					log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", f.ResourceName())
 				default:
 					log.Fatalf("loading and filtering of %ss failed due to: %s", f.ResourceName(), err.Error())
 				}
@@ -128,6 +132,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
 	rootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
 	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
+	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "", "kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)")
 }
 
 func initConfig() {

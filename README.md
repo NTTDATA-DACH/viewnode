@@ -17,10 +17,12 @@ Flags:
   -A, --all-namespaces             use all namespaces
   -b, --container-block-view       format view of containers as a text block, otherwise inline
   -h, --help                       help for viewnode
+      --kubeconfig string          kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)
   -n, --namespace string           namespace to use
   -f, --node-filter string         show only nodes according to filter
   -p, --pod-filter string          show only pods according to filter
   -c, --show-containers            show containers in pod
+  -m, --show-metrics               show memory footprint of nodes, pods and containers
   -t, --show-pod-start-times       show start times of pods
   -r, --show-requests-and-limits   show requests and limits for containers' cpu and memory (requires -c flag)
       --show-running-only          show running pods only

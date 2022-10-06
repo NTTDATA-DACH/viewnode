@@ -1,9 +1,10 @@
 package srv
 
 import (
-	v1 "k8s.io/api/core/v1"
 	"strings"
 	"time"
+
+	v1 "k8s.io/api/core/v1"
 )
 
 type PodFilter struct {
