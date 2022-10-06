@@ -32,8 +32,6 @@ func (e ErrKubeCfgFileNotExist) Is(target error) bool {
 
 type Setup struct {
 	KubeCfgPath      string
-	KubeContext      string
-	KubeCluster      string
 	ClientConfig     clientcmd.ClientConfig
 	Namespace        string
 	Clientset        *kubernetes.Clientset
@@ -92,13 +90,6 @@ func (s *Setup) GetCurrentNamespace() (string, error) {
 // DetermineClientConfig determines clients configuration by looking for the config file using different path queues
 func (s *Setup) DetermineClientConfig() error {
 	co := &clientcmd.ConfigOverrides{}
-	if s.KubeContext != "" {
-		co.CurrentContext = s.KubeContext
-	}
-	if s.KubeCluster != "" {
-		co.Context.Cluster = s.KubeCluster
-	}
-
 	lr := clientcmd.NewDefaultClientConfigLoadingRules()
 	if len(s.KubeCfgPath) == 0 {
 		s.ClientConfig = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(lr, co)
