@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
+	"strings"
+
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
-	"os"
-	"strings"
 )
 
 // ErrKubeCfgFileNotExist is a sentinel (expected) error, when the config file cannot be found at the given path

@@ -1,12 +1,13 @@
 package srv
 
 import (
-	"gotest.tools/v3/assert"
-	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"gotest.tools/v3/assert"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 type configTestCase struct {
