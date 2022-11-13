@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sh-ls
+  namespace: viewnode
+spec:
+  params:
+    - name: subdirectory
+      type: string
+      default: '.'
+  steps:
+    - name: ls
+      image: alpine:3
+      script: |
+        cd $(workspaces.folder.path) && pwd && ls -la
+  workspaces:
+    - name: folder
+

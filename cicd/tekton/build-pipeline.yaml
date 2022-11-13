@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-viewnode
+  namespace: viewnode
+spec:
+  description: |
+    Viewnode build pipeline.
+  params:
+    - name: repo-url
+      type: string
+      description: The git repo URL to clone from.
+    - name: branch-name
+      type: string
+      description: The git branch to clone.
+  workspaces:
+    - name: shared-data
+      description: |
+        This workspace contains the cloned repo files, so they can be read by the next task.
+  tasks:
+  - name: fetch
+    taskRef:
+      name: git-clone
+    workspaces:
+      - name: output
+        workspace: shared-data
+    params:
+      - name: url
+        value: $(params.repo-url)
+      - name: revision
+        value: $(params.branch-name)
+      - name: subdirectory
+        value: .
+  - name: sh
+    taskRef:
+      name: sh-ls
+      kind: Task
+    runAfter:
+      - fetch
+    params:
+    - name: subdirectory
+      value: .
+    workspaces:
+    - name: folder
+      workspace: shared-data
+  - name: lint
+    taskRef:
+      name: golangci-lint
+      kind: Task
+    runAfter:
+      - sh
+    params:
+    - name: package
+      value: viewnode
+    - name: context
+      value: .
+    - name: flags
+      value: --verbose
+    workspaces:
+    - name: source
+      workspace: shared-data
+

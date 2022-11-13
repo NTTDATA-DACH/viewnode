@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: build-viewnode-run
+  namespace: viewnode
+spec:
+  pipelineRef:
+    name: build-viewnode
+  workspaces:
+    - name: shared-data
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Mi
+  params:
+    - name: repo-url
+      value: https://github.com/NTTDATA-DACH/viewnode
+    - name: branch-name
+      value: develop
