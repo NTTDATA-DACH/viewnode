@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: viewnode
 spec:
-  version: v0.8.2
+  version: {{ .TagName }}
   homepage: https://github.com/NTTDATA-DACH/viewnode
   shortDescription: Displays nodes with their pods and containers and provides metrics for resources
   description: |
@@ -17,20 +17,23 @@ spec:
         matchLabels:
           os: darwin
           arch: amd64
-      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.2/viewnode_0.8.2_darwin_amd64.tar.gz
-      sha256: 9d535dc6b66cc64b75c74f84db172a958609444cecff35fc25e0c47650f38a23
+      {{addURIAndSha "https://github.com/NTTDATA-DACH/viewnode/releases/download/{{ .TagName }}/viewnode_{{ .TagName }}_darwin_amd64.tar.gz" .TagName | indent 6 }}
+      bin: viewnode
+    - selector:
+        matchLabels:
+          os: darwin
+          arch: arm64
+      {{addURIAndSha "https://github.com/NTTDATA-DACH/viewnode/releases/download/{{ .TagName }}/viewnode_{{ .TagName }}_darwin_arm64.tar.gz" .TagName | indent 6 }}
       bin: viewnode
     - selector:
         matchLabels:
           os: linux
           arch: amd64
-      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.2/viewnode_0.8.2_linux_amd64.tar.gz
-      sha256: ce5023f230da06485737b890f67b90bfef446f1117169b6faacc25367c73bad0
+      {{addURIAndSha "https://github.com/NTTDATA-DACH/viewnode/releases/download/{{ .TagName }}/viewnode_{{ .TagName }}_linux_amd64.tar.gz" .TagName | indent 6 }}
       bin: viewnode
     - selector:
         matchLabels:
           os: windows
           arch: amd64
-      uri: https://github.com/NTTDATA-DACH/viewnode/releases/download/v0.8.2/viewnode_0.8.2_windows_amd64.tar.gz
-      sha256: 2cebcaa56b0ed7b84056690c043d0cd48dd69f513ef11c471730a61b3947dae6
+      {{addURIAndSha "https://github.com/NTTDATA-DACH/viewnode/releases/download/{{ .TagName }}/viewnode_{{ .TagName }}_windows_amd64.tar.gz" .TagName | indent 6 }}
       bin: viewnode.exe

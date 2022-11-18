@@ -1,26 +1,21 @@
 name: Go
-
 on:
   push:
-    branches: [ 'develop', 'feature/**' ]
-    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ 'develop', 'feature/**' ]
-
+    branches:
+      - '**'
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
-
       - name: Build
         run: go build -v ./...
-
       - name: Test
-        run: go test -v ./...
+        run: go test -cover -coverprofile=coverage.txt -v ./...
