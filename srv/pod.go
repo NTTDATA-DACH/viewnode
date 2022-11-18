@@ -81,6 +81,9 @@ func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error)
 	if pf.WithMetrics {
 		pml, err := pf.Api.RetrievePodMetricses(pf.Namespace)
 		if err != nil {
+			if strings.Contains(err.Error(), "(get pods.metrics.k8s.io)") {
+				return vns, ErrMetricsServerNotInstalled
+			}
 			return nil, err
 		}
 		for i := range vns {

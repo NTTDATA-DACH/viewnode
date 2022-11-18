@@ -1,10 +1,13 @@
 package srv
 
 import (
+	"errors"
 	"strings"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
+
+var ErrMetricsServerNotInstalled = errors.New("could not find resource metrics.k8s.io; is the metrics server installed?")
 
 type NodeFilter struct {
 	SearchText  string
@@ -34,6 +37,9 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	if nf.WithMetrics {
 		nml, err := nf.Api.RetrieveNodeMetricses()
 		if err != nil {
+			if strings.Contains(err.Error(), "(get nodes.metrics.k8s.io)") {
+				return vns, ErrMetricsServerNotInstalled
+			}
 			return nil, err
 		}
 		for i := range vns {
