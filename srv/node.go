@@ -27,9 +27,10 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	for _, n := range list.Items {
 		if strings.Contains(n.Name, nf.SearchText) {
 			vn := ViewNode{
-				Name: n.Name,
-				Os:   n.Status.NodeInfo.OperatingSystem,
-				Arch: n.Status.NodeInfo.Architecture,
+				Name:             n.Name,
+				Os:               n.Status.NodeInfo.OperatingSystem,
+				Arch:             n.Status.NodeInfo.Architecture,
+				ContainerRuntime: n.Status.NodeInfo.ContainerRuntimeVersion,
 			}
 			vns = append(vns, vn)
 		}
