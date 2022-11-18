@@ -5,7 +5,7 @@ import (
 	"viewnode/srv"
 )
 
-func TestNodeLoadAndFilter(t *testing.T) {
+func TestNode_LoadAndFilter(t *testing.T) {
 	var api MockApi
 	nf := srv.NodeFilter{
 		SearchText: NodeName1,

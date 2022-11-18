@@ -5,7 +5,7 @@ import (
 	"viewnode/srv"
 )
 
-func TestPodLoadAndFilter(t *testing.T) {
+func TestPod_LoadAndFilter(t *testing.T) {
 	var api MockApi
 	nf := srv.NodeFilter{
 		Api: api,
