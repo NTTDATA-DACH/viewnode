@@ -1,4 +1,4 @@
-VERSION = v0.8.2
+VERSION = v0.8.3
 
 .PHONY: clean build run install all release
 
@@ -7,6 +7,9 @@ clean:
 
 build:
 	@go build -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=`git rev-parse HEAD`"
+
+test:
+	@go test -cover -coverprofile=coverage.txt
 
 run:
 	@go run -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=`git rev-parse HEAD`" main.go $(cmd)
