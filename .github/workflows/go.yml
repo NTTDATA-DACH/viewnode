@@ -20,5 +20,7 @@ jobs:
         run: make build
       - name: Run Unit Tests with Coverage
         run: make test
+      - name: List Function Coverage
+        run: go tool cover -func=coverage.out
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
