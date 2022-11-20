@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPod_LoadAndFilter(t *testing.T) {
+func TestPodFilter_LoadAndFilter(t *testing.T) {
 	var api MockApi
 	nf := NodeFilter{
 		Api: api,

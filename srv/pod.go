@@ -15,6 +15,7 @@ type PodFilter struct {
 	Api         Api
 }
 
+// LoadAndFilter loads and filters pods over an API (if search text is specified on filter)
 func (pf PodFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error) {
 	list, err := pf.Api.RetrievePodList(pf.Namespace)
 	if err != nil {

@@ -15,6 +15,7 @@ type NodeFilter struct {
 	Api         Api
 }
 
+// LoadAndFilter loads and filters nodes over an API (if search text is specified on filter)
 func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error) {
 	list, err := nf.Api.RetrieveNodeList()
 	if err != nil {

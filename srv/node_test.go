@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNode_LoadAndFilter(t *testing.T) {
+func TestNodeFilter_LoadAndFilter(t *testing.T) {
 	var api MockApi
 	nf := NodeFilter{
 		SearchText: NodeName1,
