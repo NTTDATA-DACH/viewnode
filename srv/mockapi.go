@@ -1,4 +1,4 @@
-package test
+package srv
 
 import (
 	v1 "k8s.io/api/core/v1"

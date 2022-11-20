@@ -9,6 +9,7 @@ build:
 	@go build -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=`git rev-parse HEAD`"
 
 test:
+	# use 'atomic' cover mode for safe concurrent test (default is 'set', we can use also 'count')
 	@go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
 run:
