@@ -22,7 +22,7 @@ type KubernetesApi struct {
 }
 
 func (k KubernetesApi) RetrieveNodeList() (*v1.NodeList, error) {
-	nl, err := k.Setup.Clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	nl, err := k.Setup.Clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, DecorateError(err)
 	}
@@ -30,7 +30,7 @@ func (k KubernetesApi) RetrieveNodeList() (*v1.NodeList, error) {
 }
 
 func (k KubernetesApi) RetrievePodList(namespace string) (*v1.PodList, error) {
-	pl, err := k.Setup.Clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+	pl, err := k.Setup.Clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, DecorateError(err)
 	}
@@ -38,7 +38,7 @@ func (k KubernetesApi) RetrievePodList(namespace string) (*v1.PodList, error) {
 }
 
 func (k KubernetesApi) RetrieveNodeMetricses() (*v1beta1.NodeMetricsList, error) {
-	nm, err := k.Setup.MetricsClientset.MetricsV1beta1().NodeMetricses().List(context.TODO(), metav1.ListOptions{})
+	nm, err := k.Setup.MetricsClientset.MetricsV1beta1().NodeMetricses().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, DecorateError(err)
 	}
@@ -46,7 +46,7 @@ func (k KubernetesApi) RetrieveNodeMetricses() (*v1beta1.NodeMetricsList, error)
 }
 
 func (k KubernetesApi) RetrievePodMetricses(namespace string) (*v1beta1.PodMetricsList, error) {
-	pm, err := k.Setup.MetricsClientset.MetricsV1beta1().PodMetricses(namespace).List(context.TODO(), metav1.ListOptions{})
+	pm, err := k.Setup.MetricsClientset.MetricsV1beta1().PodMetricses(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
