@@ -56,9 +56,7 @@ func TestSetup_GetRestConfig(t *testing.T) {
 
 		switch len(ctc.errStringContains) {
 		case 0:
-			if err != nil {
-				t.Errorf("%d: unexpected error: %s", i, err.Error())
-			}
+			assert.NilError(t, err, "unexpected error")
 		default:
 			if err == nil {
 				t.Errorf("%d: wrong error detected: %s (expected) != %s (actual)", i, ctc.errStringContains, err)

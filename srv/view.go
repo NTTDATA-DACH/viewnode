@@ -9,11 +9,12 @@ import (
 )
 
 type ViewNode struct {
-	Name    string
-	Os      string
-	Arch    string
-	Metrics ViewMetrics
-	Pods    []ViewPod
+	Name             string
+	Os               string
+	Arch             string
+	ContainerRuntime string
+	Metrics          ViewMetrics
+	Pods             []ViewPod
 }
 
 type ViewPod struct {
@@ -89,7 +90,7 @@ func (vnd ViewNodeData) Printout() error {
 	fmt.Printf("%d running node(s) with %d scheduled pod(s):\n", l-1, nsp)
 	for _, n := range vnd.Nodes {
 		if n.Name != "" {
-			fmt.Printf("- %s running %d pod(s) (%s/%s", n.Name, len(n.Pods), n.Os, n.Arch)
+			fmt.Printf("- %s running %d pod(s) (%s/%s/%s", n.Name, len(n.Pods), n.Os, n.Arch, n.ContainerRuntime)
 			if vnd.Config.ShowMetrics {
 				fmt.Printf(" | mem: %s", utils.ByteCountIEC(n.Metrics.Memory))
 			}
