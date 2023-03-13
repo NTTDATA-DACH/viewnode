@@ -1,8 +1,9 @@
 package srv
 
 import (
-	"gotest.tools/v3/assert"
 	"testing"
+
+	"gotest.tools/v3/assert"
 )
 
 func TestPodFilter_LoadAndFilter(t *testing.T) {
