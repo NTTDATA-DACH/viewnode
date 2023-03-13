@@ -1,11 +1,6 @@
 /*
-	Convert byte size to bytes, kilobytes, megabytes, gigabytes, ...
-
-	These utility functions convert a byte size to a human-readable string
-	in either SI (decimal) or IEC (binary) format.
-
-
-	Source: https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
+Package utils contains various utility functions.
+Source: https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
 */
 package utils
 

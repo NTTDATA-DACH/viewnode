@@ -1,10 +1,13 @@
 package srv
 
 import (
+	"errors"
 	"strings"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
+
+var ErrMetricsServerNotInstalled = errors.New("could not find resource metrics.k8s.io; is the metrics server installed?")
 
 type NodeFilter struct {
 	SearchText  string
@@ -12,6 +15,7 @@ type NodeFilter struct {
 	Api         Api
 }
 
+// LoadAndFilter loads and filters nodes over an API (if search text is specified on filter)
 func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error) {
 	list, err := nf.Api.RetrieveNodeList()
 	if err != nil {
@@ -24,9 +28,10 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	for _, n := range list.Items {
 		if strings.Contains(n.Name, nf.SearchText) {
 			vn := ViewNode{
-				Name: n.Name,
-				Os:   n.Status.NodeInfo.OperatingSystem,
-				Arch: n.Status.NodeInfo.Architecture,
+				Name:             n.Name,
+				Os:               n.Status.NodeInfo.OperatingSystem,
+				Arch:             n.Status.NodeInfo.Architecture,
+				ContainerRuntime: n.Status.NodeInfo.ContainerRuntimeVersion,
 			}
 			vns = append(vns, vn)
 		}
@@ -34,6 +39,9 @@ func (nf NodeFilter) LoadAndFilter(vns []ViewNode) (result []ViewNode, err error
 	if nf.WithMetrics {
 		nml, err := nf.Api.RetrieveNodeMetricses()
 		if err != nil {
+			if strings.Contains(err.Error(), "(get nodes.metrics.k8s.io)") {
+				return vns, ErrMetricsServerNotInstalled
+			}
 			return nil, err
 		}
 		for i := range vns {

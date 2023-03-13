@@ -79,6 +79,9 @@ You can find the source code and usage documentation at GitHub: https://github.c
 				case errors.As(err, &srv.NodesIsForbiddenError{}):
 					log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
 					continue
+				case errors.Is(err, srv.ErrMetricsServerNotInstalled):
+					log.Warnf("loading of metrics for %ss failed; %s", f.ResourceName(), err.Error())
+					continue
 				case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
 					log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", f.ResourceName())
 				default:
