@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
+	"time"
 	"viewnode/srv"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
@@ -25,6 +27,7 @@ var showReqLimitsFlag bool
 var showMetricsFlag bool
 var verbosity string
 var kubeconfig string
+var watchOn bool
 
 var rootCmd = &cobra.Command{
 	Use:   "viewnode",
@@ -99,15 +102,53 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		vnd.Config.ShowReqLimits = showReqLimitsFlag
 		vnd.Config.ShowMetrics = showMetricsFlag
 		vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeBlockFlag)
-		err = vnd.Printout()
-		if err != nil {
-			log.Fatalln("displaying failed")
+
+		stopCh := make(chan bool)
+		errCh := make(chan error)
+		go handleErrors(errCh)
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go schedule(&wg, vnd, stopCh, errCh)
+		if !watchOn {
+			close(stopCh)
 		}
+		wg.Wait()
 	},
 }
 
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
+}
+
+func schedule(wg *sync.WaitGroup, vnd srv.ViewNodeData, stop <-chan bool, errCh chan<- error) {
+	defer wg.Done()
+	ticker := time.NewTicker(1 * time.Second)
+	executePrintOut(vnd, errCh)
+	for {
+		select {
+		case <-stop:
+			ticker.Stop()
+			return
+		case <-ticker.C:
+			executePrintOut(vnd, errCh)
+		}
+	}
+}
+
+func executePrintOut(vnd srv.ViewNodeData, errCh chan<- error) {
+	err := vnd.Printout()
+	if err != nil {
+		errCh <- err
+		return
+	}
+}
+
+func handleErrors(errCh <-chan error) {
+	for err := range errCh {
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 }
 
 func init() {
@@ -136,6 +177,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
 	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "", "kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)")
+	rootCmd.PersistentFlags().BoolVarP(&watchOn, "watch", "w", false, "executes the command every second so that changes can be observed")
 }
 
 func initConfig() {

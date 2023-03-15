@@ -27,6 +27,7 @@ Flags:
   -r, --show-requests-and-limits   show requests and limits for containers' cpu and memory (requires -c flag)
       --show-running-only          show running pods only
   -v, --verbosity string           defines log level (debug, info, warn, error, fatal, panic) (default "warning")
+  -w, --watch                      executes the command every second so that changes can be observed
 
 Use "viewnode [command] --help" for more information about a command.
 ```
