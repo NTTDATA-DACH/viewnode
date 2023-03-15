@@ -1,6 +1,6 @@
 module viewnode
 
-go 1.18
+go 1.20
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
