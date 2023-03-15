@@ -40,75 +40,12 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeBlockFlag) {
 			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-block-view) flag without -c (--show-containers) flag")
 		}
-		setup := srv.Setup{KubeCfgPath: kubeconfig}
-		err := setup.Initialize()
-		if err != nil {
-			log.Fatalf("init setup failed (%s)", err.Error())
-		}
-		if namespace != "" {
-			setup.Namespace = namespace
-		}
-		if allNamespacesFlag {
-			setup.Namespace = ""
-		} else {
-			fmt.Printf("namespace: %s\n", setup.Namespace)
-		}
-		api := srv.KubernetesApi{
-			Setup: &setup,
-		}
-		fs := []srv.LoadAndFilter{
-			srv.NodeFilter{
-				SearchText:  nodeFilter,
-				Api:         api,
-				WithMetrics: showMetricsFlag,
-			},
-			srv.PodFilter{
-				Namespace:   setup.Namespace,
-				SearchText:  podFilter,
-				Api:         api,
-				RunningOnly: showRunningFlag,
-				WithMetrics: showMetricsFlag,
-			},
-		}
-		var vns []srv.ViewNode
-		for _, f := range fs {
-			log.Tracef("starting loading and filtering of %ss", f.ResourceName())
-			vns, err = f.LoadAndFilter(vns)
-			if err != nil {
-				log.Debugf("ERROR: %s", err.Error())
-				switch {
-				case errors.As(err, &srv.UnauthorizedError{}):
-					log.Fatalln("you are not authorized; please login to the cloud/cluster before continuing")
-				case errors.As(err, &srv.NodesIsForbiddenError{}):
-					log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
-					continue
-				case errors.Is(err, srv.ErrMetricsServerNotInstalled):
-					log.Warnf("loading of metrics for %ss failed; %s", f.ResourceName(), err.Error())
-					continue
-				case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
-					log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", f.ResourceName())
-				default:
-					log.Fatalf("loading and filtering of %ss failed due to: %s", f.ResourceName(), err.Error())
-				}
-			}
-			log.Tracef("finished loading and filtering of %ss", f.ResourceName())
-		}
-		vnd := srv.ViewNodeData{
-			Nodes: vns,
-		}
-		vnd.Config.ShowNamespaces = allNamespacesFlag
-		vnd.Config.ShowContainers = showContainersFlag
-		vnd.Config.ShowTimes = showTimesFlag
-		vnd.Config.ShowReqLimits = showReqLimitsFlag
-		vnd.Config.ShowMetrics = showMetricsFlag
-		vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeBlockFlag)
-
 		stopCh := make(chan bool)
 		errCh := make(chan error)
 		go handleErrors(errCh)
 		var wg sync.WaitGroup
 		wg.Add(1)
-		go schedule(&wg, vnd, stopCh, errCh)
+		go schedule(&wg, stopCh, errCh)
 		if !watchOn {
 			close(stopCh)
 		}
@@ -120,9 +57,10 @@ func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
 
-func schedule(wg *sync.WaitGroup, vnd srv.ViewNodeData, stop <-chan bool, errCh chan<- error) {
+func schedule(wg *sync.WaitGroup, stop <-chan bool, errCh chan<- error) {
 	defer wg.Done()
 	ticker := time.NewTicker(1 * time.Second)
+	vnd := executeLoadAndFilter(errCh)
 	executePrintOut(vnd, errCh)
 	for {
 		select {
@@ -130,13 +68,81 @@ func schedule(wg *sync.WaitGroup, vnd srv.ViewNodeData, stop <-chan bool, errCh 
 			ticker.Stop()
 			return
 		case <-ticker.C:
+			vnd = executeLoadAndFilter(errCh)
 			executePrintOut(vnd, errCh)
 		}
 	}
 }
 
+func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
+	setup := srv.Setup{KubeCfgPath: kubeconfig}
+	err := setup.Initialize()
+	if err != nil {
+		errCh <- fmt.Errorf("init setup failed (%w)", err)
+		return srv.ViewNodeData{}
+	}
+	if namespace != "" {
+		setup.Namespace = namespace
+	}
+	if allNamespacesFlag {
+		setup.Namespace = ""
+	}
+	api := srv.KubernetesApi{
+		Setup: &setup,
+	}
+	fs := []srv.LoadAndFilter{
+		srv.NodeFilter{
+			SearchText:  nodeFilter,
+			Api:         api,
+			WithMetrics: showMetricsFlag,
+		},
+		srv.PodFilter{
+			Namespace:   setup.Namespace,
+			SearchText:  podFilter,
+			Api:         api,
+			RunningOnly: showRunningFlag,
+			WithMetrics: showMetricsFlag,
+		},
+	}
+	var vns []srv.ViewNode
+	for _, f := range fs {
+		log.Tracef("starting loading and filtering of %ss", f.ResourceName())
+		vns, err = f.LoadAndFilter(vns)
+		if err != nil {
+			log.Debugf("ERROR: %s", err.Error())
+			switch {
+			case errors.As(err, &srv.UnauthorizedError{}):
+				log.Fatalln("you are not authorized; please login to the cloud/cluster before continuing")
+			case errors.As(err, &srv.NodesIsForbiddenError{}):
+				log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
+				continue
+			case errors.Is(err, srv.ErrMetricsServerNotInstalled):
+				log.Warnf("loading of metrics for %ss failed; %s", f.ResourceName(), err.Error())
+				continue
+			case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
+				log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", f.ResourceName())
+			default:
+				log.Fatalf("loading and filtering of %ss failed due to: %s", f.ResourceName(), err.Error())
+			}
+		}
+		log.Tracef("finished loading and filtering of %ss", f.ResourceName())
+	}
+	vnd := srv.ViewNodeData{
+		Namespace: setup.Namespace,
+		Nodes:     vns,
+	}
+	vnd.Config.ShowNamespaces = allNamespacesFlag
+	vnd.Config.ShowContainers = showContainersFlag
+	vnd.Config.ShowTimes = showTimesFlag
+	vnd.Config.ShowReqLimits = showReqLimitsFlag
+	vnd.Config.ShowMetrics = showMetricsFlag
+	vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeBlockFlag)
+
+	return vnd
+}
+
 func executePrintOut(vnd srv.ViewNodeData, errCh chan<- error) {
-	err := vnd.Printout()
+	err := vnd.Printout(watchOn)
 	if err != nil {
 		errCh <- err
 		return

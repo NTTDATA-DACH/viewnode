@@ -42,8 +42,9 @@ type ViewMetrics struct {
 }
 
 type ViewNodeData struct {
-	Config ViewNodeDataConfig
-	Nodes  []ViewNode
+	Config    ViewNodeDataConfig
+	Namespace string
+	Nodes     []ViewNode
 }
 
 type ViewType int
@@ -64,12 +65,18 @@ type ViewNodeDataConfig struct {
 }
 
 type View interface {
-	Printout() error
+	Printout(cls bool) error
 }
 
-func (vnd ViewNodeData) Printout() error {
+func (vnd ViewNodeData) Printout(cls bool) error {
+	if cls {
+		fmt.Print("\033[2J\033[0;0H")
+	}
 	if vnd.Nodes == nil {
 		return errors.New("list of view nodes must not be null")
+	}
+	if vnd.Namespace != "" {
+		fmt.Printf("namespace: %s\n", vnd.Namespace)
 	}
 	l := len(vnd.Nodes)
 	if l <= 1 {
