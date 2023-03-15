@@ -1,4 +1,4 @@
-VERSION = v0.9.0.1
+VERSION = v0.9.1
 
 .PHONY: clean build test run install all release
 
