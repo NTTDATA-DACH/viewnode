@@ -1,4 +1,4 @@
-VERSION = v0.9.2
+VERSION = v0.9.1.1
 
 .PHONY: clean build test run install all release
 
@@ -21,4 +21,4 @@ install:
 all: clean install
 
 release:
-	@goreleaser --snapshot --skip-publish --rm-dist
+	@goreleaser release --snapshot

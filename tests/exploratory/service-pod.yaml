@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-agent-service-0
+  labels:
+    app: viewnode
+spec:
+  restartPolicy: Never
+  activeDeadlineSeconds: 10
+  containers:
+  - name: default
+    image: agent-service-random-sleep:0.0.1
+    tty: true
+    resources:
+      requests:
+          memory: "100Mi"
+          cpu: "100m"
+      limits:
+          memory: "200Mi"
+          cpu: "1000m"
+    imagePullPolicy: Never
