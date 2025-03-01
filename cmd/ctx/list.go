@@ -8,8 +8,9 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all Kubernetes contexts",
+	Use:     "list",
+	Short:   "List all Kubernetes contexts",
+	Aliases: []string{"ls"},
 	RunE: func(c *cobra.Command, args []string) error {
 		setup := config.GetConfig()
 		rawConfig, err := setup.ClientConfig.RawConfig()
