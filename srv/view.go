@@ -51,7 +51,7 @@ type ViewType int
 
 const (
 	Inline ViewType = iota
-	Block
+	Tree
 )
 
 type ViewNodeDataConfig struct {
@@ -154,7 +154,7 @@ func (vnd ViewNodeData) Printout(cls bool) error {
 						}
 					}
 					fmt.Printf(")")
-				case Block:
+				case Tree:
 					fmt.Printf(" %d container/s:", len(p.Containers))
 					for i, c := range p.Containers {
 						containerPrefix := "├──"

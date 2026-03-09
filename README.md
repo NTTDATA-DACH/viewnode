@@ -15,7 +15,7 @@ Available Commands:
 
 Flags:
   -A, --all-namespaces             use all namespaces
-  -b, --container-block-view       format view of containers as a text block, otherwise inline
+  -b, --container-tree-view        format containers in tree view, otherwise inline
   -h, --help                       help for viewnode
       --kubeconfig string          kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)
   -n, --namespace string           namespace to use
