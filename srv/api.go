@@ -2,6 +2,7 @@ package srv
 
 import (
 	"context"
+	"viewnode/cmd/config"
 
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 
@@ -18,7 +19,7 @@ type Api interface {
 }
 
 type KubernetesApi struct {
-	Setup *Setup
+	Setup *config.Setup
 }
 
 func (k KubernetesApi) RetrieveNodeList() (*v1.NodeList, error) {

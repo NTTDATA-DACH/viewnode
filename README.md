@@ -10,12 +10,13 @@ Usage:
   viewnode [command]
 
 Available Commands:
+  ctx         Manage Kubernetes context
   help        Help about any command
   version     Plugin Version
 
 Flags:
   -A, --all-namespaces             use all namespaces
-  -b, --container-block-view       format view of containers as a text block, otherwise inline
+  -b, --container-tree-view        format containers in tree view, otherwise inline
   -h, --help                       help for viewnode
       --kubeconfig string          kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)
   -n, --namespace string           namespace to use
@@ -31,6 +32,26 @@ Flags:
 
 Use "viewnode [command] --help" for more information about a command.
 ```
+
+### Context command
+Manage kubeconfig contexts directly from `viewnode`:
+
+```
+$ viewnode ctx list
+[*] dev-cluster
+[ ] staging-cluster
+
+$ viewnode ctx get-current
+dev-cluster
+
+$ viewnode ctx set-current staging-cluster
+current context set to staging-cluster
+```
+
+Aliases:
+- `viewnode ctx getcurrent`
+- `viewnode ctx setcurrent staging-cluster`
+
 ## Installation
 ### As a Krew Plugin
 Follow the instructions to [install](https://krew.sigs.k8s.io/docs/user-guide/setup/install/) krew and then run the following command:
@@ -56,17 +77,17 @@ namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-341-ffkt5-2k64t (running)
-  * docker-in-the-cloud-86-822pd-d6p3d (running)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-338-3wc8r-n1t7z (running)
-  * docker-in-the-cloud-340-cms5r-pxxq7 (running)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
-  * docker-in-the-cloud-337-4c4lm-q3mtp (running)
-  * docker-in-the-cloud-339-4x9dq-0xd3q (running)
-  * docker-in-the-cloud-342-r5khq-9cx2w (running)
-  * liveness-test-4-boom (failed)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-341-ffkt5-2k64t (running)
+│   └── docker-in-the-cloud-86-822pd-d6p3d (running)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-338-3wc8r-n1t7z (running)
+│   └── docker-in-the-cloud-340-cms5r-pxxq7 (running)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── docker-in-the-cloud-337-4c4lm-q3mtp (running)
+    ├── docker-in-the-cloud-339-4x9dq-0xd3q (running)
+    ├── docker-in-the-cloud-342-r5khq-9cx2w (running)
+    └── liveness-test-4-boom (failed)
 ```
 Showing nodes, pods and containers:
 ```
@@ -75,17 +96,17 @@ namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-341-ffkt5-2k64t (running) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-86-822pd-d6p3d (running) (3: default/running docker-daemon/running jnlp/terminated)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-338-3wc8r-n1t7z (running) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-340-cms5r-pxxq7 (running) (3: default/running docker-daemon/running jnlp/running)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
-  * docker-in-the-cloud-337-4c4lm-q3mtp (running) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-339-4x9dq-0xd3q (running) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-342-r5khq-9cx2w (running) (3: default/running docker-daemon/running jnlp/running)
-  * liveness-test-4-boom (failed) (3: dead-container/terminated liveness1/running liveness2/running)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-341-ffkt5-2k64t (running) (3: default/running docker-daemon/running jnlp/running)
+│   └── docker-in-the-cloud-86-822pd-d6p3d (running) (3: default/running docker-daemon/running jnlp/terminated)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-338-3wc8r-n1t7z (running) (3: default/running docker-daemon/running jnlp/running)
+│   └── docker-in-the-cloud-340-cms5r-pxxq7 (running) (3: default/running docker-daemon/running jnlp/running)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── docker-in-the-cloud-337-4c4lm-q3mtp (running) (3: default/running docker-daemon/running jnlp/running)
+    ├── docker-in-the-cloud-339-4x9dq-0xd3q (running) (3: default/running docker-daemon/running jnlp/running)
+    ├── docker-in-the-cloud-342-r5khq-9cx2w (running) (3: default/running docker-daemon/running jnlp/running)
+    └── liveness-test-4-boom (failed) (3: dead-container/terminated liveness1/running liveness2/running)
 ```
 Showing nodes and pods with their start times:
 ```
@@ -94,17 +115,17 @@ namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-341-ffkt5-2k64t (running/Thu Aug 26 09:36:04 CEST 2021)
-  * docker-in-the-cloud-86-822pd-d6p3d (running/Thu Aug 19 09:09:20 CEST 2021)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-338-3wc8r-n1t7z (running/Thu Aug 26 09:36:02 CEST 2021)
-  * docker-in-the-cloud-340-cms5r-pxxq7 (running/Thu Aug 26 09:36:04 CEST 2021)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
-  * docker-in-the-cloud-337-4c4lm-q3mtp (running/Thu Aug 26 09:35:36 CEST 2021)
-  * docker-in-the-cloud-339-4x9dq-0xd3q (running/Thu Aug 26 09:36:03 CEST 2021)
-  * docker-in-the-cloud-342-r5khq-9cx2w (running/Thu Aug 26 09:36:05 CEST 2021)
-  * liveness-test-4-boom (failed/Wed Aug 25 15:07:52 CEST 2021)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-341-ffkt5-2k64t (running/Thu Aug 26 09:36:04 CEST 2021)
+│   └── docker-in-the-cloud-86-822pd-d6p3d (running/Thu Aug 19 09:09:20 CEST 2021)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-338-3wc8r-n1t7z (running/Thu Aug 26 09:36:02 CEST 2021)
+│   └── docker-in-the-cloud-340-cms5r-pxxq7 (running/Thu Aug 26 09:36:04 CEST 2021)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── docker-in-the-cloud-337-4c4lm-q3mtp (running/Thu Aug 26 09:35:36 CEST 2021)
+    ├── docker-in-the-cloud-339-4x9dq-0xd3q (running/Thu Aug 26 09:36:03 CEST 2021)
+    ├── docker-in-the-cloud-342-r5khq-9cx2w (running/Thu Aug 26 09:36:05 CEST 2021)
+    └── liveness-test-4-boom (failed/Wed Aug 25 15:07:52 CEST 2021)
 ```
 You can also combine show options:
 ```
@@ -113,17 +134,17 @@ namespace: jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-341-ffkt5-2k64t (running/Thu Aug 26 09:36:04 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-86-822pd-d6p3d (running/Thu Aug 19 09:09:20 CEST 2021) (3: default/running docker-daemon/running jnlp/terminated)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
-  * docker-in-the-cloud-338-3wc8r-n1t7z (running/Thu Aug 26 09:36:02 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-340-cms5r-pxxq7 (running/Thu Aug 26 09:36:04 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
-  * docker-in-the-cloud-337-4c4lm-q3mtp (running/Thu Aug 26 09:35:36 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-339-4x9dq-0xd3q (running/Thu Aug 26 09:36:03 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
-  * docker-in-the-cloud-342-r5khq-9cx2w (running/Thu Aug 26 09:36:05 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
-  * liveness-test-4-boom (failed/Wed Aug 25 15:07:52 CEST 2021) (3: dead-container/terminated liveness1/running liveness2/running)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-341-ffkt5-2k64t (running/Thu Aug 26 09:36:04 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
+│   └── docker-in-the-cloud-86-822pd-d6p3d (running/Thu Aug 19 09:09:20 CEST 2021) (3: default/running docker-daemon/running jnlp/terminated)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
+│   ├── docker-in-the-cloud-338-3wc8r-n1t7z (running/Thu Aug 26 09:36:02 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
+│   └── docker-in-the-cloud-340-cms5r-pxxq7 (running/Thu Aug 26 09:36:04 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── docker-in-the-cloud-337-4c4lm-q3mtp (running/Thu Aug 26 09:35:36 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
+    ├── docker-in-the-cloud-339-4x9dq-0xd3q (running/Thu Aug 26 09:36:03 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
+    ├── docker-in-the-cloud-342-r5khq-9cx2w (running/Thu Aug 26 09:36:05 CEST 2021) (3: default/running docker-daemon/running jnlp/running)
+    └── liveness-test-4-boom (failed/Wed Aug 25 15:07:52 CEST 2021) (3: dead-container/terminated liveness1/running liveness2/running)
 ```
 As well as filter nodes and pods:
 ```
@@ -132,11 +153,11 @@ namespace: jenkins-onprem
 4 pod(s) in total
 0 unscheduled pod(s)
 1 running node(s) with 4 scheduled pod(s):
-- gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
-  * docker-in-the-cloud-337-4c4lm-q3mtp (running)
-  * docker-in-the-cloud-339-4x9dq-0xd3q (running)
-  * docker-in-the-cloud-342-r5khq-9cx2w (running)
-  * liveness-test-4-boom (failed)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── docker-in-the-cloud-337-4c4lm-q3mtp (running)
+    ├── docker-in-the-cloud-339-4x9dq-0xd3q (running)
+    ├── docker-in-the-cloud-342-r5khq-9cx2w (running)
+    └── liveness-test-4-boom (failed)
 ```
 Very popular is combining `viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
 ```

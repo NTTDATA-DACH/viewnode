@@ -1,24 +1,35 @@
-VERSION = v0.9.1
+SHELL := /bin/sh
 
-.PHONY: clean build test run install all release
+MAIN_PKG ?= .
+ENTRYPOINT ?= ./main.go
 
-clean:
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+LDFLAGS ?= -s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT)
+
+.DEFAULT_GOAL := help
+
+.PHONY: help clean build test run install all release
+
+help: ## Show available targets.
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / {printf "%-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+clean: ## Clean Go build/test caches.
 	@go clean
 
-build:
-	@go build -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=`git rev-parse HEAD`"
+build: ## Build the project binary.
+	@go build -ldflags "$(LDFLAGS)" $(MAIN_PKG)
 
-test:
-	# use 'atomic' cover mode for safe concurrent test (default is 'set', we can use also 'count')
+test: ## Run all tests with race detection and coverage output.
 	@go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
-run:
-	@go run -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=`git rev-parse HEAD`" main.go $(cmd)
+run: ## Run the main entrypoint. Pass args via: make run cmd="--help"
+	@go run -ldflags "$(LDFLAGS)" $(ENTRYPOINT) $(cmd)
 
-install:
-	@go install -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=`git rev-parse HEAD`"
+install: ## Install the project with linker metadata.
+	@go install -ldflags "$(LDFLAGS)" $(MAIN_PKG)
 
-all: clean install
+all: clean install ## Clean and install.
 
-release:
-	@goreleaser --snapshot --skip-publish --rm-dist
+release: ## Create a snapshot release with goreleaser.
+	@goreleaser release --snapshot

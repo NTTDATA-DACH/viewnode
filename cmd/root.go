@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strings"
 	"sync"
 	"time"
+	"viewnode/cmd/config"
+	"viewnode/cmd/ctx"
 	"viewnode/srv"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
@@ -20,6 +21,7 @@ var allNamespacesFlag bool
 var nodeFilter string
 var podFilter string
 var showContainersFlag bool
+var containerViewTypeTreeFlag bool
 var containerViewTypeBlockFlag bool
 var showTimesFlag bool
 var showRunningFlag bool
@@ -29,7 +31,7 @@ var verbosity string
 var kubeconfig string
 var watchOn bool
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "viewnode",
 	Short: "'viewnode' displays nodes with their pods and containers.",
 	Long: `
@@ -37,8 +39,8 @@ The 'viewnode' displays nodes with their pods and containers.
 You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeBlockFlag) {
-			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-block-view) flag without -c (--show-containers) flag")
+		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeTreeFlag || containerViewTypeBlockFlag) {
+			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-tree-view) flag without -c (--show-containers) flag")
 		}
 		stopCh := make(chan bool)
 		errCh := make(chan error)
@@ -54,7 +56,7 @@ You can find the source code and usage documentation at GitHub: https://github.c
 }
 
 func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
+	cobra.CheckErr(RootCmd.Execute())
 }
 
 func schedule(wg *sync.WaitGroup, stop <-chan bool, errCh chan<- error) {
@@ -75,12 +77,7 @@ func schedule(wg *sync.WaitGroup, stop <-chan bool, errCh chan<- error) {
 }
 
 func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
-	setup := srv.Setup{KubeCfgPath: kubeconfig}
-	err := setup.Initialize()
-	if err != nil {
-		errCh <- fmt.Errorf("init setup failed (%w)", err)
-		return srv.ViewNodeData{}
-	}
+	setup := config.GetConfig()
 	if namespace != "" {
 		setup.Namespace = namespace
 	}
@@ -88,7 +85,7 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 		setup.Namespace = ""
 	}
 	api := srv.KubernetesApi{
-		Setup: &setup,
+		Setup: setup,
 	}
 	fs := []srv.LoadAndFilter{
 		srv.NodeFilter{
@@ -104,7 +101,10 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 			WithMetrics: showMetricsFlag,
 		},
 	}
-	var vns []srv.ViewNode
+	var (
+		vns []srv.ViewNode
+		err error
+	)
 	for _, f := range fs {
 		log.Tracef("starting loading and filtering of %ss", f.ResourceName())
 		vns, err = f.LoadAndFilter(vns)
@@ -136,7 +136,7 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 	vnd.Config.ShowTimes = showTimesFlag
 	vnd.Config.ShowReqLimits = showReqLimitsFlag
 	vnd.Config.ShowMetrics = showMetricsFlag
-	vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeBlockFlag)
+	vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeTreeFlag || containerViewTypeBlockFlag)
 
 	return vnd
 }
@@ -159,7 +159,7 @@ func handleErrors(errCh <-chan error) {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+	RootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		log.SetFormatter(&nested.Formatter{
 			ShowFullLevel: true,
 			HideKeys:      true,
@@ -170,20 +170,29 @@ func init() {
 		}
 		return nil
 	}
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
-	rootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
-	rootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
-	rootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
-	rootCmd.Flags().BoolVarP(&showContainersFlag, "show-containers", "c", false, "show containers in pod")
-	rootCmd.Flags().BoolVarP(&containerViewTypeBlockFlag, "container-block-view", "b", false, "format view of containers as a text block, otherwise inline")
-	rootCmd.Flags().BoolVarP(&showReqLimitsFlag, "show-requests-and-limits", "r", false, "show requests and limits for containers' cpu and memory (requires -c flag)")
-	rootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
-	rootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
-	rootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
-	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
-	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "", "kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)")
-	rootCmd.PersistentFlags().BoolVarP(&watchOn, "watch", "w", false, "executes the command every second so that changes can be observed")
+	RootCmd.CompletionOptions.DisableDefaultCmd = true
+	RootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
+	RootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
+	RootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
+	RootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
+	RootCmd.Flags().BoolVarP(&showContainersFlag, "show-containers", "c", false, "show containers in pod")
+	RootCmd.Flags().BoolVarP(&containerViewTypeTreeFlag, "container-tree-view", "b", false, "format containers in tree view, otherwise inline")
+	RootCmd.Flags().BoolVar(&containerViewTypeBlockFlag, "container-block-view", false, "deprecated alias of --container-tree-view")
+	_ = RootCmd.Flags().MarkDeprecated("container-block-view", "use --container-tree-view instead")
+	RootCmd.Flags().BoolVarP(&showReqLimitsFlag, "show-requests-and-limits", "r", false, "show requests and limits for containers' cpu and memory (requires -c flag)")
+	RootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
+	RootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
+	RootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
+	RootCmd.Flags().BoolVarP(&watchOn, "watch", "w", false, "executes the command every second so that changes can be observed")
+	RootCmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)")
+	RootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
+
+	RootCmd.AddCommand(ctx.CtxCmd)
+
+	_, err := config.Initialize(RootCmd)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func initConfig() {
@@ -201,7 +210,7 @@ func initLog(out io.Writer, verbosity string) error {
 
 func getContainerViewType(flag bool) srv.ViewType {
 	if flag {
-		return srv.Block
+		return srv.Tree
 	}
 	return srv.Inline
 }
