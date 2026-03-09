@@ -16,6 +16,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
       - uses: actions/checkout@v6
@@ -34,13 +36,13 @@ jobs:
         run: go tool cover -func=coverage.out
 
       - name: Upload Coverage
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        if: ${{ env.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage.out
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
       - name: Skip Coverage Upload (Missing Token)
-        if: ${{ secrets.CODECOV_TOKEN == '' }}
+        if: ${{ env.CODECOV_TOKEN == '' }}
         run: echo "CODECOV_TOKEN is not set; skipping Codecov upload."
