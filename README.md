@@ -163,6 +163,8 @@ Very popular is combining `viewnode` with `watch` command e.g. watching all node
 ```
 watch -n1 viewnode --show-pod-start-times --show-containers
 ```
-# Compatibility
-The `viewnode` was tested against _Google Cloud Platform_ and _Amazon EKS_ with _Kubernetes_ v1.19 and v1.20.
-It should however work with any cloud platform supported by the [client-go](https://github.com/kubernetes/client-go).
+## Compatibility
+`viewnode` uses Kubernetes `client-go` (currently `v0.35.2` in this repository).
+It should work with any cloud platform and Kubernetes distribution supported by [client-go](https://github.com/kubernetes/client-go).
+
+Compatibility generally follows the Kubernetes `client-go` policy for nearby cluster versions (for example, same minor version and close minor versions).
