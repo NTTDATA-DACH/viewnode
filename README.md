@@ -10,6 +10,7 @@ Usage:
   viewnode [command]
 
 Available Commands:
+  ctx         Manage Kubernetes context
   help        Help about any command
   version     Plugin Version
 
@@ -31,6 +32,26 @@ Flags:
 
 Use "viewnode [command] --help" for more information about a command.
 ```
+
+### Context command
+Manage kubeconfig contexts directly from `viewnode`:
+
+```
+$ viewnode ctx list
+[*] dev-cluster
+[ ] staging-cluster
+
+$ viewnode ctx get-current
+dev-cluster
+
+$ viewnode ctx set-current staging-cluster
+current context set to staging-cluster
+```
+
+Aliases:
+- `viewnode ctx getcurrent`
+- `viewnode ctx setcurrent staging-cluster`
+
 ## Installation
 ### As a Krew Plugin
 Follow the instructions to [install](https://krew.sigs.k8s.io/docs/user-guide/setup/install/) krew and then run the following command:
