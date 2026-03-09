@@ -11,5 +11,5 @@ var CtxCmd = &cobra.Command{
 }
 
 func init() {
-	CtxCmd.AddCommand(listCmd, getCurrent)
+	CtxCmd.AddCommand(listCmd, getCurrent, setCurrent)
 }

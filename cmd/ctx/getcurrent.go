@@ -9,7 +9,7 @@ import (
 var getCurrent = &cobra.Command{
 	Use:     "get-current",
 	Short:   "Get current Kubernetes context",
-	Aliases: []string{"gc"},
+	Aliases: []string{"gc", "getcurrent"},
 	RunE: func(c *cobra.Command, args []string) error {
 		setup := config.GetConfig()
 		rawConfig, err := setup.ClientConfig.RawConfig()
