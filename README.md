@@ -37,25 +37,6 @@ Flags:
 Use "viewnode [command] --help" for more information about a command.
 ```
 
-### Context command
-Manage kubeconfig contexts directly from `viewnode`:
-
-```
-$ viewnode ctx list
-[*] dev-cluster
-[ ] staging-cluster
-
-$ viewnode ctx get-current
-dev-cluster
-
-$ viewnode ctx set-current staging-cluster
-current context set to staging-cluster
-```
-
-Aliases:
-- `viewnode ctx getcurrent`
-- `viewnode ctx setcurrent staging-cluster`
-
 ## Installation
 ### As a Krew Plugin
 Follow the instructions to [install](https://krew.sigs.k8s.io/docs/user-guide/setup/install/) krew and then run the following command:
@@ -185,6 +166,26 @@ Very popular is combining `viewnode` with `watch` command e.g. watching all node
 ```
 watch -n1 viewnode --show-pod-start-times --show-containers
 ```
+
+### Context command
+Manage kubeconfig contexts directly from `viewnode`:
+
+```
+$ viewnode ctx list
+[*] dev-cluster
+[ ] staging-cluster
+
+$ viewnode ctx get-current
+dev-cluster
+
+$ viewnode ctx set-current staging-cluster
+current context set to staging-cluster
+```
+
+Aliases:
+- `viewnode ctx getcurrent`
+- `viewnode ctx setcurrent staging-cluster`
+
 ## Compatibility
 `viewnode` uses Kubernetes `client-go` (currently `v0.35.2` in this repository).
 It should work with any cloud platform and Kubernetes distribution supported by [client-go](https://github.com/kubernetes/client-go).
