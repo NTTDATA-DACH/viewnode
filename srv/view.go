@@ -76,7 +76,7 @@ func (vnd ViewNodeData) Printout(cls bool) error {
 		return errors.New("list of view nodes must not be null")
 	}
 	if vnd.Namespace != "" {
-		fmt.Printf("namespace: %s\n", vnd.Namespace)
+		fmt.Printf("namespace(s): %s\n", vnd.Namespace)
 	}
 	l := len(vnd.Nodes)
 	if l <= 1 {

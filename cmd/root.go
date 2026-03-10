@@ -31,6 +31,28 @@ var verbosity string
 var kubeconfig string
 var watchOn bool
 
+func parseNamespaces(value string) []string {
+	if value == "" {
+		return nil
+	}
+
+	rawNamespaces := strings.Split(value, ",")
+	namespaces := make([]string, 0, len(rawNamespaces))
+	seen := make(map[string]struct{}, len(rawNamespaces))
+	for _, namespace := range rawNamespaces {
+		namespace = strings.TrimSpace(namespace)
+		if namespace == "" {
+			continue
+		}
+		if _, ok := seen[namespace]; ok {
+			continue
+		}
+		seen[namespace] = struct{}{}
+		namespaces = append(namespaces, namespace)
+	}
+	return namespaces
+}
+
 var RootCmd = &cobra.Command{
 	Use:   "viewnode",
 	Short: "'viewnode' displays nodes with their pods and containers.",
@@ -78,11 +100,13 @@ func schedule(wg *sync.WaitGroup, stop <-chan bool, errCh chan<- error) {
 
 func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 	setup := config.GetConfig()
+	selectedNamespaces := parseNamespaces(namespace)
 	if namespace != "" {
-		setup.Namespace = namespace
+		setup.Namespace = strings.Join(selectedNamespaces, ",")
 	}
 	if allNamespacesFlag {
 		setup.Namespace = ""
+		selectedNamespaces = nil
 	}
 	api := srv.KubernetesApi{
 		Setup: setup,
@@ -132,6 +156,9 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 		Nodes:     vns,
 	}
 	vnd.Config.ShowNamespaces = allNamespacesFlag
+	if len(selectedNamespaces) > 1 {
+		vnd.Config.ShowNamespaces = true
+	}
 	vnd.Config.ShowContainers = showContainersFlag
 	vnd.Config.ShowTimes = showTimesFlag
 	vnd.Config.ShowReqLimits = showReqLimitsFlag
@@ -171,7 +198,7 @@ func init() {
 		return nil
 	}
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
-	RootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use")
+	RootCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace to use; accepts comma-separated values")
 	RootCmd.Flags().BoolVarP(&allNamespacesFlag, "all-namespaces", "A", false, "use all namespaces")
 	RootCmd.Flags().StringVarP(&nodeFilter, "node-filter", "f", "", "show only nodes according to filter")
 	RootCmd.Flags().StringVarP(&podFilter, "pod-filter", "p", "", "show only pods according to filter")
