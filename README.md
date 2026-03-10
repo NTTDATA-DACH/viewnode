@@ -46,7 +46,7 @@ kubectl krew install viewnode
 The plugin will be available as `kubectl viewnode`.
 
 ### Standalone
-The `viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-EMEA/viewnode/releases) and run it.
+The `viewnode` is written in _go_, so just download the correct executable suitable for your platform from the [releases](https://github.com/NTTDATA-DACH/viewnode/releases) and run it.
 
 ### Build It
 You can also download the source code from [GitHub](https://github.com/NTTDATA-DACH/viewnode) and compile it by running the following command:
