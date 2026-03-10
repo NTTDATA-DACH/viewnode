@@ -14,6 +14,13 @@ var setCurrent = &cobra.Command{
 	Aliases: []string{"sc", "setcurrent"},
 	Args:    cobra.ExactArgs(1),
 	RunE: func(c *cobra.Command, args []string) error {
+		configCmd := c.Root()
+		if configCmd == nil {
+			configCmd = c
+		}
+		if _, err := config.Initialize(configCmd); err != nil {
+			return err
+		}
 		setup := config.GetConfig()
 		rawConfig, err := setup.ClientConfig.RawConfig()
 		if err != nil {

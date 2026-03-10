@@ -12,6 +12,13 @@ var listCmd = &cobra.Command{
 	Short:   "List all Kubernetes contexts",
 	Aliases: []string{"ls"},
 	RunE: func(c *cobra.Command, args []string) error {
+		configCmd := c.Root()
+		if configCmd == nil {
+			configCmd = c
+		}
+		if _, err := config.Initialize(configCmd); err != nil {
+			return err
+		}
 		setup := config.GetConfig()
 		rawConfig, err := setup.ClientConfig.RawConfig()
 		if err != nil {

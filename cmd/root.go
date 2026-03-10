@@ -61,6 +61,10 @@ The 'viewnode' displays nodes with their pods and containers.
 You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		_, err := config.Initialize(cmd)
+		if err != nil {
+			log.Fatal(err)
+		}
 		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeTreeFlag || containerViewTypeBlockFlag) {
 			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-tree-view) flag without -c (--show-containers) flag")
 		}
@@ -215,11 +219,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 
 	RootCmd.AddCommand(ctx.CtxCmd)
-
-	_, err := config.Initialize(RootCmd)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func initConfig() {
