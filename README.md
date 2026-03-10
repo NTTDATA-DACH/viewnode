@@ -2,6 +2,10 @@
 The `viewnode` displays Kubernetes cluster nodes with their pods and containers.
 It is very useful when you need to monitor multiple resources such as nodes, pods or containers in a dynamic environment like a CI/CD platform.
 
+Source code: [GitHub](https://github.com/NTTDATA-DACH/viewnode)
+
+Copyright: © 2026 NTT DATA Deutschland SE, Adam Boczek
+
 ## Usage
 
 ```
