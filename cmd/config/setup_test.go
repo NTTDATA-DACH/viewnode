@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"gotest.tools/v3/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -38,7 +38,7 @@ current-context: a
 
 func TestSetup_GetRestConfig(t *testing.T) {
 	basic, err := clientcmd.NewClientConfigFromBytes([]byte(KUBECONFIG))
-	assert.NilError(t, err)
+	require.NoError(t, err)
 	for i, ctc := range []configTestCase{
 		{
 			clientcmd.NewDefaultClientConfig(clientcmdapi.Config{}, &clientcmd.ConfigOverrides{}),
@@ -56,7 +56,7 @@ func TestSetup_GetRestConfig(t *testing.T) {
 
 		switch len(ctc.errStringContains) {
 		case 0:
-			assert.NilError(t, err, "unexpected error")
+			require.NoError(t, err, "unexpected error")
 		default:
 			if err == nil {
 				t.Errorf("%d: wrong error detected: %s (expected) != %s (actual)", i, ctc.errStringContains, err)
@@ -68,12 +68,12 @@ func TestSetup_GetRestConfig(t *testing.T) {
 	}
 	sEmpty := &Setup{}
 	sEmpty.ClientConfig, err = clientcmd.NewClientConfigFromBytes([]byte(""))
-	assert.NilError(t, err)
+	require.NoError(t, err)
 	_, err = sEmpty.GetRestConfig()
-	assert.ErrorContains(t, err, "no configuration has been provided")
+	require.ErrorContains(t, err, "no configuration has been provided")
 
 	sEmpty = &Setup{}
 	sEmpty.KubeCfgPath = filepath.Join("bad", "path", "file")
 	_, err = sEmpty.GetRestConfig()
-	assert.ErrorContains(t, err, "config file not found")
+	require.ErrorContains(t, err, "config file not found")
 }
