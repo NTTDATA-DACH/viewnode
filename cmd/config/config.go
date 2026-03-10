@@ -18,7 +18,11 @@ func Initialize(cmd *cobra.Command) (*Setup, error) {
 	if stp == nil {
 		stp = &Setup{}
 	}
-	stp.KubeCfgPath = cmd.Flags().Lookup("kubeconfig").Value.String()
+	if kubeconfigFlag := cmd.Flags().Lookup("kubeconfig"); kubeconfigFlag != nil {
+		stp.KubeCfgPath = kubeconfigFlag.Value.String()
+	} else {
+		stp.KubeCfgPath = ""
+	}
 	err := stp.Initialize()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize setup (%w)", err)

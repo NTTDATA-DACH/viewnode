@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"gotest.tools/v3/assert"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestByteCountSI(t *testing.T) {
@@ -24,7 +25,7 @@ func TestByteCountSI(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, ByteCountSI(tt.b), tt.expected)
+			require.Equal(t, tt.expected, ByteCountSI(tt.b))
 		})
 	}
 }
@@ -48,7 +49,7 @@ func TestByteCountIEC(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, ByteCountIEC(tt.b), tt.expected)
+			require.Equal(t, tt.expected, ByteCountIEC(tt.b))
 		})
 	}
 }

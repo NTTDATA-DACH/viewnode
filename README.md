@@ -2,6 +2,10 @@
 The `viewnode` displays Kubernetes cluster nodes with their pods and containers.
 It is very useful when you need to monitor multiple resources such as nodes, pods or containers in a dynamic environment like a CI/CD platform.
 
+Source code: [GitHub](https://github.com/NTTDATA-DACH/viewnode)
+
+Copyright: © 2026 NTT DATA Deutschland SE, Adam Boczek
+
 ## Usage
 
 ```
@@ -19,7 +23,7 @@ Flags:
   -b, --container-tree-view        format containers in tree view, otherwise inline
   -h, --help                       help for viewnode
       --kubeconfig string          kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)
-  -n, --namespace string           namespace to use
+  -n, --namespace string           namespace to use; accepts comma-separated values
   -f, --node-filter string         show only nodes according to filter
   -p, --pod-filter string          show only pods according to filter
   -c, --show-containers            show containers in pod
@@ -32,25 +36,6 @@ Flags:
 
 Use "viewnode [command] --help" for more information about a command.
 ```
-
-### Context command
-Manage kubeconfig contexts directly from `viewnode`:
-
-```
-$ viewnode ctx list
-[*] dev-cluster
-[ ] staging-cluster
-
-$ viewnode ctx get-current
-dev-cluster
-
-$ viewnode ctx set-current staging-cluster
-current context set to staging-cluster
-```
-
-Aliases:
-- `viewnode ctx getcurrent`
-- `viewnode ctx setcurrent staging-cluster`
 
 ## Installation
 ### As a Krew Plugin
@@ -73,7 +58,7 @@ make build
 Showing nodes and pods:
 ```
 $ viewnode
-namespace: jenkins-onprem
+namespace(s): jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
@@ -92,7 +77,7 @@ namespace: jenkins-onprem
 Showing nodes, pods and containers:
 ```
 $ viewnode --show-containers
-namespace: jenkins-onprem
+namespace(s): jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
@@ -111,7 +96,7 @@ namespace: jenkins-onprem
 Showing nodes and pods with their start times:
 ```
 $ viewnode --show-pod-start-times
-namespace: jenkins-onprem
+namespace(s): jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
@@ -130,7 +115,7 @@ namespace: jenkins-onprem
 You can also combine show options:
 ```
 $ viewnode --show-pod-start-times --show-containers
-namespace: jenkins-onprem
+namespace(s): jenkins-onprem
 8 pod(s) in total
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
@@ -149,7 +134,7 @@ namespace: jenkins-onprem
 As well as filter nodes and pods:
 ```
 $ viewnode --node-filter v1vr
-namespace: jenkins-onprem
+namespace(s): jenkins-onprem
 4 pod(s) in total
 0 unscheduled pod(s)
 1 running node(s) with 4 scheduled pod(s):
@@ -159,10 +144,48 @@ namespace: jenkins-onprem
     ├── docker-in-the-cloud-342-r5khq-9cx2w (running)
     └── liveness-test-4-boom (failed)
 ```
+You can also aggregate pods from selected namespaces only:
+```
+$ viewnode --namespace jenkins-onprem,default
+8 pod(s) in total
+0 unscheduled pod(s)
+3 running node(s) with 8 scheduled pod(s):
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
+│   ├── default: docker-in-the-cloud-86-822pd-d6p3d (running)
+│   └── jenkins-onprem: docker-in-the-cloud-341-ffkt5-2k64t (running)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
+│   ├── default: docker-in-the-cloud-340-cms5r-pxxq7 (running)
+│   └── jenkins-onprem: docker-in-the-cloud-338-3wc8r-n1t7z (running)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── default: docker-in-the-cloud-339-4x9dq-0xd3q (running)
+    ├── default: liveness-test-4-boom (failed)
+    ├── jenkins-onprem: docker-in-the-cloud-337-4c4lm-q3mtp (running)
+    └── jenkins-onprem: docker-in-the-cloud-342-r5khq-9cx2w (running)
+```
 Very popular is combining `viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
 ```
 watch -n1 viewnode --show-pod-start-times --show-containers
 ```
+
+### Context command
+Manage kubeconfig contexts directly from `viewnode`:
+
+```
+$ viewnode ctx list
+[*] dev-cluster
+[ ] staging-cluster
+
+$ viewnode ctx get-current
+dev-cluster
+
+$ viewnode ctx set-current staging-cluster
+current context set to staging-cluster
+```
+
+Aliases:
+- `viewnode ctx getcurrent`
+- `viewnode ctx setcurrent staging-cluster`
+
 ## Compatibility
 `viewnode` uses Kubernetes `client-go` (currently `v0.35.2` in this repository).
 It should work with any cloud platform and Kubernetes distribution supported by [client-go](https://github.com/kubernetes/client-go).

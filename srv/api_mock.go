@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )
 
@@ -53,10 +54,16 @@ func (m MockApi) RetrievePodList(namespace string) (*v1.PodList, error) {
 	pl.Items = make([]v1.Pod, PodsCount)
 	pl.Items[0].Name = PodName1
 	pl.Items[0].Spec.NodeName = NodeName1
+	pl.Items[0].Namespace = namespace
+	if pl.Items[0].Namespace == "" {
+		pl.Items[0].Namespace = "default"
+	}
 	pl.Items[1].Name = PodName2
 	pl.Items[1].Spec.NodeName = NodeName1
+	pl.Items[1].Namespace = pl.Items[0].Namespace
 	pl.Items[2].Name = PodName3
 	pl.Items[2].Spec.NodeName = NodeName1
+	pl.Items[2].Namespace = pl.Items[0].Namespace
 	return &pl, nil
 }
 
@@ -75,5 +82,23 @@ func (m MockApi) RetrievePodMetricses(namespace string) (*v1beta1.PodMetricsList
 	if m.ApiTypeValue == PodMetricsesError {
 		return nil, ErrMetricsServerNotInstalled
 	}
-	panic("implement me")
+	var pml v1beta1.PodMetricsList
+	pml.Items = make([]v1beta1.PodMetrics, PodsCount)
+	pml.Items[0].Name = PodName1
+	pml.Items[0].Namespace = namespace
+	pml.Items[1].Name = PodName2
+	pml.Items[1].Namespace = namespace
+	pml.Items[2].Name = PodName3
+	pml.Items[2].Namespace = namespace
+	for i := range pml.Items {
+		pml.Items[i].Containers = []v1beta1.ContainerMetrics{
+			{
+				Name: "container",
+				Usage: v1.ResourceList{
+					v1.ResourceMemory: resource.MustParse("10Mi"),
+				},
+			},
+		}
+	}
+	return &pml, nil
 }
