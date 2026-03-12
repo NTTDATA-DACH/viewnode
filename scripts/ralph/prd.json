@@ -26,7 +26,7 @@
         "Failures during namespace discovery are returned through the command error path instead of being silently ignored."
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Use cluster API state for namespace enumeration, not kubeconfig parsing. Keep output and wording aligned with `cmd/ctx/list.go`."
     },
     {

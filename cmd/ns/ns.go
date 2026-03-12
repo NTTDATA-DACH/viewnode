@@ -7,3 +7,7 @@ var NsCmd = &cobra.Command{
 	Short: "Manage Kubernetes namespaces",
 	Long:  `Manage Kubernetes namespaces and namespace-related operations.`,
 }
+
+func init() {
+	NsCmd.AddCommand(listCmd)
+}

@@ -32,3 +32,6 @@
 ## Validation
 - Before committing, run:
     - `make test`
+
+## Command conventions
+- Cobra subcommands that need the global `--kubeconfig` value should call `config.Initialize` with the root command (`cmd.Root()` fallback to the current command) so flag lookup resolves the root-level flag correctly.

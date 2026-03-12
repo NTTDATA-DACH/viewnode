@@ -91,7 +91,7 @@ func TestRootCmdHelpIncludesNamespaceCommand(t *testing.T) {
 	err := RootCmd.Execute()
 
 	require.NoError(t, err)
-	require.Contains(t, output.String(), "viewnode ns      Manage Kubernetes namespaces")
+	require.Contains(t, output.String(), "  ns          Manage Kubernetes namespaces")
 }
 
 func TestRootCmdExecuteParsesNamespaceFlag(t *testing.T) {

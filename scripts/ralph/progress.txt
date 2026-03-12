@@ -1,6 +1,7 @@
 # Ralph Progress Log
 ## Codebase Patterns
 - Top-level Cobra commands without subcommands render under `Additional help topics` in root help output, so help assertions should match that section instead of `Available Commands`.
+- Commands that honor the global `--kubeconfig` flag must pass the root Cobra command into `config.Initialize`; using the leaf subcommand directly can miss the root-level flag lookup.
 
 Started: Thu Mar 12 07:29:15 CET 2026
 ---
@@ -15,4 +16,16 @@ Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file pre
   - Patterns discovered: top-level command groups should live in their own `cmd/<name>` package and be registered from `cmd/root.go` alongside `ctx`.
   - Gotchas encountered: Cobra places command groups with no subcommands under `Additional help topics`, which affects help-output tests.
   - Useful context: the branch from `prd.json` already existed locally and on `origin`, so no branch creation was needed for issue `#47`.
+---
+
+## [2026-03-12 10:23:10 CET] - #47-002
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
+- Implemented `viewnode ns list` to initialize shared Kubernetes config, load namespaces from the cluster API, sort names deterministically, and print the current namespace with `[*]`.
+- Registered the `list` subcommand under the existing `ns` command group and kept command text aligned with the existing Cobra structure.
+- Updated the root help assertion to match Cobra's rendered command table after `ns` gained a subcommand.
+- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/ns.go`, `cmd/root_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: namespace enumeration belongs to the Kubernetes API clientset, while the current namespace still comes from `config.Setup.Namespace` after shared initialization.
+  - Gotchas encountered: once a top-level Cobra topic gains a subcommand, it moves from `Additional help topics` into `Available Commands`, which changes root help assertions.
+  - Useful context: `config.Initialize` reads `kubeconfig` from the command passed into it, so subcommands should resolve and pass `c.Root()` to honor the global flag.
 ---
