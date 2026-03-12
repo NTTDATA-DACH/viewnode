@@ -80,6 +80,20 @@ func TestRootCmdHelpIncludesNamespaceDescription(t *testing.T) {
 	require.Contains(t, output.String(), "namespace to use; accepts comma-separated values")
 }
 
+func TestRootCmdHelpIncludesNamespaceCommand(t *testing.T) {
+	resetRootCommandState()
+
+	var output bytes.Buffer
+	RootCmd.SetOut(&output)
+	RootCmd.SetErr(&output)
+	RootCmd.SetArgs([]string{"--help"})
+
+	err := RootCmd.Execute()
+
+	require.NoError(t, err)
+	require.Contains(t, output.String(), "viewnode ns      Manage Kubernetes namespaces")
+}
+
 func TestRootCmdExecuteParsesNamespaceFlag(t *testing.T) {
 	resetRootCommandState()
 

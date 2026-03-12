@@ -12,7 +12,7 @@
         "The command help text describes `ns` as the root for namespace-related operations without changing existing root command behavior."
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse existing Cobra patterns from `cmd/ctx` and avoid introducing a parallel command structure outside the established command tree."
     },
     {

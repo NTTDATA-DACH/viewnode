@@ -1,3 +1,18 @@
 # Ralph Progress Log
+## Codebase Patterns
+- Top-level Cobra commands without subcommands render under `Additional help topics` in root help output, so help assertions should match that section instead of `Available Commands`.
+
 Started: Thu Mar 12 07:29:15 CET 2026
+---
+
+## [2026-03-12 10:18:38 CET] - #47-001
+Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file present in workspace during this iteration)
+- Added a new top-level `ns` Cobra command in a dedicated `cmd/ns` package with help text for namespace-related operations.
+- Registered `ns` on the root command so it is visible from `viewnode --help` without changing existing command behavior.
+- Added test coverage for root help output and the new command metadata.
+- Files changed: `cmd/root.go`, `cmd/root_test.go`, `cmd/ns/ns.go`, `cmd/ns/ns_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: top-level command groups should live in their own `cmd/<name>` package and be registered from `cmd/root.go` alongside `ctx`.
+  - Gotchas encountered: Cobra places command groups with no subcommands under `Additional help topics`, which affects help-output tests.
+  - Useful context: the branch from `prd.json` already existed locally and on `origin`, so no branch creation was needed for issue `#47`.
 ---
