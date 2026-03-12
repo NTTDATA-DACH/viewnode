@@ -39,7 +39,7 @@
         "The new tests follow existing command test patterns and pass with `make test`."
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Follow the style of `cmd/ctx/ctx_test.go`, but use suitable API mocking or fake clients because namespace lists come from the cluster rather than kubeconfig content alone."
     },
     {

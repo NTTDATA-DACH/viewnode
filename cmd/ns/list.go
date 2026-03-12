@@ -10,6 +10,22 @@ import (
 	"viewnode/cmd/config"
 )
 
+var initializeConfig = config.Initialize
+var currentSetup = config.GetConfig
+var listNamespaces = func(ctx context.Context, setup *config.Setup) ([]string, error) {
+	namespaces, err := setup.Clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceNames := make([]string, 0, len(namespaces.Items))
+	for _, namespace := range namespaces.Items {
+		namespaceNames = append(namespaceNames, namespace.Name)
+	}
+
+	return namespaceNames, nil
+}
+
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List all Kubernetes namespaces",
@@ -20,19 +36,14 @@ var listCmd = &cobra.Command{
 			configCmd = c
 		}
 
-		if _, err := config.Initialize(configCmd); err != nil {
+		if _, err := initializeConfig(configCmd); err != nil {
 			return err
 		}
-		setup := config.GetConfig()
+		setup := currentSetup()
 
-		namespaces, err := setup.Clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+		namespaceNames, err := listNamespaces(context.Background(), setup)
 		if err != nil {
 			return fmt.Errorf("getting kubernetes namespaces failed (%w)", err)
-		}
-
-		namespaceNames := make([]string, 0, len(namespaces.Items))
-		for _, namespace := range namespaces.Items {
-			namespaceNames = append(namespaceNames, namespace.Name)
 		}
 		sort.Strings(namespaceNames)
 

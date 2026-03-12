@@ -2,6 +2,7 @@
 ## Codebase Patterns
 - Top-level Cobra commands without subcommands render under `Additional help topics` in root help output, so help assertions should match that section instead of `Available Commands`.
 - Commands that honor the global `--kubeconfig` flag must pass the root Cobra command into `config.Initialize`; using the leaf subcommand directly can miss the root-level flag lookup.
+- Cobra tests that need inherited persistent flags should execute through a root command tree with `Execute()`; calling a leaf command's `RunE` directly skips the normal flag propagation.
 
 Started: Thu Mar 12 07:29:15 CET 2026
 ---
@@ -28,4 +29,15 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: namespace enumeration belongs to the Kubernetes API clientset, while the current namespace still comes from `config.Setup.Namespace` after shared initialization.
   - Gotchas encountered: once a top-level Cobra topic gains a subcommand, it moves from `Additional help topics` into `Available Commands`, which changes root help assertions.
   - Useful context: `config.Initialize` reads `kubeconfig` from the command passed into it, so subcommands should resolve and pass `c.Root()` to honor the global flag.
+---
+
+## [2026-03-12 10:24:55 CET] - #47-003
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-2.txt
+- Added focused automated coverage for `viewnode ns list` using a narrow seam around config setup and namespace discovery.
+- Verified sorted namespace output, current namespace marker rendering, inherited root `--kubeconfig` handling, and an API discovery error path.
+- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: `cmd/ns/list.go` can be tested without a live cluster by overriding package-level seams for config initialization, config access, and namespace discovery.
+  - Gotchas encountered: inherited Cobra persistent flags are only available after command execution wiring, so tests should call `Execute()` on a root command tree when validating root flag behavior.
+  - Useful context: the error contract for namespace discovery is `getting kubernetes namespaces failed (<cause>)`, so future changes should preserve that wrapper for callers and tests.
 ---
