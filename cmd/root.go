@@ -9,6 +9,7 @@ import (
 	"time"
 	"viewnode/cmd/config"
 	"viewnode/cmd/ctx"
+	"viewnode/cmd/ns"
 	"viewnode/srv"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
@@ -218,7 +219,7 @@ func init() {
 	RootCmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)")
 	RootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 
-	RootCmd.AddCommand(ctx.CtxCmd)
+	RootCmd.AddCommand(ctx.CtxCmd, ns.NsCmd)
 }
 
 func initConfig() {

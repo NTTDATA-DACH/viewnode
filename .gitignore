@@ -25,4 +25,5 @@ viewnode
 .DS_Store
 
 # Added by goreleaser init:
-dist/
+dist/scripts/ralph/.last-branch
+scripts/ralph/.codex-last-message*.txt

@@ -1,0 +1,55 @@
+# Ralph Progress Log
+## Codebase Patterns
+- Top-level Cobra commands without subcommands render under `Additional help topics` in root help output, so help assertions should match that section instead of `Available Commands`.
+- Commands that honor the global `--kubeconfig` flag must pass the root Cobra command into `config.Initialize`; using the leaf subcommand directly can miss the root-level flag lookup.
+- Cobra tests that need inherited persistent flags should execute through a root command tree with `Execute()`; calling a leaf command's `RunE` directly skips the normal flag propagation.
+- `README.md` command listings and CLI usage examples are maintained manually, so user-facing CLI command changes should update the README in the same change.
+
+Started: Thu Mar 12 07:29:15 CET 2026
+---
+
+## [2026-03-12 10:18:38 CET] - #47-001
+Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file present in workspace during this iteration)
+- Added a new top-level `ns` Cobra command in a dedicated `cmd/ns` package with help text for namespace-related operations.
+- Registered `ns` on the root command so it is visible from `viewnode --help` without changing existing command behavior.
+- Added test coverage for root help output and the new command metadata.
+- Files changed: `cmd/root.go`, `cmd/root_test.go`, `cmd/ns/ns.go`, `cmd/ns/ns_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: top-level command groups should live in their own `cmd/<name>` package and be registered from `cmd/root.go` alongside `ctx`.
+  - Gotchas encountered: Cobra places command groups with no subcommands under `Additional help topics`, which affects help-output tests.
+  - Useful context: the branch from `prd.json` already existed locally and on `origin`, so no branch creation was needed for issue `#47`.
+---
+
+## [2026-03-12 10:23:10 CET] - #47-002
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
+- Implemented `viewnode ns list` to initialize shared Kubernetes config, load namespaces from the cluster API, sort names deterministically, and print the current namespace with `[*]`.
+- Registered the `list` subcommand under the existing `ns` command group and kept command text aligned with the existing Cobra structure.
+- Updated the root help assertion to match Cobra's rendered command table after `ns` gained a subcommand.
+- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/ns.go`, `cmd/root_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: namespace enumeration belongs to the Kubernetes API clientset, while the current namespace still comes from `config.Setup.Namespace` after shared initialization.
+  - Gotchas encountered: once a top-level Cobra topic gains a subcommand, it moves from `Additional help topics` into `Available Commands`, which changes root help assertions.
+  - Useful context: `config.Initialize` reads `kubeconfig` from the command passed into it, so subcommands should resolve and pass `c.Root()` to honor the global flag.
+---
+
+## [2026-03-12 10:24:55 CET] - #47-003
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-2.txt
+- Added focused automated coverage for `viewnode ns list` using a narrow seam around config setup and namespace discovery.
+- Verified sorted namespace output, current namespace marker rendering, inherited root `--kubeconfig` handling, and an API discovery error path.
+- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: `cmd/ns/list.go` can be tested without a live cluster by overriding package-level seams for config initialization, config access, and namespace discovery.
+  - Gotchas encountered: inherited Cobra persistent flags are only available after command execution wiring, so tests should call `Execute()` on a root command tree when validating root flag behavior.
+  - Useful context: the error contract for namespace discovery is `getting kubernetes namespaces failed (<cause>)`, so future changes should preserve that wrapper for callers and tests.
+---
+
+## [2026-03-12 10:26:45 CET] - #47-004
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-3.txt
+- Updated the manual CLI reference in `README.md` to include the top-level `ns` command in the root command table.
+- Added a `Namespace command` usage example documenting `viewnode ns list` output and the `ns ls` alias.
+- Files changed: `AGENTS.md`, `README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: `README.md` is the manual source for user-facing command listings and command examples, so CLI command additions need a README update in the same change.
+  - Gotchas encountered: there is no generated command reference step in this repository, so documentation drift is easy if README updates are skipped.
+  - Useful context: the existing command documentation groups related subcommands into short example sections such as `Context command`, which is the right pattern to reuse for future command groups.
+---
