@@ -16,6 +16,7 @@ Usage:
 Available Commands:
   ctx         Manage Kubernetes context
   help        Help about any command
+  ns          Manage Kubernetes namespaces
   version     Plugin Version
 
 Flags:
@@ -185,6 +186,19 @@ current context set to staging-cluster
 Aliases:
 - `viewnode ctx getcurrent`
 - `viewnode ctx setcurrent staging-cluster`
+
+### Namespace command
+List namespaces available in the current Kubernetes context directly from `viewnode`:
+
+```
+$ viewnode ns list
+[ ] default
+[*] jenkins-onprem
+[ ] kube-system
+```
+
+Alias:
+- `viewnode ns ls`
 
 ## Compatibility
 `viewnode` uses Kubernetes `client-go` (currently `v0.35.2` in this repository).

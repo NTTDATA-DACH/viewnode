@@ -38,3 +38,6 @@
 
 ## Testing conventions
 - For Cobra subcommands that depend on inherited persistent flags, prefer executing through a small root command tree with `Execute()` in tests instead of calling the leaf command's `RunE` directly; this matches Cobra's real flag propagation.
+
+## Documentation conventions
+- `README.md` command listings and CLI examples are maintained manually; when adding or changing user-facing commands, update the README command reference and relevant usage examples in the same change.

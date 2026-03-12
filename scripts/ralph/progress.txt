@@ -3,6 +3,7 @@
 - Top-level Cobra commands without subcommands render under `Additional help topics` in root help output, so help assertions should match that section instead of `Available Commands`.
 - Commands that honor the global `--kubeconfig` flag must pass the root Cobra command into `config.Initialize`; using the leaf subcommand directly can miss the root-level flag lookup.
 - Cobra tests that need inherited persistent flags should execute through a root command tree with `Execute()`; calling a leaf command's `RunE` directly skips the normal flag propagation.
+- `README.md` command listings and CLI usage examples are maintained manually, so user-facing CLI command changes should update the README in the same change.
 
 Started: Thu Mar 12 07:29:15 CET 2026
 ---
@@ -40,4 +41,15 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: `cmd/ns/list.go` can be tested without a live cluster by overriding package-level seams for config initialization, config access, and namespace discovery.
   - Gotchas encountered: inherited Cobra persistent flags are only available after command execution wiring, so tests should call `Execute()` on a root command tree when validating root flag behavior.
   - Useful context: the error contract for namespace discovery is `getting kubernetes namespaces failed (<cause>)`, so future changes should preserve that wrapper for callers and tests.
+---
+
+## [2026-03-12 10:26:45 CET] - #47-004
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-3.txt
+- Updated the manual CLI reference in `README.md` to include the top-level `ns` command in the root command table.
+- Added a `Namespace command` usage example documenting `viewnode ns list` output and the `ns ls` alias.
+- Files changed: `AGENTS.md`, `README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: `README.md` is the manual source for user-facing command listings and command examples, so CLI command additions need a README update in the same change.
+  - Gotchas encountered: there is no generated command reference step in this repository, so documentation drift is easy if README updates are skipped.
+  - Useful context: the existing command documentation groups related subcommands into short example sections such as `Context command`, which is the right pattern to reuse for future command groups.
 ---

@@ -51,7 +51,7 @@
         "Any added example or wording matches the existing CLI terminology used in the repository."
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Keep documentation changes limited to the new namespace command and do not expand scope into future namespace operations."
     }
   ]
