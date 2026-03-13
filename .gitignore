@@ -25,5 +25,11 @@ viewnode
 .DS_Store
 
 # Added by goreleaser init:
-dist/scripts/ralph/.last-branch
+dist/
+
+# Ralph runtime files
+scripts/ralph/.last-branch
 scripts/ralph/.codex-last-message*.txt
+
+# Codex agent folder (may contain credentials/tokens)
+.codex/
