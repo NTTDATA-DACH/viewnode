@@ -188,17 +188,25 @@ Aliases:
 - `viewnode ctx setcurrent staging-cluster`
 
 ### Namespace command
-List namespaces available in the current Kubernetes context directly from `viewnode`:
+Manage namespaces in the current Kubernetes context directly from `viewnode`:
 
 ```
 $ viewnode ns list
 [ ] default
 [*] jenkins-onprem
 [ ] kube-system
+
+$ viewnode ns get-current
+jenkins-onprem
+
+$ viewnode ns set-current kube-system
+current namespace set to kube-system
 ```
 
-Alias:
+Aliases:
 - `viewnode ns ls`
+- `viewnode ns getcurrent`
+- `viewnode ns setcurrent kube-system`
 
 ## Compatibility
 `viewnode` uses Kubernetes `client-go` (currently `v0.35.2` in this repository).

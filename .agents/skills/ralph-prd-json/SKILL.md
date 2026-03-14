@@ -1,19 +1,25 @@
 ---
 name: ralph-prd-json
-description: Convert a feature PRD in tasks/prd-*.md into a Ralph-ready scripts/ralph/prd.json, or update an existing Ralph spec from revised PRD requirements.
+description: Convert a repository-aligned PRD in tasks/prd-*.md into a Ralph-ready scripts/ralph/prd.json, or refresh an existing Ralph spec from updated PRD requirements.
 ---
 
 # Purpose
 
 Convert a Markdown PRD into a Ralph-ready `scripts/ralph/prd.json`.
 
-Use repository guidance from `AGENTS.md` for branch handling, validation, commit rules, and project conventions. Do not restate stable repo rules in the JSON unless they materially affect Ralph execution.
+Use repository guidance from `AGENTS.md` for branch handling, validation, commit rules, naming, and project conventions. Do not restate stable repo rules in the JSON unless they materially affect Ralph execution.
 
 # Inputs
 
-- Source PRD in `tasks/prd-*.md`
-- `AGENTS.md`
-- Existing `scripts/ralph/prd.json`, if present
+Accept any of:
+- a source PRD path, typically `tasks/prd-*.md`
+- an existing `scripts/ralph/prd.json`, if present
+- repository guidance from `AGENTS.md`
+
+If the user does not provide an explicit PRD path, resolve the intended PRD from repository context when possible.
+
+Do not require the PRD filename or feature name to exactly match the current branch name.
+Treat branch context as a hint for issue and feature resolution, while allowing shorter artifact names when they remain unambiguous and traceable.
 
 # Output
 
@@ -25,7 +31,7 @@ The result must be immediately usable by Ralph without manual cleanup.
 
 # Mode selection
 
-Choose the correct mode from the task context:
+Choose the correct mode from task context:
 
 ## New generation
 Use this when creating a new Ralph spec from a PRD.
@@ -34,9 +40,10 @@ Use this when creating a new Ralph spec from a PRD.
 Use this when `scripts/ralph/prd.json` already exists and the task is to revise or extend previously planned work.
 
 In update mode:
-- preserve correctly completed stories
-- prefer adding new follow-up stories for changed requirements
-- only reopen or rewrite completed stories if they are no longer valid
+- preserve correctly completed stories that remain valid
+- prefer adding new follow-up stories for changed or additional requirements
+- only reopen, replace, or rewrite completed stories if they are no longer valid
+- preserve existing `passes: true` only for unchanged stories that still satisfy the revised PRD
 
 # Workflow
 
@@ -45,21 +52,32 @@ In update mode:
 3. Inspect existing `scripts/ralph/prd.json` if it exists.
 4. Determine `branchName` from repository guidance and task context.
 5. Convert the PRD into a small set of execution-ready user stories.
-6. Order stories by dependency and execution priority.
+6. Order stories by dependency, execution priority, and change type.
 7. Write explicit, minimal, testable acceptance criteria for each story.
-8. Keep the plan aligned with existing repository patterns and command conventions.
+8. Keep the plan aligned with existing repository patterns and conventions.
 9. Write the final JSON to `scripts/ralph/prd.json`.
 
 # Branch handling
 
 Set `branchName` using repository guidance from `AGENTS.md`.
 
+When already on a branch that clearly matches the PRD or issue context:
+- reuse that branch if repository guidance supports doing so
+- prefer the existing branch over deriving a new one
+
 When the PRD or task maps to a GitHub issue:
-- follow the issue-based branch rules from `AGENTS.md`
+- follow the repository's issue-based branch rules
 - use an existing issue branch if repository guidance requires checking for one
 - otherwise derive the branch name according to the repository rule
 
-Do not invent a different branch when the repository rules already define branch behavior.
+When the PRD does not map to a GitHub issue:
+- derive the branch name from repository guidance and task context
+
+Do not invent a different branch when repository rules already define branch behavior.
+
+Artifact naming does not need to exactly match the branch name:
+- a shorter PRD filename may be used when it remains unambiguous and traceable
+- `branchName` in `scripts/ralph/prd.json` should still reflect the actual branch Ralph is expected to use
 
 # Story rules
 
@@ -69,13 +87,22 @@ Each story must:
 - be independently verifiable
 - avoid bundling unrelated work
 
-Prefer this execution order when applicable:
-1. command or API wiring
+Adapt story slicing to the change type:
+- for behavior changes, slice by observable behavior and dependency order
+- for refactors, slice by safe structural steps plus verification
+- for test-related work, slice by coverage area, harness, or validation goal
+- for documentation work, slice by document surface or audience-facing update
+- for maintenance or internal tooling work, slice by operator outcome and verification
+
+Choose execution order based on dependencies and change type.
+
+For behavior changes, prefer this order when applicable:
+1. wiring or entry-point changes
 2. core behavior
-3. tests
+3. validation and tests
 4. documentation or polish
 
-If the feature is too large, split by execution slice rather than by broad technical layers.
+If the change is too large, split by execution slice rather than by broad technical layers.
 
 # Acceptance criteria rules
 
@@ -85,14 +112,16 @@ Acceptance criteria must be:
 - minimal
 - specific enough for Ralph to verify completion
 
-Include validation criteria when relevant, based on `AGENTS.md`.
+Include validation criteria when relevant, based on `AGENTS.md` and the PRD.
 
 # Repository alignment
 
 For this repository:
-- follow existing command conventions and structure
+- follow existing project conventions and structure
 - reuse established patterns
 - use relevant hints from `AGENTS.md`
+
+Do not assume the PRD came from a specific upstream workflow; treat the PRD as the source of truth regardless of whether it originated directly from an issue or from Spec Kit artifacts.
 
 # Output schema
 
@@ -110,16 +139,35 @@ Each user story must include:
 - `passes`
 - `notes`
 
-The `id` must:
-- reuse existing ID defines in tasks/prd-*.md when applicable, or be a new unique ID if the story is new.
-- in case of GitHub issue like #47, the `id` should be `#47-<nnn>`, where `<nnn>` is a zero-padded sequential number (e.g., `001`, `002`) representing the story's order within the PRD.
+# Story ID rules
 
-Set `passes` to `false` for newly generated or newly added work unless the user explicitly asks to preserve prior completion state.
+The `id` must:
+- reuse existing story IDs defined in the PRD when applicable
+- otherwise preserve stable IDs already present in an existing `scripts/ralph/prd.json` when the story is unchanged
+- otherwise create a new unique ID
+
+When the PRD clearly maps to a GitHub issue, prefer:
+- `#<issue>-<nnn>`
+
+where:
+- `<issue>` is the issue number
+- `<nnn>` is a zero-padded sequential story number such as `001`, `002`
+
+When no issue number is available, derive IDs from repository-consistent task context.
+
+# Pass state rules
+
+Set `passes` to `false` for:
+- newly generated stories
+- newly added stories
+- materially changed stories
+
+Only preserve `passes: true` when the story is unchanged and still valid under the revised PRD.
 
 # Completion bar
 
 The final `scripts/ralph/prd.json` must:
 - be ready for immediate Ralph execution
-- contain multiple small stories when the feature is non-trivial
+- contain multiple small stories when the work is non-trivial
 - reflect relevant repository guidance from `AGENTS.md`
 - avoid unnecessary duplication of stable repo policy inside the JSON
