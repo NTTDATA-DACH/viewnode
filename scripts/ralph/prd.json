@@ -42,7 +42,7 @@
         "The command respects the inherited root `--kubeconfig` flag."
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Keep cluster validation and kubeconfig mutation separate so failed validation cannot accidentally persist a change."
     },
     {
