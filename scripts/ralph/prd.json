@@ -1,58 +1,63 @@
 {
-  "branchName": "47-add-ns-command-list-subcommand-for-listing-namespaces-in-a-context",
-  "overview": "Add a new top-level `ns` command group with an initial `list` subcommand that lists namespaces in the current Kubernetes context, marks the current namespace with the same format as `ctx list`, respects `--kubeconfig`, follows existing Cobra command conventions, and updates tests and documentation accordingly.",
+  "branchName": "50-add-get-current-and-set-current-subcommands-to-root-command-ns-to-get-current-namespace-and-set-new-current-namespace",
+  "overview": "Add `viewnode ns get-current` and `viewnode ns set-current` to mirror the existing `ctx` workflow, respect the root `--kubeconfig` flag, validate namespace changes against the current cluster before persisting them, cover the new behavior with tests, and update the manually maintained README examples.",
   "userStories": [
     {
-      "id": "#47-001",
-      "title": "Add namespace command group",
-      "description": "Introduce a new top-level `ns` Cobra command and register it with the root command using the same structural pattern already used for `ctx`, so future namespace-related subcommands have a consistent home.",
+      "id": "#50-001",
+      "title": "Wire namespace current-state subcommands",
+      "description": "Extend the existing `ns` Cobra command group with `get-current` and `set-current` subcommands so namespace current-state operations have the same entry-point structure and alias pattern as the existing `ctx` command family.",
       "acceptanceCriteria": [
-        "A new top-level `viewnode ns` command exists and appears in the root command help output.",
-        "The `ns` command is defined in a dedicated command package that mirrors the existing `ctx` command organization.",
-        "The command help text describes `ns` as the root for namespace-related operations without changing existing root command behavior."
+        "The `ns` command registers `get-current` and `set-current` subcommands without changing existing `ns list` behavior.",
+        "The new subcommands include the legacy-style aliases `getcurrent` and `setcurrent`.",
+        "The command definitions follow the existing `cmd/ctx` structural pattern so future namespace operations remain in the same command tree."
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Reuse existing Cobra patterns from `cmd/ctx` and avoid introducing a parallel command structure outside the established command tree."
+      "passes": false,
+      "notes": "Reuse the established Cobra command organization in `cmd/ns` and avoid introducing any parallel command structure."
     },
     {
-      "id": "#47-002",
-      "title": "Implement namespace list output",
-      "description": "Add `viewnode ns list` to load namespaces from the current cluster context, sort them deterministically, and print them with `[*]` for the current namespace and `[ ]` for all others, matching `ctx list` output style.",
+      "id": "#50-002",
+      "title": "Implement namespace current lookup",
+      "description": "Add `viewnode ns get-current` to read the current namespace from the active kubeconfig context using the root-command config initialization flow, and preserve Kubernetes default behavior when no namespace is explicitly set.",
       "acceptanceCriteria": [
-        "Running `viewnode ns list` prints one line per discovered namespace in deterministic order.",
-        "The namespace returned by the existing configuration setup as current is marked with `[*]` and all other namespaces are marked with `[ ]`.",
-        "The command respects the existing global `--kubeconfig` flag when resolving the client configuration and current namespace.",
-        "Failures during namespace discovery are returned through the command error path instead of being silently ignored."
+        "Running `viewnode ns get-current` prints the current namespace from the active kubeconfig context followed by a trailing newline.",
+        "If the active kubeconfig context does not define a namespace, the command prints `default`.",
+        "The command resolves kubeconfig through the same root-command flow as the rest of the CLI, including support for the inherited `--kubeconfig` flag.",
+        "Failures while initializing config or reading kubeconfig state are returned as command errors."
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Use cluster API state for namespace enumeration, not kubeconfig parsing. Keep output and wording aligned with `cmd/ctx/list.go`."
+      "passes": false,
+      "notes": "Initialize config from `cmd.Root()` with fallback to the current command so inherited persistent flags resolve correctly."
     },
     {
-      "id": "#47-003",
-      "title": "Cover namespace listing with tests",
-      "description": "Add automated coverage for the new namespace command so the listing behavior, current marker behavior, kubeconfig-aware setup, and at least one error path are verified in the repository's existing Go test style.",
+      "id": "#50-003",
+      "title": "Implement validated namespace current update",
+      "description": "Add `viewnode ns set-current <namespace>` to validate the requested namespace against the current cluster, then update only the active kubeconfig context namespace and report a clear success or failure result.",
       "acceptanceCriteria": [
-        "Automated tests verify successful `ns list` output for multiple namespaces including the current marker.",
-        "Automated tests verify at least one namespace discovery failure case.",
-        "The new tests follow existing command test patterns and pass with `make test`."
+        "Running `viewnode ns set-current <namespace>` with an existing namespace updates only the active kubeconfig context namespace.",
+        "On success, the command prints `current namespace set to <namespace>`.",
+        "The command validates that the requested namespace exists in the current cluster before writing kubeconfig.",
+        "If the requested namespace does not exist, the command returns a descriptive error and does not mutate kubeconfig.",
+        "If kubeconfig read or write operations fail, the command returns a descriptive error instead of silently succeeding.",
+        "The command respects the inherited root `--kubeconfig` flag."
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Follow the style of `cmd/ctx/ctx_test.go`, but use suitable API mocking or fake clients because namespace lists come from the cluster rather than kubeconfig content alone."
+      "passes": false,
+      "notes": "Keep cluster validation and kubeconfig mutation separate so failed validation cannot accidentally persist a change."
     },
     {
-      "id": "#47-004",
-      "title": "Document the namespace list command",
-      "description": "Update user-facing command documentation so the new `ns` command group and `ns list` subcommand are reflected anywhere command listings or usage examples are maintained manually.",
+      "id": "#50-004",
+      "title": "Verify and document namespace current-state commands",
+      "description": "Add automated coverage for the new namespace commands, including inherited flag behavior, and update the manually maintained README command reference and examples to reflect the new user-facing commands and aliases.",
       "acceptanceCriteria": [
-        "The command reference documents the new `ns` command group and `ns list` subcommand.",
-        "Any added example or wording matches the existing CLI terminology used in the repository."
+        "Automated tests cover `ns get-current` success, `default` fallback, and inherited `--kubeconfig` propagation through a small root command tree executed with `Execute()`.",
+        "Automated tests cover `ns set-current` success, persisted kubeconfig mutation, missing-namespace validation failure, and at least one kubeconfig error path.",
+        "The namespace command section in `README.md` documents `ns get-current`, `ns set-current`, and the `getcurrent` and `setcurrent` aliases.",
+        "The change passes `make test`."
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Keep documentation changes limited to the new namespace command and do not expand scope into future namespace operations."
+      "passes": false,
+      "notes": "Follow the repository testing convention for Cobra inherited flags and keep README command listings in sync in the same change."
     }
   ]
 }
