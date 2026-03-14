@@ -74,6 +74,8 @@
 
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
+- How does the CLI preserve existing naming, help text, and output conventions?
+- What happens if the change increases API calls, render time, or watch-loop load?
 
 ## Requirements *(mandatory)*
 
@@ -89,11 +91,17 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-006**: System MUST preserve repository CLI UX conventions for command names,
+  flags, help text, and output unless an explicitly approved change says otherwise.
+- **FR-007**: System MUST define the automated tests needed to prove the changed
+  behavior and list any required README updates for user-visible changes.
+- **FR-008**: System MUST state measurable or observable performance expectations
+  whenever the feature can affect Kubernetes requests, rendering, or watch mode.
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-009**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-010**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 
@@ -113,3 +121,6 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-005**: Automated tests covering the changed behavior pass in `make test`.
+- **SC-006**: User-facing command changes remain documented and consistent with
+  repository CLI conventions.

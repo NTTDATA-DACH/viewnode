@@ -31,7 +31,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Code Quality**: Explain which existing repository patterns this plan follows
+  and justify any added abstraction or command structure.
+- **Testing**: List the automated tests that will change or be added, including
+  root-command execution coverage for Cobra inherited flags when applicable.
+- **CLI UX Consistency**: Describe user-visible command, flag, help text, output,
+  and README impacts.
+- **Performance**: State expected effects on Kubernetes API calls, render cost,
+  memory use, and watch-mode behavior; include how regressions will be checked.
+- **Increment Size**: Confirm the work is sliced into independently verifiable
+  increments with explicit acceptance criteria.
 
 ## Project Structure
 
