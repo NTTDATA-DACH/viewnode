@@ -36,6 +36,7 @@
 ## Command conventions
 - Cobra subcommands that need the global `--kubeconfig` value should call `config.Initialize` with the root command (`cmd.Root()` fallback to the current command) so flag lookup resolves the root-level flag correctly.
 - Cobra command groups should mirror the existing `cmd/ctx` and `cmd/ns` layout: keep the group command in `<group>.go`, put each subcommand in its own file, and register all subcommands from the group package `init()`.
+- Namespace current-state commands should inspect `setup.ClientConfig.RawConfig()` for the active context value and treat an empty context namespace as `default`; this preserves kubeconfig semantics better than relying only on `Setup.Namespace`.
 
 ## Testing conventions
 - For Cobra subcommands that depend on inherited persistent flags, prefer executing through a small root command tree with `Execute()` in tests instead of calling the leaf command's `RunE` directly; this matches Cobra's real flag propagation.

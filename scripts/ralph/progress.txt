@@ -5,6 +5,7 @@
 - Cobra tests that need inherited persistent flags should execute through a root command tree with `Execute()`; calling a leaf command's `RunE` directly skips the normal flag propagation.
 - `README.md` command listings and CLI usage examples are maintained manually, so user-facing CLI command changes should update the README in the same change.
 - Cobra command groups in `cmd/<name>` follow the `ctx` pattern: define the group command in `<name>.go`, keep each subcommand in its own file, and register them together from the package `init()`.
+- Namespace current-state lookups should read the active context from `ClientConfig.RawConfig()` and print `default` when the context namespace is unset, so the CLI mirrors Kubernetes kubeconfig behavior.
 
 Started: Thu Mar 12 07:29:15 CET 2026
 ---
@@ -17,7 +18,18 @@ Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file pre
 - **Learnings for future iterations:**
   - Patterns discovered: namespace command groups should mirror `cmd/ctx` by keeping one file per subcommand and centralizing registration in `ns.go`.
   - Gotchas encountered: this story is only command wiring, so behavior should remain unimplemented until later iterations to avoid skipping PRD ordering.
-  - Useful context: `NsCmd.Find([]string{"subcommand"})` is a simple way to assert subcommand registration and alias metadata without building a full root tree.
+- Useful context: `NsCmd.Find([]string{"subcommand"})` is a simple way to assert subcommand registration and alias metadata without building a full root tree.
+---
+
+## [2026-03-14 14:11:50 CET] - #50-002
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
+- Implemented `viewnode ns get-current` to initialize config through the root command, read the active kubeconfig context namespace from raw config, and print `default` when no namespace is set.
+- Added tests for inherited `--kubeconfig` propagation via `Execute()`, `default` namespace fallback from kubeconfig, raw-config read failures, and initialization failures.
+- Files changed: `cmd/ns/getcurrent.go`, `cmd/ns/ns_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: namespace current-state reads should inspect `ClientConfig.RawConfig().Contexts[CurrentContext].Namespace` instead of relying only on `Setup.Namespace`, because the CLI needs to distinguish explicit namespace state from Kubernetes' implicit `default`.
+  - Gotchas encountered: `config.Initialize` still constructs clientsets during command setup, so tests for kubeconfig-reading behavior are easier to keep deterministic by overriding narrow package-level seams.
+  - Useful context: a small synthetic root command with `Execute()` is sufficient to verify inherited `--kubeconfig` handling without wiring the entire application root.
 ---
 
 ## [2026-03-12 10:18:38 CET] - #47-001

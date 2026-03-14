@@ -26,7 +26,7 @@
         "Failures while initializing config or reading kubeconfig state are returned as command errors."
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Initialize config from `cmd.Root()` with fallback to the current command so inherited persistent flags resolve correctly."
     },
     {
