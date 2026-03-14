@@ -221,6 +221,42 @@ func TestSetCurrentRunEReturnsPersistError(t *testing.T) {
 	require.EqualError(t, err, "setting kubernetes current namespace failed (boom)")
 }
 
+func TestSetCurrentRunEReturnsMissingCurrentContextError(t *testing.T) {
+	originalInitializeConfig := initializeConfig
+	originalCurrentSetup := currentSetup
+	originalCurrentRawConfig := currentRawConfig
+	originalNamespaceExists := namespaceExists
+	t.Cleanup(func() {
+		initializeConfig = originalInitializeConfig
+		currentSetup = originalCurrentSetup
+		currentRawConfig = originalCurrentRawConfig
+		namespaceExists = originalNamespaceExists
+	})
+
+	setup := &config.Setup{}
+	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
+		return setup, nil
+	}
+	currentSetup = func() *config.Setup {
+		return setup
+	}
+	namespaceExists = func(_ context.Context, _ *config.Setup, _ string) (bool, error) {
+		return true, nil
+	}
+	currentRawConfig = func(_ *config.Setup) (clientcmdapi.Config, error) {
+		return clientcmdapi.Config{
+			CurrentContext: "missing-context",
+			Contexts: map[string]*clientcmdapi.Context{
+				"dev-cluster": {Namespace: "team-a"},
+			},
+		}, nil
+	}
+
+	err := setCurrent.RunE(setCurrent, []string{"team-c"})
+
+	require.EqualError(t, err, `current kubernetes context "missing-context" not found`)
+}
+
 func TestPersistRawConfigUsesExplicitKubeconfigPath(t *testing.T) {
 	kubeconfigPath := filepath.Join(t.TempDir(), "config")
 	require.NoError(t, os.WriteFile(kubeconfigPath, []byte(kubeConfigFixtureWithNamespace), 0o600))

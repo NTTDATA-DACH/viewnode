@@ -56,7 +56,7 @@
         "The change passes `make test`."
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Follow the repository testing convention for Cobra inherited flags and keep README command listings in sync in the same change."
     }
   ]

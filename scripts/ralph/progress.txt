@@ -44,6 +44,17 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Useful context: mutating `rawConfig.Contexts[rawConfig.CurrentContext].Namespace` preserves other contexts unchanged, which is the right scope for namespace current-state updates.
 ---
 
+## [2026-03-14 14:18:00 CET] - #50-004
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-3.txt
+- Expanded README namespace command documentation to cover `ns get-current`, `ns set-current`, and the legacy `getcurrent` / `setcurrent` aliases alongside the existing `ns ls` alias.
+- Added an extra `ns set-current` test for the missing-active-context kubeconfig error path and verified the full suite with `make test`.
+- Files changed: `README.md`, `cmd/ns/setcurrent_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: manual CLI examples in `README.md` should show both the canonical subcommand form and any supported legacy aliases when a command family preserves backward-compatible names.
+  - Gotchas encountered: `ns set-current` has an additional kubeconfig guard when `RawConfig().CurrentContext` is unset or missing from the contexts map, so tests should cover that explicit error path.
+  - Useful context: the namespace README section now documents the full current-state workflow (`list`, `get-current`, `set-current`) in one example block, matching how the `ctx` section is presented.
+---
+
 ## [2026-03-12 10:18:38 CET] - #47-001
 Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file present in workspace during this iteration)
 - Added a new top-level `ns` Cobra command in a dedicated `cmd/ns` package with help text for namespace-related operations.
