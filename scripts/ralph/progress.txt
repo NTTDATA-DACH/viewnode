@@ -4,8 +4,20 @@
 - Commands that honor the global `--kubeconfig` flag must pass the root Cobra command into `config.Initialize`; using the leaf subcommand directly can miss the root-level flag lookup.
 - Cobra tests that need inherited persistent flags should execute through a root command tree with `Execute()`; calling a leaf command's `RunE` directly skips the normal flag propagation.
 - `README.md` command listings and CLI usage examples are maintained manually, so user-facing CLI command changes should update the README in the same change.
+- Cobra command groups in `cmd/<name>` follow the `ctx` pattern: define the group command in `<name>.go`, keep each subcommand in its own file, and register them together from the package `init()`.
 
 Started: Thu Mar 12 07:29:15 CET 2026
+---
+
+## [2026-03-14 14:08:54 CET] - #50-001
+Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file present in workspace during this iteration)
+- Added `ns get-current` and `ns set-current` command definitions in dedicated files and registered them under the existing `ns` command group.
+- Added focused command-structure coverage to verify both subcommands are discoverable from `ns` and expose the required legacy aliases.
+- Files changed: `AGENTS.md`, `cmd/ns/getcurrent.go`, `cmd/ns/ns.go`, `cmd/ns/ns_test.go`, `cmd/ns/setcurrent.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: namespace command groups should mirror `cmd/ctx` by keeping one file per subcommand and centralizing registration in `ns.go`.
+  - Gotchas encountered: this story is only command wiring, so behavior should remain unimplemented until later iterations to avoid skipping PRD ordering.
+  - Useful context: `NsCmd.Find([]string{"subcommand"})` is a simple way to assert subcommand registration and alias metadata without building a full root tree.
 ---
 
 ## [2026-03-12 10:18:38 CET] - #47-001

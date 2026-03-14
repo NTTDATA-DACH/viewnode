@@ -12,7 +12,7 @@
         "The command definitions follow the existing `cmd/ctx` structural pattern so future namespace operations remain in the same command tree."
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse the established Cobra command organization in `cmd/ns` and avoid introducing any parallel command structure."
     },
     {

@@ -9,5 +9,5 @@ var NsCmd = &cobra.Command{
 }
 
 func init() {
-	NsCmd.AddCommand(listCmd)
+	NsCmd.AddCommand(listCmd, getCurrent, setCurrent)
 }
