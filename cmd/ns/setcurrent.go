@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"viewnode/cmd/config"
+
 	"github.com/spf13/cobra"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"viewnode/cmd/config"
 )
 
 var namespaceExists = func(ctx context.Context, setup *config.Setup, namespace string) (bool, error) {
@@ -34,9 +35,9 @@ var persistRawConfig = func(setup *config.Setup, rawConfig clientcmdapi.Config) 
 }
 
 var setCurrent = &cobra.Command{
-	Use:     "set-current NAMESPACE",
+	Use:     "set-current",
 	Short:   "Set current Kubernetes namespace",
-	Aliases: []string{"setcurrent"},
+	Aliases: []string{"sc", "setcurrent"},
 	Args:    cobra.ExactArgs(1),
 	RunE: func(c *cobra.Command, args []string) error {
 		configCmd := c.Root()

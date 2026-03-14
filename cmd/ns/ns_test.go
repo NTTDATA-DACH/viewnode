@@ -8,11 +8,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"viewnode/cmd/config"
+
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"viewnode/cmd/config"
 )
 
 func TestNsCmdHelpText(t *testing.T) {
@@ -25,12 +26,12 @@ func TestNsCmdRegistersCurrentStateSubcommands(t *testing.T) {
 	getCurrentCmd, _, err := NsCmd.Find([]string{"get-current"})
 	require.NoError(t, err)
 	require.Same(t, getCurrent, getCurrentCmd)
-	require.Equal(t, []string{"getcurrent"}, getCurrentCmd.Aliases)
+	require.Equal(t, []string{"gc", "getcurrent"}, getCurrentCmd.Aliases)
 
 	setCurrentCmd, _, err := NsCmd.Find([]string{"set-current"})
 	require.NoError(t, err)
 	require.Same(t, setCurrent, setCurrentCmd)
-	require.Equal(t, []string{"setcurrent"}, setCurrentCmd.Aliases)
+	require.Equal(t, []string{"sc", "setcurrent"}, setCurrentCmd.Aliases)
 }
 
 const kubeConfigFixtureWithNamespace = `apiVersion: v1
