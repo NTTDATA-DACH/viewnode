@@ -12,7 +12,7 @@
         "Focused automated tests cover deterministic ordering and active-state marking for the shared helper."
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "Keep the helper in the existing command support structure and avoid introducing a new parallel command abstraction."
     },
     {
@@ -26,7 +26,7 @@
         "Automated tests cover successful context listing and at least one kubeconfig failure case."
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "Preserve the current raw kubeconfig lookup path in `cmd/ctx/list.go`; only the list preparation should change."
     },
     {
@@ -40,7 +40,7 @@
         "Automated tests cover successful namespace listing, `default` fallback behavior, and at least one namespace lookup failure case."
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "Keep namespace discovery tied to the existing Kubernetes API call path and do not add extra cluster requests."
     },
     {
@@ -53,7 +53,7 @@
         "Running `make test` succeeds after the refactor changes are complete."
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "This story is the final verification slice for the refactor and should run after the command-specific stories land."
     }
   ]

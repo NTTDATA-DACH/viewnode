@@ -44,3 +44,10 @@
 
 ## Documentation conventions
 - `README.md` command listings and CLI examples are maintained manually; when adding or changing user-facing commands, update the README command reference and relevant usage examples in the same change.
+
+## Active Technologies
+- Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify` (48-refactor-ctx-list-ns-list-commands)
+- Kubeconfig files plus live Kubernetes API data for namespace discovery (48-refactor-ctx-list-ns-list-commands)
+
+## Recent Changes
+- 48-refactor-ctx-list-ns-list-commands: Added Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`

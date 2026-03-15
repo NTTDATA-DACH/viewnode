@@ -10,6 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"viewnode/cmd/config"
 )
 
@@ -36,14 +38,20 @@ func captureStdout(t *testing.T, fn func()) string {
 func TestListCmdRunE(t *testing.T) {
 	originalInitializeConfig := initializeConfig
 	originalCurrentSetup := currentSetup
+	originalCurrentRawConfig := currentRawConfig
 	originalListNamespaces := listNamespaces
 	t.Cleanup(func() {
 		initializeConfig = originalInitializeConfig
 		currentSetup = originalCurrentSetup
+		currentRawConfig = originalCurrentRawConfig
 		listNamespaces = originalListNamespaces
 	})
 
-	setup := &config.Setup{Namespace: "team-b"}
+	rawConfig, err := clientcmd.Load([]byte(kubeConfigFixtureWithNamespace))
+	require.NoError(t, err)
+	rawConfig.Contexts[rawConfig.CurrentContext].Namespace = "team-b"
+
+	setup := &config.Setup{}
 	var capturedKubeconfig string
 
 	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
@@ -54,6 +62,10 @@ func TestListCmdRunE(t *testing.T) {
 	}
 	currentSetup = func() *config.Setup {
 		return setup
+	}
+	currentRawConfig = func(actualSetup *config.Setup) (clientcmdapi.Config, error) {
+		require.Equal(t, setup, actualSetup)
+		return *rawConfig, nil
 	}
 	listNamespaces = func(ctx context.Context, actualSetup *config.Setup) ([]string, error) {
 		require.Equal(t, setup, actualSetup)
@@ -75,6 +87,45 @@ func TestListCmdRunE(t *testing.T) {
 
 	require.Equal(t, "/tmp/test-kubeconfig", capturedKubeconfig)
 	require.Equal(t, "[ ] team-a\n[*] team-b\n[ ] team-c\n", output)
+}
+
+func TestListCmdRunEDefaultNamespaceFallback(t *testing.T) {
+	originalInitializeConfig := initializeConfig
+	originalCurrentSetup := currentSetup
+	originalCurrentRawConfig := currentRawConfig
+	originalListNamespaces := listNamespaces
+	t.Cleanup(func() {
+		initializeConfig = originalInitializeConfig
+		currentSetup = originalCurrentSetup
+		currentRawConfig = originalCurrentRawConfig
+		listNamespaces = originalListNamespaces
+	})
+
+	rawConfig, err := clientcmd.Load([]byte(kubeConfigFixtureWithoutNamespace))
+	require.NoError(t, err)
+
+	setup := &config.Setup{}
+	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
+		return setup, nil
+	}
+	currentSetup = func() *config.Setup {
+		return setup
+	}
+	currentRawConfig = func(actualSetup *config.Setup) (clientcmdapi.Config, error) {
+		require.Equal(t, setup, actualSetup)
+		return *rawConfig, nil
+	}
+	listNamespaces = func(ctx context.Context, actualSetup *config.Setup) ([]string, error) {
+		require.Equal(t, setup, actualSetup)
+		return []string{"team-b", "default", "team-a"}, nil
+	}
+
+	output := captureStdout(t, func() {
+		err := listCmd.RunE(listCmd, nil)
+		require.NoError(t, err)
+	})
+
+	require.Equal(t, "[*] default\n[ ] team-a\n[ ] team-b\n", output)
 }
 
 func TestListCmdRunEReturnsNamespaceDiscoveryError(t *testing.T) {
@@ -99,7 +150,30 @@ func TestListCmdRunEReturnsNamespaceDiscoveryError(t *testing.T) {
 		return nil, errors.New("boom")
 	}
 
-	err := listCmd.RunE(listCmd, nil)
+	var runErr error
+	output := captureStdout(t, func() {
+		runErr = listCmd.RunE(listCmd, nil)
+	})
 
-	require.EqualError(t, err, "getting kubernetes namespaces failed (boom)")
+	require.EqualError(t, runErr, "getting kubernetes namespaces failed (boom)")
+	require.Empty(t, output)
+}
+
+func TestListCmdRunEReturnsInitializeErrorWithoutPartialOutput(t *testing.T) {
+	originalInitializeConfig := initializeConfig
+	t.Cleanup(func() {
+		initializeConfig = originalInitializeConfig
+	})
+
+	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
+		return nil, errors.New("failed to initialize setup (config file not found at the following path: /tmp/missing-config)")
+	}
+
+	var runErr error
+	output := captureStdout(t, func() {
+		runErr = listCmd.RunE(listCmd, nil)
+	})
+
+	require.EqualError(t, runErr, "failed to initialize setup (config file not found at the following path: /tmp/missing-config)")
+	require.Empty(t, output)
 }
