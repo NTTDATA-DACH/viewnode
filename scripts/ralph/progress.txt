@@ -7,6 +7,7 @@
 - `README.md` command listings and CLI usage examples are maintained manually, so user-facing CLI command changes should update the README in the same change.
 - Cobra command groups in `cmd/<name>` follow the `ctx` pattern: define the group command in `<name>.go`, keep each subcommand in its own file, and register them together from the package `init()`.
 - Namespace current-state lookups should read the active context from `ClientConfig.RawConfig()` and print `default` when the context namespace is unset, so the CLI mirrors Kubernetes kubeconfig behavior.
+- Shared alphabetical list rendering logic for command output belongs in `cmd/internal/listing`, with package-specific entry types built from a common active-state preparer instead of duplicating sort-and-mark loops in command packages.
 
 Started: Thu Mar 12 07:29:15 CET 2026
 ---
@@ -99,4 +100,15 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: `README.md` is the manual source for user-facing command listings and command examples, so CLI command additions need a README update in the same change.
   - Gotchas encountered: there is no generated command reference step in this repository, so documentation drift is easy if README updates are skipped.
   - Useful context: the existing command documentation groups related subcommands into short example sections such as `Context command`, which is the right pattern to reuse for future command groups.
+---
+
+## [2026-03-15 14:34 CET] - #48-001
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-4.txt
+- Added `cmd/internal/listing` with explicit `ContextEntry` and `NamespaceEntry` types plus a shared helper that sorts raw names and marks the active item.
+- Added focused tests covering deterministic ordering and active-state behavior for the shared helper without changing `ctx list` or `ns list` command behavior yet.
+- Files changed: `cmd/internal/listing/entries.go`, `cmd/internal/listing/entries_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: list-row preparation can be shared cleanly without moving kubeconfig or namespace discovery logic out of the command packages.
+  - Gotchas encountered: this repo already treats command-structure refactors as separate story slices, so keep helper introduction separate from command rewiring.
+  - Useful context: `make test` includes the new internal package automatically, so story-level helper coverage is visible in the standard validation run.
 ---

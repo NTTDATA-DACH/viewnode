@@ -12,7 +12,7 @@
         "Focused automated tests cover deterministic ordering and active-state marking for the shared helper."
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Keep the helper in the existing command support structure and avoid introducing a new parallel command abstraction."
     },
     {
