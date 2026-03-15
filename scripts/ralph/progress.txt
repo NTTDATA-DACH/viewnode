@@ -112,3 +112,14 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Gotchas encountered: this repo already treats command-structure refactors as separate story slices, so keep helper introduction separate from command rewiring.
   - Useful context: `make test` includes the new internal package automatically, so story-level helper coverage is visible in the standard validation run.
 ---
+
+## [2026-03-15 14:28:08 CET] - #48-002
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
+- Refactored `viewnode ctx list` to render through `cmd/internal/listing.PrepareContextEntries` while keeping raw kubeconfig lookup and the existing `[marker] name` output contract in `cmd/ctx/list.go`.
+- Added focused command tests for successful context listing through a root command tree and for initialization failure propagation without partial stdout output.
+- Files changed: `cmd/ctx/ctx_test.go`, `cmd/ctx/list.go`, `cmd/ctx/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: command packages can adopt the `initializeConfig` / `currentSetup` seam pattern for deterministic tests without moving command-specific kubeconfig reads out of the command implementation.
+  - Gotchas encountered: `config.Initialize` caches global setup state, so direct failure-path tests are more reliable when they override narrow package-level seams instead of depending on repeated real initialization.
+  - Useful context: `clientcmd.NewDefaultClientConfig` built from the shared kubeconfig fixture is enough to exercise `RawConfig()`-based context listing logic without creating a live clientset.
+---

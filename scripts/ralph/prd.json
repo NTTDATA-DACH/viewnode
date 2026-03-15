@@ -26,7 +26,7 @@
         "Automated tests cover successful context listing and at least one kubeconfig failure case."
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Preserve the current raw kubeconfig lookup path in `cmd/ctx/list.go`; only the list preparation should change."
     },
     {
