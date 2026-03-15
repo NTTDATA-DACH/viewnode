@@ -136,3 +136,14 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Gotchas encountered: reusing namespace fixtures across tests can silently carry the wrong active namespace unless the raw config is adjusted explicitly in the test setup.
   - Useful context: `PrepareNamespaceEntries` now owns the ordering for `ns list`, so command tests can focus on data sourcing and output contracts rather than local sort behavior.
 ---
+
+## [2026-03-15 14:33:15 CET] - #48-004
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-5.txt
+- Added the missing command-level `ctx list` test for raw kubeconfig failure propagation and verified that it produces no partial stdout output.
+- Ran `make test` to validate the full list-command refactor across the repository.
+- Files changed: `cmd/ctx/list_test.go`, `scripts/ralph/.codex-last-message-iter-5.txt`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: `ctx list` failure-path coverage is easiest to keep deterministic by injecting a stub `clientcmd.ClientConfig` that fails only on `RawConfig()`.
+  - Gotchas encountered: existing `.codex-last-message-iter-*` files may not sort numerically by modification time, so Ralph progress entries should point to the file created in the current iteration.
+  - Useful context: `make test` passed after the additional `ctx list` failure-path coverage, so the shared list-entry refactor now has command-level success and failure validation for both `ctx list` and `ns list`.
+---

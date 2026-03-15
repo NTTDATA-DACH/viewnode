@@ -53,7 +53,7 @@
         "Running `make test` succeeds after the refactor changes are complete."
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "This story is the final verification slice for the refactor and should run after the command-specific stories land."
     }
   ]

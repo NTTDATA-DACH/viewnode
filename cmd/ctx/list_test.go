@@ -6,8 +6,31 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"viewnode/cmd/config"
 )
+
+type failingClientConfig struct {
+	rawConfigErr error
+}
+
+func (f failingClientConfig) RawConfig() (clientcmdapi.Config, error) {
+	return clientcmdapi.Config{}, f.rawConfigErr
+}
+
+func (f failingClientConfig) ClientConfig() (*rest.Config, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (f failingClientConfig) Namespace() (string, bool, error) {
+	return "", false, errors.New("not implemented")
+}
+
+func (f failingClientConfig) ConfigAccess() clientcmd.ConfigAccess {
+	return nil
+}
 
 func TestListCmdRunEUsesSharedContextEntries(t *testing.T) {
 	originalInitializeConfig := initializeConfig
@@ -67,5 +90,33 @@ func TestListCmdRunEReturnsInitializeErrorWithoutPartialOutput(t *testing.T) {
 	})
 
 	require.EqualError(t, runErr, "failed to initialize setup (config file not found at the following path: /tmp/missing-config)")
+	require.Empty(t, output)
+}
+
+func TestListCmdRunEReturnsRawConfigErrorWithoutPartialOutput(t *testing.T) {
+	originalInitializeConfig := initializeConfig
+	originalCurrentSetup := currentSetup
+	t.Cleanup(func() {
+		initializeConfig = originalInitializeConfig
+		currentSetup = originalCurrentSetup
+	})
+
+	setup := &config.Setup{
+		ClientConfig: failingClientConfig{rawConfigErr: errors.New("boom")},
+	}
+
+	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
+		return setup, nil
+	}
+	currentSetup = func() *config.Setup {
+		return setup
+	}
+
+	var runErr error
+	output := captureStdout(t, func() {
+		runErr = listCmd.RunE(listCmd, nil)
+	})
+
+	require.EqualError(t, runErr, "getting kubernetes raw config failed (boom)")
 	require.Empty(t, output)
 }
