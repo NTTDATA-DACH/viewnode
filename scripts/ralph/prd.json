@@ -1,63 +1,60 @@
 {
-  "branchName": "50-add-get-current-and-set-current-subcommands-to-root-command-ns-to-get-current-namespace-and-set-new-current-namespace",
-  "overview": "Add `viewnode ns get-current` and `viewnode ns set-current` to mirror the existing `ctx` workflow, respect the root `--kubeconfig` flag, validate namespace changes against the current cluster before persisting them, cover the new behavior with tests, and update the manually maintained README examples.",
+  "branchName": "48-refactor-ctx-list-ns-list-commands",
+  "overview": "Refactor `viewnode ctx list` and `viewnode ns list` to share explicit list-entry preparation logic while preserving current command behavior, alphabetical output ordering, active-item semantics including `default` namespace fallback, existing error handling, and repository validation through `make test`.",
   "userStories": [
     {
-      "id": "#50-001",
-      "title": "Wire namespace current-state subcommands",
-      "description": "Extend the existing `ns` Cobra command group with `get-current` and `set-current` subcommands so namespace current-state operations have the same entry-point structure and alias pattern as the existing `ctx` command family.",
+      "id": "#48-001",
+      "title": "Extract shared list-entry preparation helper",
+      "description": "Introduce explicit list-entry structures and a narrow shared helper for ordered active-state preparation so the duplicated list-building behavior used by `ctx list` and `ns list` is centralized without changing command-specific data retrieval.",
       "acceptanceCriteria": [
-        "The `ns` command registers `get-current` and `set-current` subcommands without changing existing `ns list` behavior.",
-        "The new subcommands include the legacy-style aliases `getcurrent` and `setcurrent`.",
-        "The command definitions follow the existing `cmd/ctx` structural pattern so future namespace operations remain in the same command tree."
+        "The codebase defines explicit list-entry structures for context and namespace display rows.",
+        "A shared helper prepares sorted entries from raw names plus one active name without performing kubeconfig or Kubernetes API reads.",
+        "Focused automated tests cover deterministic ordering and active-state marking for the shared helper."
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Reuse the established Cobra command organization in `cmd/ns` and avoid introducing any parallel command structure."
+      "passes": false,
+      "notes": "Keep the helper in the existing command support structure and avoid introducing a new parallel command abstraction."
     },
     {
-      "id": "#50-002",
-      "title": "Implement namespace current lookup",
-      "description": "Add `viewnode ns get-current` to read the current namespace from the active kubeconfig context using the root-command config initialization flow, and preserve Kubernetes default behavior when no namespace is explicitly set.",
+      "id": "#48-002",
+      "title": "Refactor context list to use shared entries",
+      "description": "Update `viewnode ctx list` to build and render context output through the shared list-entry path while preserving current output format, active-context selection, and error behavior.",
       "acceptanceCriteria": [
-        "Running `viewnode ns get-current` prints the current namespace from the active kubeconfig context followed by a trailing newline.",
-        "If the active kubeconfig context does not define a namespace, the command prints `default`.",
-        "The command resolves kubeconfig through the same root-command flow as the rest of the CLI, including support for the inherited `--kubeconfig` flag.",
-        "Failures while initializing config or reading kubeconfig state are returned as command errors."
+        "Running `viewnode ctx list` still prints contexts in alphabetical order using the existing `[marker] name` format.",
+        "Only the kubeconfig current context is marked with `[*]`.",
+        "If kubeconfig loading fails, the command still returns a descriptive error and produces no partial list output.",
+        "Automated tests cover successful context listing and at least one kubeconfig failure case."
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Initialize config from `cmd.Root()` with fallback to the current command so inherited persistent flags resolve correctly."
+      "passes": false,
+      "notes": "Preserve the current raw kubeconfig lookup path in `cmd/ctx/list.go`; only the list preparation should change."
     },
     {
-      "id": "#50-003",
-      "title": "Implement validated namespace current update",
-      "description": "Add `viewnode ns set-current <namespace>` to validate the requested namespace against the current cluster, then update only the active kubeconfig context namespace and report a clear success or failure result.",
+      "id": "#48-003",
+      "title": "Refactor namespace list with default fallback semantics",
+      "description": "Update `viewnode ns list` to use the shared list-entry path while keeping the existing namespace query flow and normalizing an empty active kubeconfig namespace to `default` before active-state comparison.",
       "acceptanceCriteria": [
-        "Running `viewnode ns set-current <namespace>` with an existing namespace updates only the active kubeconfig context namespace.",
-        "On success, the command prints `current namespace set to <namespace>`.",
-        "The command validates that the requested namespace exists in the current cluster before writing kubeconfig.",
-        "If the requested namespace does not exist, the command returns a descriptive error and does not mutate kubeconfig.",
-        "If kubeconfig read or write operations fail, the command returns a descriptive error instead of silently succeeding.",
-        "The command respects the inherited root `--kubeconfig` flag."
+        "Running `viewnode ns list` still prints namespaces in alphabetical order using the existing `[marker] name` format.",
+        "If the active kubeconfig context has no explicit namespace, `default` is treated as the active namespace for marker comparison.",
+        "If namespace discovery fails, the command still returns a descriptive error and produces no partial list output.",
+        "Automated tests cover successful namespace listing, `default` fallback behavior, and at least one namespace lookup failure case."
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Keep cluster validation and kubeconfig mutation separate so failed validation cannot accidentally persist a change."
+      "passes": false,
+      "notes": "Keep namespace discovery tied to the existing Kubernetes API call path and do not add extra cluster requests."
     },
     {
-      "id": "#50-004",
-      "title": "Verify and document namespace current-state commands",
-      "description": "Add automated coverage for the new namespace commands, including inherited flag behavior, and update the manually maintained README command reference and examples to reflect the new user-facing commands and aliases.",
+      "id": "#48-004",
+      "title": "Run full validation for list-command refactor",
+      "description": "Finish the refactor by verifying command-level regressions are covered and the repository test suite passes with the new shared list-entry implementation.",
       "acceptanceCriteria": [
-        "Automated tests cover `ns get-current` success, `default` fallback, and inherited `--kubeconfig` propagation through a small root command tree executed with `Execute()`.",
-        "Automated tests cover `ns set-current` success, persisted kubeconfig mutation, missing-namespace validation failure, and at least one kubeconfig error path.",
-        "The namespace command section in `README.md` documents `ns get-current`, `ns set-current`, and the `getcurrent` and `setcurrent` aliases.",
-        "The change passes `make test`."
+        "Command-level tests cover context listing success, namespace listing success, namespace `default` fallback, and failure propagation for both affected commands.",
+        "The final implementation still follows the established `cmd/ctx`, `cmd/ns`, and `cmd/config` repository structure.",
+        "Running `make test` succeeds after the refactor changes are complete."
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Follow the repository testing convention for Cobra inherited flags and keep README command listings in sync in the same change."
+      "passes": false,
+      "notes": "This story is the final verification slice for the refactor and should run after the command-specific stories land."
     }
   ]
 }
