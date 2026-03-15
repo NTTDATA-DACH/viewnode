@@ -1,13 +1,19 @@
 ---
 name: spec-to-prd
-description: Create or refresh a PRD from Spec Kit artifacts and save it under tasks/prd-*.md. Use when specs/<feature>/spec.md exists, optionally with plan.md and tasks.md, and a repository-aligned execution-oriented PRD is needed.
+description: Create or refresh a PRD from Spec Kit artifacts and save it under tasks/prd-*.md. Use when a Spec Kit feature exists under specs/<feature>/ and a repository-aligned execution-oriented PRD is needed.
 ---
 
 Read the relevant Spec Kit artifacts and create or refresh a PRD markdown file for this repository.
 
 # Purpose
 
-Convert a Spec Kit spec into an execution-oriented PRD suitable for later Ralph conversion.
+Convert a Spec Kit feature into an execution-oriented PRD suitable for later Ralph conversion.
+
+This skill is intended to run after Spec Kit has produced one or more upstream artifacts, typically through:
+- `$speckit-specify`
+- optionally `$speckit-clarify`
+- `$speckit-plan`
+- `$speckit-tasks`
 
 # Inputs
 
@@ -25,10 +31,25 @@ Treat branch context as a hint for resolving the feature, not as a requirement t
 
 # Source priority
 
-Use sources in this order:
+Use the best available source in this order, when present:
 1. `specs/<feature>/tasks.md`
 2. `specs/<feature>/plan.md`
 3. `specs/<feature>/spec.md`
+
+Do not fail merely because `tasks.md` or `plan.md` is missing if a valid `spec.md` exists.
+
+Primary PRD sources are:
+- `spec.md`
+- `plan.md`
+- `tasks.md`
+
+Do not treat the outputs of other Spec Kit skills as primary PRD sources unless the user explicitly asks:
+- `speckit-analyze`
+- `speckit-checklist`
+- `speckit-implement`
+- `speckit-taskstoissues`
+
+Those may inform validation or follow-up work, but the PRD should still be derived mainly from the feature spec, plan, and tasks.
 
 # Default behavior
 
@@ -48,7 +69,7 @@ Use sources in this order:
 - Apply relevant repository guidance from `AGENTS.md`.
 - Keep the PRD implementation-aware but not implementation-heavy.
 - Preserve the intent of the spec.
-- Pull technical constraints, integration points, validation notes, and sequencing from `plan.md` and `tasks.md` when available.
+- Pull technical constraints, integration points, validation notes, sequencing, and work shaping from `plan.md` and `tasks.md` when available.
 - If important ambiguity remains, include an explicit `Assumptions / Open Questions` section rather than inventing facts.
 - When the spec references an existing pattern, command, API, workflow, feature, or document, preserve that reference as part of the acceptance contract.
 
@@ -88,8 +109,11 @@ Include when useful:
 - Use `tasks.md` to shape work packages and later Ralph conversion.
 - Prefer stable identifiers for acceptance criteria and major scope items when useful.
 - Do not let task wording distort the original intent from the spec.
+- If only `spec.md` exists, derive the PRD from the spec alone and keep missing planning detail explicit rather than guessing.
+- If `plan.md` exists but `tasks.md` does not, use the plan to enrich the PRD without pretending that task breakdown already exists.
 
 # Output
 
 - Write the PRD to the resolved path, typically `tasks/prd-<feature>.md`.
 - Return the resolved feature name, source paths used, and output path.
+- Be explicit about which Spec Kit artifacts were available and which were absent.

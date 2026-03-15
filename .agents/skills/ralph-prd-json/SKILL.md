@@ -7,6 +7,9 @@ description: Convert a repository-aligned PRD in tasks/prd-*.md into a Ralph-rea
 
 Convert a Markdown PRD into a Ralph-ready `scripts/ralph/prd.json`.
 
+This skill is intended to run after a PRD already exists, typically after:
+- `$spec-to-prd`
+
 Use repository guidance from `AGENTS.md` for branch handling, validation, commit rules, naming, and project conventions. Do not restate stable repo rules in the JSON unless they materially affect Ralph execution.
 
 # Inputs
@@ -20,6 +23,9 @@ If the user does not provide an explicit PRD path, resolve the intended PRD from
 
 Do not require the PRD filename or feature name to exactly match the current branch name.
 Treat branch context as a hint for issue and feature resolution, while allowing shorter artifact names when they remain unambiguous and traceable.
+
+Treat the PRD as the planning source of truth for this skill.
+Do not read back into upstream Spec Kit artifacts such as `spec.md`, `plan.md`, or `tasks.md` unless the user explicitly asks, or unless repository workflow requires verification against them.
 
 # Output
 
@@ -41,8 +47,9 @@ Use this when `scripts/ralph/prd.json` already exists and the task is to revise 
 
 In update mode:
 - preserve correctly completed stories that remain valid
+- preserve unchanged valid stories whenever possible
 - prefer adding new follow-up stories for changed or additional requirements
-- only reopen, replace, or rewrite completed stories if they are no longer valid
+- only reopen, replace, or rewrite completed stories if they are no longer valid under the revised PRD
 - preserve existing `passes: true` only for unchanged stories that still satisfy the revised PRD
 
 # Workflow
@@ -122,6 +129,8 @@ For this repository:
 - use relevant hints from `AGENTS.md`
 
 Do not assume the PRD came from a specific upstream workflow; treat the PRD as the source of truth regardless of whether it originated directly from an issue or from Spec Kit artifacts.
+
+If the PRD includes traceability metadata from Spec Kit or issue-based workflows, preserve the intent of that metadata when useful, but do not let it override the actual PRD requirements.
 
 # Output schema
 
