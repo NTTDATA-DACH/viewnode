@@ -3,11 +3,11 @@ package ns
 import (
 	"context"
 	"fmt"
-	"sort"
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"viewnode/cmd/config"
+	"viewnode/cmd/internal/listing"
 )
 
 var initializeConfig = config.Initialize
@@ -45,14 +45,23 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("getting kubernetes namespaces failed (%w)", err)
 		}
-		sort.Strings(namespaceNames)
 
-		for _, namespaceName := range namespaceNames {
+		rawConfig, err := currentRawConfig(setup)
+		if err != nil {
+			return fmt.Errorf("getting kubernetes raw config failed (%w)", err)
+		}
+
+		activeNamespace := "default"
+		if context := rawConfig.Contexts[rawConfig.CurrentContext]; context != nil && context.Namespace != "" {
+			activeNamespace = context.Namespace
+		}
+
+		for _, entry := range listing.PrepareNamespaceEntries(namespaceNames, activeNamespace) {
 			marker := " "
-			if namespaceName == setup.Namespace {
+			if entry.IsActive {
 				marker = "*"
 			}
-			fmt.Printf("[%s] %s\n", marker, namespaceName)
+			fmt.Printf("[%s] %s\n", marker, entry.Name)
 		}
 
 		return nil
