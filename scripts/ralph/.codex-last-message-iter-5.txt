@@ -1,1 +1,0 @@
-Implemented story #48-004 by closing the remaining command-level validation gap for `ctx list`, then ran the full repository test suite with `make test`.
