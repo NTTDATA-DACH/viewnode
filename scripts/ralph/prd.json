@@ -78,7 +78,7 @@
         "Running `make test` succeeds after the feature changes are complete."
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Keep documentation updates in the same change as the CLI behavior update, per repository guidance."
     }
   ]

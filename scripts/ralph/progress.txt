@@ -60,3 +60,13 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Gotchas encountered: the empty-state branch in `srv.ViewNodeData.Printout` distinguishes filtered vs. unfiltered output solely from `NodeFilter`, while `Nodes` still contains the unscheduled-pod placeholder entry.
   - Useful context: retaining both filtered and unfiltered empty-state tests in `srv/view_test.go` makes future wording changes safer because the two branches are easy to conflate.
 ---
+## [2026-03-23 14:58:04 CET] - #53-006
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-5.txt
+- Documented `viewnode ns list --filter` and `viewnode ns list -f` in `README.md`, including a filtered namespace example and the success-path no-match output.
+- Ran `make test` to complete repository validation for the namespace filter feature.
+- Files changed: `README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: the README keeps command behavior examples inline under the relevant command section rather than maintaining a separate command reference table.
+  - Gotchas encountered: user-facing CLI changes in this repository are expected to ship with README updates in the same iteration, even when the code change landed earlier.
+  - Useful context: the namespace command section is the right place to document `ns list` flags and output examples; the top-level usage block remains focused on root flags only.
+---
