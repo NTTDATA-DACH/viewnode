@@ -38,6 +38,7 @@
 - Commands that persist kubeconfig changes must set `clientcmd.ClientConfigLoadingRules.ExplicitPath` from `setup.KubeCfgPath` before calling `clientcmd.ModifyConfig`, otherwise `--kubeconfig` updates can be written to the default config file instead of the requested one.
 - Cobra command groups should mirror the existing `cmd/ctx` and `cmd/ns` layout: keep the group command in `<group>.go`, put each subcommand in its own file, and register all subcommands from the group package `init()`.
 - Namespace current-state commands should inspect `setup.ClientConfig.RawConfig()` for the active context value and treat an empty context namespace as `default`; this preserves kubeconfig semantics better than relying only on `Setup.Namespace`.
+- Filter-aware empty-state messaging for the main node view should stay in `srv/view.go`; pass only the minimal CLI context needed on `srv.ViewNodeData` instead of branching the root command print pipeline.
 
 ## Testing conventions
 - For Cobra subcommands that depend on inherited persistent flags, prefer executing through a small root command tree with `Execute()` in tests instead of calling the leaf command's `RunE` directly; this matches Cobra's real flag propagation.
@@ -48,6 +49,8 @@
 ## Active Technologies
 - Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify` (48-refactor-ctx-list-ns-list-commands)
 - Kubeconfig files plus live Kubernetes API data for namespace discovery (48-refactor-ctx-list-ns-list-commands)
+- Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`, `github.com/sirupsen/logrus` (53-add-ns-filter)
+- Kubeconfig files plus live Kubernetes API data for namespace and node/pod discovery (53-add-ns-filter)
 
 ## Recent Changes
 - 48-refactor-ctx-list-ns-list-commands: Added Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`

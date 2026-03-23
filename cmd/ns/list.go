@@ -3,6 +3,7 @@ package ns
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,6 +13,7 @@ import (
 
 var initializeConfig = config.Initialize
 var currentSetup = config.GetConfig
+var namespaceFilter string
 var listNamespaces = func(ctx context.Context, setup *config.Setup) ([]string, error) {
 	namespaces, err := setup.Clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -36,6 +38,11 @@ var listCmd = &cobra.Command{
 			configCmd = c
 		}
 
+		filterValue := ""
+		if filterFlag := c.Flags().Lookup("filter"); filterFlag != nil && filterFlag.Changed {
+			filterValue = normalizeNamespaceFilter(filterFlag.Value.String())
+		}
+
 		if _, err := initializeConfig(configCmd); err != nil {
 			return err
 		}
@@ -44,6 +51,11 @@ var listCmd = &cobra.Command{
 		namespaceNames, err := listNamespaces(context.Background(), setup)
 		if err != nil {
 			return fmt.Errorf("getting kubernetes namespaces failed (%w)", err)
+		}
+		namespaceNames = filterNamespaceNames(namespaceNames, filterValue)
+		if filterValue != "" && len(namespaceNames) == 0 {
+			fmt.Printf("no namespaces matched filter %q\n", filterValue)
+			return nil
 		}
 
 		rawConfig, err := currentRawConfig(setup)
@@ -66,4 +78,28 @@ var listCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func filterNamespaceNames(namespaceNames []string, filter string) []string {
+	if filter == "" {
+		return namespaceNames
+	}
+
+	normalizedFilter := strings.ToLower(filter)
+	filteredNames := make([]string, 0, len(namespaceNames))
+	for _, namespaceName := range namespaceNames {
+		if strings.Contains(strings.ToLower(namespaceName), normalizedFilter) {
+			filteredNames = append(filteredNames, namespaceName)
+		}
+	}
+
+	return filteredNames
+}
+
+func normalizeNamespaceFilter(filter string) string {
+	return strings.TrimSpace(filter)
+}
+
+func init() {
+	listCmd.Flags().StringVarP(&namespaceFilter, "filter", "f", "", "show only namespaces according to filter")
 }

@@ -42,9 +42,10 @@ type ViewMetrics struct {
 }
 
 type ViewNodeData struct {
-	Config    ViewNodeDataConfig
-	Namespace string
-	Nodes     []ViewNode
+	Config     ViewNodeDataConfig
+	Namespace  string
+	NodeFilter string
+	Nodes      []ViewNode
 }
 
 type ViewType int
@@ -80,6 +81,10 @@ func (vnd ViewNodeData) Printout(cls bool) error {
 	}
 	l := len(vnd.Nodes)
 	if l <= 1 {
+		if vnd.NodeFilter != "" {
+			fmt.Printf("no nodes matched filter %q\n", vnd.NodeFilter)
+			return nil
+		}
 		fmt.Println("no nodes to display...")
 		return nil
 	}

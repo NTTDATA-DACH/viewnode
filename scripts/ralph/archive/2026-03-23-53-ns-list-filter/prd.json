@@ -12,7 +12,7 @@
         "The existing root `--node-filter` flag name and meaning remain unchanged."
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "Keep flag wiring local to `cmd/ns/list.go` so shorthand `-f` is scoped to namespace listing only."
     },
     {
@@ -25,7 +25,7 @@
         "Active namespace marking continues to treat an empty active kubeconfig namespace as `default`."
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "Reuse the current namespace entry preparation path and avoid adding extra Kubernetes API requests."
     },
     {
@@ -38,7 +38,7 @@
         "Unfiltered namespace list behavior remains unchanged."
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "Implement this normalization in the existing `cmd/ns/list.go` flow alongside filter matching."
     },
     {
@@ -51,7 +51,7 @@
         "Filtered no-match outcomes remain distinguishable from namespace discovery or cluster access failures."
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "Use minimal additional context from `cmd/root.go` into `srv/view.go` and avoid restructuring the existing printout pipeline."
     },
     {
@@ -65,7 +65,7 @@
         "Cobra tests that depend on inherited flags execute through a small root command tree."
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": "Primary coverage belongs in `cmd/ns/list_test.go` and `srv/view_test.go`."
     },
     {
@@ -78,7 +78,7 @@
         "Running `make test` succeeds after the feature changes are complete."
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": "Keep documentation updates in the same change as the CLI behavior update, per repository guidance."
     }
   ]

@@ -196,6 +196,13 @@ $ viewnode ns list
 [*] jenkins-onprem
 [ ] kube-system
 
+$ viewnode ns list --filter kube
+[ ] kube-public
+[ ] kube-system
+
+$ viewnode ns list -f missing
+no namespaces matched filter "missing"
+
 $ viewnode ns get-current
 jenkins-onprem
 

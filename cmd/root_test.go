@@ -200,6 +200,23 @@ func TestExecutePrintOutNoError(t *testing.T) {
 	require.Empty(t, errCh)
 }
 
+func TestExecutePrintOutNodeFilterNoMatchMessage(t *testing.T) {
+	resetRootCommandState()
+
+	errCh := make(chan error, 1)
+	output := captureStdout(t, func() {
+		executePrintOut(srv.ViewNodeData{
+			NodeFilter: "worker-a",
+			Nodes: []srv.ViewNode{
+				{Name: ""},
+			},
+		}, errCh)
+	})
+
+	require.Equal(t, "no nodes matched filter \"worker-a\"\n", output)
+	require.Empty(t, errCh)
+}
+
 func TestHandleErrorsIgnoresNil(t *testing.T) {
 	errCh := make(chan error, 1)
 	errCh <- nil
