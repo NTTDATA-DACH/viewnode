@@ -25,7 +25,7 @@
         "Active namespace marking continues to treat an empty active kubeconfig namespace as `default`."
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse the current namespace entry preparation path and avoid adding extra Kubernetes API requests."
     },
     {

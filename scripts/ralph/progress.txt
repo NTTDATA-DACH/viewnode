@@ -1,5 +1,6 @@
 ## Codebase Patterns
 - For Cobra subcommands that intentionally reuse a shorthand owned by a root flag, register the shorthand on the leaf command and verify it through a small root command tree with `Execute()` so parsing matches the real CLI path.
+- For Cobra leaf flags backed by package-level variables, only honor the flag value when that command's flag was actually set; otherwise shared state can leak between cloned commands and tests.
 
 # Ralph Progress Log
 Started: Mon Mar 23 14:43:02 CET 2026
@@ -13,4 +14,14 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: local leaf-command shorthands can coexist with root shorthands when they are registered on the subcommand itself.
   - Gotchas encountered: namespace list tests inherit active-namespace markers from the kubeconfig fixture, so expected output must account for `[*]`.
   - Useful context: `cmd/ns/list_test.go` already has stubs for kubeconfig initialization and namespace discovery, so new `ns list` behavior can usually be tested without touching live client-go code.
+---
+## [2026-03-23 14:48:18 CET] - #53-002
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
+- Implemented case-insensitive substring filtering for `viewnode ns list` before namespace entries are prepared, preserving the existing alphabetical sort and active namespace marker path.
+- Added regression coverage that verifies mixed-case filter matching still prints sorted filtered namespaces and keeps the active marker on the current namespace.
+- Files changed: `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: namespace list formatting should continue to flow through `listing.PrepareNamespaceEntries` so sorting and active markers stay consistent.
+  - Gotchas encountered: Cobra flags bound to package globals can retain prior test values even when a later command never set that flag, so `Flag.Changed` matters for command-local behavior.
+  - Useful context: `cmd/ns/list_test.go` can validate filter behavior entirely with stubbed namespace discovery and kubeconfig raw-config fixtures; no API client setup is needed.
 ---

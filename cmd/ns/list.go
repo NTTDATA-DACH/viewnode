@@ -3,6 +3,7 @@ package ns
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,6 +38,11 @@ var listCmd = &cobra.Command{
 			configCmd = c
 		}
 
+		filterValue := ""
+		if filterFlag := c.Flags().Lookup("filter"); filterFlag != nil && filterFlag.Changed {
+			filterValue = filterFlag.Value.String()
+		}
+
 		if _, err := initializeConfig(configCmd); err != nil {
 			return err
 		}
@@ -46,6 +52,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("getting kubernetes namespaces failed (%w)", err)
 		}
+		namespaceNames = filterNamespaceNames(namespaceNames, filterValue)
 
 		rawConfig, err := currentRawConfig(setup)
 		if err != nil {
@@ -67,6 +74,22 @@ var listCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func filterNamespaceNames(namespaceNames []string, filter string) []string {
+	if filter == "" {
+		return namespaceNames
+	}
+
+	normalizedFilter := strings.ToLower(filter)
+	filteredNames := make([]string, 0, len(namespaceNames))
+	for _, namespaceName := range namespaceNames {
+		if strings.Contains(strings.ToLower(namespaceName), normalizedFilter) {
+			filteredNames = append(filteredNames, namespaceName)
+		}
+	}
+
+	return filteredNames
 }
 
 func init() {
