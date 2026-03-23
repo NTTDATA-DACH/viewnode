@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - For Cobra subcommands that intentionally reuse a shorthand owned by a root flag, register the shorthand on the leaf command and verify it through a small root command tree with `Execute()` so parsing matches the real CLI path.
 - For Cobra leaf flags backed by package-level variables, only honor the flag value when that command's flag was actually set; otherwise shared state can leak between cloned commands and tests.
+- Normalize optional string filter flags before applying match logic so an explicitly empty value behaves the same as omitting the flag.
 
 # Ralph Progress Log
 Started: Mon Mar 23 14:43:02 CET 2026
@@ -24,4 +25,14 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: namespace list formatting should continue to flow through `listing.PrepareNamespaceEntries` so sorting and active markers stay consistent.
   - Gotchas encountered: Cobra flags bound to package globals can retain prior test values even when a later command never set that flag, so `Flag.Changed` matters for command-local behavior.
   - Useful context: `cmd/ns/list_test.go` can validate filter behavior entirely with stubbed namespace discovery and kubeconfig raw-config fixtures; no API client setup is needed.
+---
+## [2026-03-23 14:54:31 CET] - #53-003
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-2.txt
+- Normalized the `ns list` filter value before matching so explicit blank input falls back to the unfiltered namespace listing path.
+- Added a Cobra regression test that runs through a root command tree and proves `viewnode ns list --filter=` returns the same ordered output as an unfiltered invocation.
+- Files changed: `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: optional string filter flags should be normalized before matching so explicit blank values reuse the default command behavior.
+  - Gotchas encountered: the `ns list` acceptance path is easiest to verify with `--filter=` in `SetArgs`, because tests bypass shell quoting.
+  - Useful context: the existing namespace list test fixture already covers alphabetical output and active namespace markers, so empty-filter regressions can assert against the full standard output.
 ---

@@ -40,7 +40,7 @@ var listCmd = &cobra.Command{
 
 		filterValue := ""
 		if filterFlag := c.Flags().Lookup("filter"); filterFlag != nil && filterFlag.Changed {
-			filterValue = filterFlag.Value.String()
+			filterValue = normalizeNamespaceFilter(filterFlag.Value.String())
 		}
 
 		if _, err := initializeConfig(configCmd); err != nil {
@@ -90,6 +90,10 @@ func filterNamespaceNames(namespaceNames []string, filter string) []string {
 	}
 
 	return filteredNames
+}
+
+func normalizeNamespaceFilter(filter string) string {
+	return strings.TrimSpace(filter)
 }
 
 func init() {

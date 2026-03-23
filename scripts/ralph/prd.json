@@ -38,7 +38,7 @@
         "Unfiltered namespace list behavior remains unchanged."
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Implement this normalization in the existing `cmd/ns/list.go` flow alongside filter matching."
     },
     {
