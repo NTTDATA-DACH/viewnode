@@ -75,15 +75,13 @@ func captureStdout(t *testing.T, fn func()) string {
 	return buf.String()
 }
 
-func TestListCmdRunE(t *testing.T) {
-	setupConfig(t)
+func newStaticClientConfig(t *testing.T, kubeconfig string) clientcmd.ClientConfig {
+	t.Helper()
 
-	output := captureStdout(t, func() {
-		err := listCmd.RunE(listCmd, nil)
-		require.NoError(t, err)
-	})
+	rawConfig, err := clientcmd.Load([]byte(kubeconfig))
+	require.NoError(t, err)
 
-	require.Equal(t, "[*] dev-cluster\n[ ] staging-cluster\n", output)
+	return clientcmd.NewDefaultClientConfig(*rawConfig, &clientcmd.ConfigOverrides{})
 }
 
 func TestGetCurrentRunE(t *testing.T) {

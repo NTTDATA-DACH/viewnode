@@ -1,102 +1,72 @@
-# Ralph Progress Log
 ## Codebase Patterns
-- Top-level Cobra commands without subcommands render under `Additional help topics` in root help output, so help assertions should match that section instead of `Available Commands`.
-- Commands that honor the global `--kubeconfig` flag must pass the root Cobra command into `config.Initialize`; using the leaf subcommand directly can miss the root-level flag lookup.
-- Commands that persist kubeconfig changes must set `ClientConfigLoadingRules.ExplicitPath` from `Setup.KubeCfgPath` before `clientcmd.ModifyConfig`, or `--kubeconfig` can write changes to the wrong file.
-- Cobra tests that need inherited persistent flags should execute through a root command tree with `Execute()`; calling a leaf command's `RunE` directly skips the normal flag propagation.
-- `README.md` command listings and CLI usage examples are maintained manually, so user-facing CLI command changes should update the README in the same change.
-- Cobra command groups in `cmd/<name>` follow the `ctx` pattern: define the group command in `<name>.go`, keep each subcommand in its own file, and register them together from the package `init()`.
-- Namespace current-state lookups should read the active context from `ClientConfig.RawConfig()` and print `default` when the context namespace is unset, so the CLI mirrors Kubernetes kubeconfig behavior.
+- For Cobra subcommands that intentionally reuse a shorthand owned by a root flag, register the shorthand on the leaf command and verify it through a small root command tree with `Execute()` so parsing matches the real CLI path.
+- For Cobra leaf flags backed by package-level variables, only honor the flag value when that command's flag was actually set; otherwise shared state can leak between cloned commands and tests.
+- Normalize optional string filter flags before applying match logic so an explicitly empty value behaves the same as omitting the flag.
+- Keep filter-aware empty-state messaging inside `srv/view.go` and pass only the minimal CLI filter context on `srv.ViewNodeData` instead of branching the root command print path.
+- For root empty-state output regressions, test `cmd.executePrintOut` with a `ViewNodeData` value that still includes the unscheduled-pod placeholder at `Nodes[0]`; the root path does not emit an actually empty slice.
 
-Started: Thu Mar 12 07:29:15 CET 2026
+# Ralph Progress Log
+Started: Mon Mar 23 14:43:02 CET 2026
 ---
-
-## [2026-03-14 14:08:54 CET] - #50-001
-Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file present in workspace during this iteration)
-- Added `ns get-current` and `ns set-current` command definitions in dedicated files and registered them under the existing `ns` command group.
-- Added focused command-structure coverage to verify both subcommands are discoverable from `ns` and expose the required legacy aliases.
-- Files changed: `AGENTS.md`, `cmd/ns/getcurrent.go`, `cmd/ns/ns.go`, `cmd/ns/ns_test.go`, `cmd/ns/setcurrent.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+## [2026-03-23 14:44:53 CET] - #53-001
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-001.txt
+- Wired a local `--filter` / `-f` flag onto `viewnode ns list` without changing the existing root `--node-filter` flag.
+- Added focused Cobra tests that execute through a root command tree and confirm both namespace filter flag forms are accepted.
+- Files changed: `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
 - **Learnings for future iterations:**
-  - Patterns discovered: namespace command groups should mirror `cmd/ctx` by keeping one file per subcommand and centralizing registration in `ns.go`.
-  - Gotchas encountered: this story is only command wiring, so behavior should remain unimplemented until later iterations to avoid skipping PRD ordering.
-- Useful context: `NsCmd.Find([]string{"subcommand"})` is a simple way to assert subcommand registration and alias metadata without building a full root tree.
+  - Patterns discovered: local leaf-command shorthands can coexist with root shorthands when they are registered on the subcommand itself.
+  - Gotchas encountered: namespace list tests inherit active-namespace markers from the kubeconfig fixture, so expected output must account for `[*]`.
+  - Useful context: `cmd/ns/list_test.go` already has stubs for kubeconfig initialization and namespace discovery, so new `ns list` behavior can usually be tested without touching live client-go code.
 ---
-
-## [2026-03-14 14:11:50 CET] - #50-002
+## [2026-03-23 14:48:18 CET] - #53-002
 Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
-- Implemented `viewnode ns get-current` to initialize config through the root command, read the active kubeconfig context namespace from raw config, and print `default` when no namespace is set.
-- Added tests for inherited `--kubeconfig` propagation via `Execute()`, `default` namespace fallback from kubeconfig, raw-config read failures, and initialization failures.
-- Files changed: `cmd/ns/getcurrent.go`, `cmd/ns/ns_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- Implemented case-insensitive substring filtering for `viewnode ns list` before namespace entries are prepared, preserving the existing alphabetical sort and active namespace marker path.
+- Added regression coverage that verifies mixed-case filter matching still prints sorted filtered namespaces and keeps the active marker on the current namespace.
+- Files changed: `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
 - **Learnings for future iterations:**
-  - Patterns discovered: namespace current-state reads should inspect `ClientConfig.RawConfig().Contexts[CurrentContext].Namespace` instead of relying only on `Setup.Namespace`, because the CLI needs to distinguish explicit namespace state from Kubernetes' implicit `default`.
-  - Gotchas encountered: `config.Initialize` still constructs clientsets during command setup, so tests for kubeconfig-reading behavior are easier to keep deterministic by overriding narrow package-level seams.
-- Useful context: a small synthetic root command with `Execute()` is sufficient to verify inherited `--kubeconfig` handling without wiring the entire application root.
+  - Patterns discovered: namespace list formatting should continue to flow through `listing.PrepareNamespaceEntries` so sorting and active markers stay consistent.
+  - Gotchas encountered: Cobra flags bound to package globals can retain prior test values even when a later command never set that flag, so `Flag.Changed` matters for command-local behavior.
+  - Useful context: `cmd/ns/list_test.go` can validate filter behavior entirely with stubbed namespace discovery and kubeconfig raw-config fixtures; no API client setup is needed.
 ---
-
-## [2026-03-14 14:15:46 CET] - #50-003
+## [2026-03-23 14:54:31 CET] - #53-003
 Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-2.txt
-- Implemented `viewnode ns set-current <namespace>` to initialize config from the root command, validate the namespace against the current cluster, update only the active kubeconfig context namespace, and print a success message after persistence.
-- Added focused tests for inherited `--kubeconfig` propagation, successful active-context mutation, missing namespace rejection without writes, validation and raw-config error paths, persistence failures, and explicit kubeconfig-path writes.
-- Files changed: `AGENTS.md`, `cmd/ns/setcurrent.go`, `cmd/ns/setcurrent_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- Normalized the `ns list` filter value before matching so explicit blank input falls back to the unfiltered namespace listing path.
+- Added a Cobra regression test that runs through a root command tree and proves `viewnode ns list --filter=` returns the same ordered output as an unfiltered invocation.
+- Files changed: `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
 - **Learnings for future iterations:**
-  - Patterns discovered: kubeconfig writes should go through `clientcmd.ModifyConfig` with loading rules that copy `setup.KubeCfgPath` into `ExplicitPath`, so root `--kubeconfig` changes persist to the intended file.
-  - Gotchas encountered: namespace validation should happen before `RawConfig()` mutation and persistence so error cases cannot partially update the kubeconfig.
-  - Useful context: mutating `rawConfig.Contexts[rawConfig.CurrentContext].Namespace` preserves other contexts unchanged, which is the right scope for namespace current-state updates.
+  - Patterns discovered: optional string filter flags should be normalized before matching so explicit blank values reuse the default command behavior.
+  - Gotchas encountered: the `ns list` acceptance path is easiest to verify with `--filter=` in `SetArgs`, because tests bypass shell quoting.
+  - Useful context: the existing namespace list test fixture already covers alphabetical output and active namespace markers, so empty-filter regressions can assert against the full standard output.
 ---
-
-## [2026-03-14 14:18:00 CET] - #50-004
+## [2026-03-23 14:52:43 CET] - #53-004
 Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-3.txt
-- Expanded README namespace command documentation to cover `ns get-current`, `ns set-current`, and the legacy `getcurrent` / `setcurrent` aliases alongside the existing `ns ls` alias.
-- Added an extra `ns set-current` test for the missing-active-context kubeconfig error path and verified the full suite with `make test`.
-- Files changed: `README.md`, `cmd/ns/setcurrent_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- Added clear success-path no-match messaging for `viewnode ns list --filter ...` and for the root node-filter flow when no nodes match.
+- Passed the active node filter from `cmd/root.go` into `srv.ViewNodeData` so `srv/view.go` can render filter-aware empty states without changing the existing load-and-print pipeline.
+- Added focused regression tests for the namespace no-match message and the node-view filtered empty state, and ran `make test`.
+- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/list_test.go`, `cmd/root.go`, `srv/view.go`, `srv/view_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
 - **Learnings for future iterations:**
-  - Patterns discovered: manual CLI examples in `README.md` should show both the canonical subcommand form and any supported legacy aliases when a command family preserves backward-compatible names.
-  - Gotchas encountered: `ns set-current` has an additional kubeconfig guard when `RawConfig().CurrentContext` is unset or missing from the contexts map, so tests should cover that explicit error path.
-  - Useful context: the namespace README section now documents the full current-state workflow (`list`, `get-current`, `set-current`) in one example block, matching how the `ctx` section is presented.
+  - Patterns discovered: filter-specific empty states in the main CLI output should be handled by enriching `srv.ViewNodeData` with minimal context and keeping the rendering decision in `srv/view.go`.
+  - Gotchas encountered: the namespace no-match path returns before raw kubeconfig inspection, so tests for that behavior only need init/setup and namespace listing stubs.
+  - Useful context: `srv/view.go` treats `Nodes[0]` as the unscheduled-pod bucket, so filtered "no nodes" cases still arrive as `len(Nodes) <= 1` rather than an empty slice.
 ---
-
-## [2026-03-12 10:18:38 CET] - #47-001
-Codex output: scripts/ralph/.codex-last-message-iter-*.txt (no matching file present in workspace during this iteration)
-- Added a new top-level `ns` Cobra command in a dedicated `cmd/ns` package with help text for namespace-related operations.
-- Registered `ns` on the root command so it is visible from `viewnode --help` without changing existing command behavior.
-- Added test coverage for root help output and the new command metadata.
-- Files changed: `cmd/root.go`, `cmd/root_test.go`, `cmd/ns/ns.go`, `cmd/ns/ns_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+## [2026-03-23 15:02:31 CET] - #53-005
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-4.txt
+- Added root-path regression coverage for the filtered node empty state through `executePrintOut`, keeping the test in `cmd/root_test.go` aligned with the actual print helper used by the root command.
+- Added a complementary `srv/view_test.go` regression to prove the generic `no nodes to display...` message still applies when no node filter is active.
+- Ran `go test ./cmd ./cmd/ns ./srv` and `make test`.
+- Files changed: `cmd/root_test.go`, `srv/view_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
 - **Learnings for future iterations:**
-  - Patterns discovered: top-level command groups should live in their own `cmd/<name>` package and be registered from `cmd/root.go` alongside `ctx`.
-  - Gotchas encountered: Cobra places command groups with no subcommands under `Additional help topics`, which affects help-output tests.
-  - Useful context: the branch from `prd.json` already existed locally and on `origin`, so no branch creation was needed for issue `#47`.
+  - Patterns discovered: root-output regressions can be covered cheaply in `cmd/root_test.go` by exercising `executePrintOut` with a placeholder `Nodes[0]` entry instead of trying to stand up full config and API dependencies.
+  - Gotchas encountered: the empty-state branch in `srv.ViewNodeData.Printout` distinguishes filtered vs. unfiltered output solely from `NodeFilter`, while `Nodes` still contains the unscheduled-pod placeholder entry.
+  - Useful context: retaining both filtered and unfiltered empty-state tests in `srv/view_test.go` makes future wording changes safer because the two branches are easy to conflate.
 ---
-
-## [2026-03-12 10:23:10 CET] - #47-002
-Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-1.txt
-- Implemented `viewnode ns list` to initialize shared Kubernetes config, load namespaces from the cluster API, sort names deterministically, and print the current namespace with `[*]`.
-- Registered the `list` subcommand under the existing `ns` command group and kept command text aligned with the existing Cobra structure.
-- Updated the root help assertion to match Cobra's rendered command table after `ns` gained a subcommand.
-- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/ns.go`, `cmd/root_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+## [2026-03-23 14:58:04 CET] - #53-006
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-5.txt
+- Documented `viewnode ns list --filter` and `viewnode ns list -f` in `README.md`, including a filtered namespace example and the success-path no-match output.
+- Ran `make test` to complete repository validation for the namespace filter feature.
+- Files changed: `README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
 - **Learnings for future iterations:**
-  - Patterns discovered: namespace enumeration belongs to the Kubernetes API clientset, while the current namespace still comes from `config.Setup.Namespace` after shared initialization.
-  - Gotchas encountered: once a top-level Cobra topic gains a subcommand, it moves from `Additional help topics` into `Available Commands`, which changes root help assertions.
-  - Useful context: `config.Initialize` reads `kubeconfig` from the command passed into it, so subcommands should resolve and pass `c.Root()` to honor the global flag.
----
-
-## [2026-03-12 10:24:55 CET] - #47-003
-Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-2.txt
-- Added focused automated coverage for `viewnode ns list` using a narrow seam around config setup and namespace discovery.
-- Verified sorted namespace output, current namespace marker rendering, inherited root `--kubeconfig` handling, and an API discovery error path.
-- Files changed: `AGENTS.md`, `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
-- **Learnings for future iterations:**
-  - Patterns discovered: `cmd/ns/list.go` can be tested without a live cluster by overriding package-level seams for config initialization, config access, and namespace discovery.
-  - Gotchas encountered: inherited Cobra persistent flags are only available after command execution wiring, so tests should call `Execute()` on a root command tree when validating root flag behavior.
-  - Useful context: the error contract for namespace discovery is `getting kubernetes namespaces failed (<cause>)`, so future changes should preserve that wrapper for callers and tests.
----
-
-## [2026-03-12 10:26:45 CET] - #47-004
-Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-3.txt
-- Updated the manual CLI reference in `README.md` to include the top-level `ns` command in the root command table.
-- Added a `Namespace command` usage example documenting `viewnode ns list` output and the `ns ls` alias.
-- Files changed: `AGENTS.md`, `README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
-- **Learnings for future iterations:**
-  - Patterns discovered: `README.md` is the manual source for user-facing command listings and command examples, so CLI command additions need a README update in the same change.
-  - Gotchas encountered: there is no generated command reference step in this repository, so documentation drift is easy if README updates are skipped.
-  - Useful context: the existing command documentation groups related subcommands into short example sections such as `Context command`, which is the right pattern to reuse for future command groups.
+  - Patterns discovered: the README keeps command behavior examples inline under the relevant command section rather than maintaining a separate command reference table.
+  - Gotchas encountered: user-facing CLI changes in this repository are expected to ship with README updates in the same iteration, even when the code change landed earlier.
+  - Useful context: the namespace command section is the right place to document `ns list` flags and output examples; the top-level usage block remains focused on root flags only.
 ---

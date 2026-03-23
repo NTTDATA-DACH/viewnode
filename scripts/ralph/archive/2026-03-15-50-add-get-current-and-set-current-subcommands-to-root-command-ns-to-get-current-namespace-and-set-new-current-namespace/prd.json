@@ -1,0 +1,60 @@
+{
+  "branchName": "48-refactor-ctx-list-ns-list-commands",
+  "overview": "Refactor `viewnode ctx list` and `viewnode ns list` to share explicit list-entry preparation logic while preserving current command behavior, alphabetical output ordering, active-item semantics including `default` namespace fallback, existing error handling, and repository validation through `make test`.",
+  "userStories": [
+    {
+      "id": "#48-001",
+      "title": "Extract shared list-entry preparation helper",
+      "description": "Introduce explicit list-entry structures and a narrow shared helper for ordered active-state preparation so the duplicated list-building behavior used by `ctx list` and `ns list` is centralized without changing command-specific data retrieval.",
+      "acceptanceCriteria": [
+        "The codebase defines explicit list-entry structures for context and namespace display rows.",
+        "A shared helper prepares sorted entries from raw names plus one active name without performing kubeconfig or Kubernetes API reads.",
+        "Focused automated tests cover deterministic ordering and active-state marking for the shared helper."
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Keep the helper in the existing command support structure and avoid introducing a new parallel command abstraction."
+    },
+    {
+      "id": "#48-002",
+      "title": "Refactor context list to use shared entries",
+      "description": "Update `viewnode ctx list` to build and render context output through the shared list-entry path while preserving current output format, active-context selection, and error behavior.",
+      "acceptanceCriteria": [
+        "Running `viewnode ctx list` still prints contexts in alphabetical order using the existing `[marker] name` format.",
+        "Only the kubeconfig current context is marked with `[*]`.",
+        "If kubeconfig loading fails, the command still returns a descriptive error and produces no partial list output.",
+        "Automated tests cover successful context listing and at least one kubeconfig failure case."
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Preserve the current raw kubeconfig lookup path in `cmd/ctx/list.go`; only the list preparation should change."
+    },
+    {
+      "id": "#48-003",
+      "title": "Refactor namespace list with default fallback semantics",
+      "description": "Update `viewnode ns list` to use the shared list-entry path while keeping the existing namespace query flow and normalizing an empty active kubeconfig namespace to `default` before active-state comparison.",
+      "acceptanceCriteria": [
+        "Running `viewnode ns list` still prints namespaces in alphabetical order using the existing `[marker] name` format.",
+        "If the active kubeconfig context has no explicit namespace, `default` is treated as the active namespace for marker comparison.",
+        "If namespace discovery fails, the command still returns a descriptive error and produces no partial list output.",
+        "Automated tests cover successful namespace listing, `default` fallback behavior, and at least one namespace lookup failure case."
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Keep namespace discovery tied to the existing Kubernetes API call path and do not add extra cluster requests."
+    },
+    {
+      "id": "#48-004",
+      "title": "Run full validation for list-command refactor",
+      "description": "Finish the refactor by verifying command-level regressions are covered and the repository test suite passes with the new shared list-entry implementation.",
+      "acceptanceCriteria": [
+        "Command-level tests cover context listing success, namespace listing success, namespace `default` fallback, and failure propagation for both affected commands.",
+        "The final implementation still follows the established `cmd/ctx`, `cmd/ns`, and `cmd/config` repository structure.",
+        "Running `make test` succeeds after the refactor changes are complete."
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "This story is the final verification slice for the refactor and should run after the command-specific stories land."
+    }
+  ]
+}

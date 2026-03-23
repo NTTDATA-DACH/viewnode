@@ -27,9 +27,16 @@ viewnode
 # Added by goreleaser init:
 dist/
 
-# Ralph runtime files
+# Ralph local run artifacts
 scripts/ralph/.last-branch
 scripts/ralph/.codex-last-message*.txt
+scripts/ralph/.codex-output-iter-*.txt
+.agents/skills/
+.specify/
+scripts/ralph/*
+!scripts/ralph/archive/
+!scripts/ralph/archive/**
+!scripts/ralph/prd.json
 
 # Codex agent folder (may contain credentials/tokens)
 .codex/
