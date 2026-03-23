@@ -1,1 +1,0 @@
-Implemented story `#53-001` by adding a local `--filter` / `-f` flag to `viewnode ns list` and adding command-level tests that confirm both forms parse successfully without changing the root `--node-filter` flag behavior. Repository validation passed with `make test`.
