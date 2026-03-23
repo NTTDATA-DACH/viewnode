@@ -48,6 +48,8 @@
 ## Active Technologies
 - Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify` (48-refactor-ctx-list-ns-list-commands)
 - Kubeconfig files plus live Kubernetes API data for namespace discovery (48-refactor-ctx-list-ns-list-commands)
+- Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`, `github.com/sirupsen/logrus` (53-add-ns-filter)
+- Kubeconfig files plus live Kubernetes API data for namespace and node/pod discovery (53-add-ns-filter)
 
 ## Recent Changes
 - 48-refactor-ctx-list-ns-list-commands: Added Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`

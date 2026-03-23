@@ -12,7 +12,7 @@
         "The existing root `--node-filter` flag name and meaning remain unchanged."
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "Keep flag wiring local to `cmd/ns/list.go` so shorthand `-f` is scoped to namespace listing only."
     },
     {

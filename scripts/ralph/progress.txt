@@ -1,0 +1,16 @@
+## Codebase Patterns
+- For Cobra subcommands that intentionally reuse a shorthand owned by a root flag, register the shorthand on the leaf command and verify it through a small root command tree with `Execute()` so parsing matches the real CLI path.
+
+# Ralph Progress Log
+Started: Mon Mar 23 14:43:02 CET 2026
+---
+## [2026-03-23 14:44:53 CET] - #53-001
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-001.txt
+- Wired a local `--filter` / `-f` flag onto `viewnode ns list` without changing the existing root `--node-filter` flag.
+- Added focused Cobra tests that execute through a root command tree and confirm both namespace filter flag forms are accepted.
+- Files changed: `cmd/ns/list.go`, `cmd/ns/list_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: local leaf-command shorthands can coexist with root shorthands when they are registered on the subcommand itself.
+  - Gotchas encountered: namespace list tests inherit active-namespace markers from the kubeconfig fixture, so expected output must account for `[*]`.
+  - Useful context: `cmd/ns/list_test.go` already has stubs for kubeconfig initialization and namespace discovery, so new `ns list` behavior can usually be tested without touching live client-go code.
+---

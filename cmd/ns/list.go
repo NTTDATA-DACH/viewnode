@@ -12,6 +12,7 @@ import (
 
 var initializeConfig = config.Initialize
 var currentSetup = config.GetConfig
+var namespaceFilter string
 var listNamespaces = func(ctx context.Context, setup *config.Setup) ([]string, error) {
 	namespaces, err := setup.Clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -66,4 +67,8 @@ var listCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func init() {
+	listCmd.Flags().StringVarP(&namespaceFilter, "filter", "f", "", "show only namespaces according to filter")
 }
