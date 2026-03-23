@@ -3,6 +3,7 @@
 - For Cobra leaf flags backed by package-level variables, only honor the flag value when that command's flag was actually set; otherwise shared state can leak between cloned commands and tests.
 - Normalize optional string filter flags before applying match logic so an explicitly empty value behaves the same as omitting the flag.
 - Keep filter-aware empty-state messaging inside `srv/view.go` and pass only the minimal CLI filter context on `srv.ViewNodeData` instead of branching the root command print path.
+- For root empty-state output regressions, test `cmd.executePrintOut` with a `ViewNodeData` value that still includes the unscheduled-pod placeholder at `Nodes[0]`; the root path does not emit an actually empty slice.
 
 # Ralph Progress Log
 Started: Mon Mar 23 14:43:02 CET 2026
@@ -47,4 +48,15 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: filter-specific empty states in the main CLI output should be handled by enriching `srv.ViewNodeData` with minimal context and keeping the rendering decision in `srv/view.go`.
   - Gotchas encountered: the namespace no-match path returns before raw kubeconfig inspection, so tests for that behavior only need init/setup and namespace listing stubs.
   - Useful context: `srv/view.go` treats `Nodes[0]` as the unscheduled-pod bucket, so filtered "no nodes" cases still arrive as `len(Nodes) <= 1` rather than an empty slice.
+---
+## [2026-03-23 15:02:31 CET] - #53-005
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-4.txt
+- Added root-path regression coverage for the filtered node empty state through `executePrintOut`, keeping the test in `cmd/root_test.go` aligned with the actual print helper used by the root command.
+- Added a complementary `srv/view_test.go` regression to prove the generic `no nodes to display...` message still applies when no node filter is active.
+- Ran `go test ./cmd ./cmd/ns ./srv` and `make test`.
+- Files changed: `cmd/root_test.go`, `srv/view_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: root-output regressions can be covered cheaply in `cmd/root_test.go` by exercising `executePrintOut` with a placeholder `Nodes[0]` entry instead of trying to stand up full config and API dependencies.
+  - Gotchas encountered: the empty-state branch in `srv.ViewNodeData.Printout` distinguishes filtered vs. unfiltered output solely from `NodeFilter`, while `Nodes` still contains the unscheduled-pod placeholder entry.
+  - Useful context: retaining both filtered and unfiltered empty-state tests in `srv/view_test.go` makes future wording changes safer because the two branches are easy to conflate.
 ---

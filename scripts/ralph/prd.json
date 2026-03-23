@@ -65,7 +65,7 @@
         "Cobra tests that depend on inherited flags execute through a small root command tree."
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Primary coverage belongs in `cmd/ns/list_test.go` and `srv/view_test.go`."
     },
     {
