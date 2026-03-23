@@ -53,6 +53,10 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("getting kubernetes namespaces failed (%w)", err)
 		}
 		namespaceNames = filterNamespaceNames(namespaceNames, filterValue)
+		if filterValue != "" && len(namespaceNames) == 0 {
+			fmt.Printf("no namespaces matched filter %q\n", filterValue)
+			return nil
+		}
 
 		rawConfig, err := currentRawConfig(setup)
 		if err != nil {

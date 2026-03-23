@@ -256,6 +256,46 @@ func TestListCmdRunETreatsEmptyFilterLikeNoFilter(t *testing.T) {
 	require.Equal(t, "[ ] team-a\n[*] team-b\n[ ] team-c\n", output)
 }
 
+func TestListCmdRunEPrintsNoMatchMessageForFilter(t *testing.T) {
+	originalInitializeConfig := initializeConfig
+	originalCurrentSetup := currentSetup
+	originalListNamespaces := listNamespaces
+	t.Cleanup(func() {
+		initializeConfig = originalInitializeConfig
+		currentSetup = originalCurrentSetup
+		listNamespaces = originalListNamespaces
+	})
+
+	setup := &config.Setup{}
+	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
+		return setup, nil
+	}
+	currentSetup = func() *config.Setup {
+		return setup
+	}
+	listNamespaces = func(ctx context.Context, actualSetup *config.Setup) ([]string, error) {
+		require.Equal(t, setup, actualSetup)
+		return []string{"team-a", "team-b"}, nil
+	}
+
+	rootCmd := &cobra.Command{Use: "viewnode"}
+	rootCmd.PersistentFlags().String("kubeconfig", "", "")
+	rootCmd.Flags().StringP("node-filter", "f", "", "")
+	nsCmd := &cobra.Command{Use: "ns"}
+	testListCmd := &cobra.Command{Use: "list", RunE: listCmd.RunE}
+	testListCmd.Flags().StringVarP(&namespaceFilter, "filter", "f", "", "show only namespaces according to filter")
+	nsCmd.AddCommand(testListCmd)
+	rootCmd.AddCommand(nsCmd)
+
+	output := captureStdout(t, func() {
+		rootCmd.SetArgs([]string{"ns", "list", "--filter", "missing"})
+		err := rootCmd.Execute()
+		require.NoError(t, err)
+	})
+
+	require.Equal(t, "no namespaces matched filter \"missing\"\n", output)
+}
+
 func TestListCmdRunEDefaultNamespaceFallback(t *testing.T) {
 	originalInitializeConfig := initializeConfig
 	originalCurrentSetup := currentSetup

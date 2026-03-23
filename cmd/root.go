@@ -157,8 +157,9 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 		log.Tracef("finished loading and filtering of %ss", f.ResourceName())
 	}
 	vnd := srv.ViewNodeData{
-		Namespace: setup.Namespace,
-		Nodes:     vns,
+		Namespace:  setup.Namespace,
+		NodeFilter: nodeFilter,
+		Nodes:      vns,
 	}
 	vnd.Config.ShowNamespaces = allNamespacesFlag
 	if len(selectedNamespaces) > 1 {

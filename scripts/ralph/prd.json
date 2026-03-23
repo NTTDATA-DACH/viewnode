@@ -51,7 +51,7 @@
         "Filtered no-match outcomes remain distinguishable from namespace discovery or cluster access failures."
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Use minimal additional context from `cmd/root.go` into `srv/view.go` and avoid restructuring the existing printout pipeline."
     },
     {
