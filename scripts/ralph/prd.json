@@ -25,7 +25,7 @@
         "The user-facing fatal message still includes the original low-level EOF detail."
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Keep the root command as the place where internal errors are translated into user-facing fatal messages."
     },
     {

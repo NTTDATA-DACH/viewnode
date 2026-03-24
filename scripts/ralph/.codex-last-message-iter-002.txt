@@ -1,0 +1,1 @@
+Implemented story `#27-002` by routing load/filter failures through a dedicated root helper and adding a scoped EOF fatal branch that mentions proxy configuration while preserving the original low-level error text. Added a focused regression test in `cmd/root_test.go` to verify the proxy hint and original EOF detail both appear in the fatal output. `make test` passes.

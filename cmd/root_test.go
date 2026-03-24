@@ -244,6 +244,37 @@ func TestHandleErrorsExitsOnError(t *testing.T) {
 	})
 }
 
+func TestHandleLoadAndFilterErrorScopedEOFIncludesProxyHintAndOriginalError(t *testing.T) {
+	originalExitFunc := log.StandardLogger().ExitFunc
+	originalOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.StandardLogger().ExitFunc = originalExitFunc
+		log.SetOutput(originalOutput)
+		log.SetFormatter(originalFormatter)
+	})
+
+	var output bytes.Buffer
+	log.SetOutput(&output)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+		DisableSorting:         true,
+		DisableQuote:           true,
+	})
+	log.StandardLogger().ExitFunc = func(code int) {
+		panic(code)
+	}
+
+	err := srv.DecorateError(errors.New("Get \"https://cluster.example/api/v1/nodes\": EOF"))
+
+	require.PanicsWithValue(t, 1, func() {
+		handleLoadAndFilterError(err, "node")
+	})
+	require.Contains(t, output.String(), "loading and filtering of nodes failed; proxy configuration may be the cause")
+	require.Contains(t, output.String(), "Get \"https://cluster.example/api/v1/nodes\": EOF")
+}
+
 func TestInitLogSetsLoggerOutputAndLevel(t *testing.T) {
 	var out bytes.Buffer
 

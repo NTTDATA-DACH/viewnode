@@ -14,3 +14,13 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Gotchas encountered: preserving wrapped errors requires `Unwrap()` on the typed decorators; otherwise `errors.Is` cannot retain access to the original low-level failure.
   - Useful context: the targeted EOF slice is currently matched from the surfaced error string shape `Get ...: EOF`, which keeps the classifier narrow without pushing string matching into `cmd/root.go`.
 ---
+## [2026-03-24 17:13:51 CET] - #27-002
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-002.txt
+- Routed root load/filter failure handling through `handleLoadAndFilterError` and added a dedicated `srv.ScopedEOFError` branch that emits a proxy-configuration hint while keeping the original EOF detail in the fatal output.
+- Added focused regression coverage in `cmd/root_test.go` to assert the scoped EOF fatal message includes both the new guidance and the wrapped low-level error text.
+- Files changed: `cmd/root.go`, `cmd/root_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/ralph/.codex-last-message-iter-002.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: root-level user-facing translation for retrieval failures now flows through `handleLoadAndFilterError`, keeping classification in `srv` and message wording in `cmd/root.go`.
+  - Gotchas encountered: when asserting fatal log text in tests, normalize the Logrus formatter or the default quoted output will escape embedded quotes from raw Kubernetes request URLs.
+  - Useful context: the proxy hint is intentionally scoped to decorated `srv.ScopedEOFError` values, so generic EOFs and other fatal paths still fall through to their existing wording.
+---
