@@ -27,3 +27,13 @@ func TestDecorateError_DoesNotClassifyNonEOF(t *testing.T) {
 	require.NotErrorAs(t, decoratedErr, &scopedEOFErr)
 	require.Same(t, originalErr, decoratedErr)
 }
+
+func TestDecorateError_DoesNotClassifyOutOfScopeEOF(t *testing.T) {
+	originalErr := errors.New("Post \"https://cluster.example/api/v1/nodes\": EOF")
+
+	decoratedErr := DecorateError(originalErr)
+
+	var scopedEOFErr ScopedEOFError
+	require.NotErrorAs(t, decoratedErr, &scopedEOFErr)
+	require.Same(t, originalErr, decoratedErr)
+}

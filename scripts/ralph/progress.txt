@@ -24,3 +24,13 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Gotchas encountered: when asserting fatal log text in tests, normalize the Logrus formatter or the default quoted output will escape embedded quotes from raw Kubernetes request URLs.
   - Useful context: the proxy hint is intentionally scoped to decorated `srv.ScopedEOFError` values, so generic EOFs and other fatal paths still fall through to their existing wording.
 ---
+## [2026-03-24 17:14:17 CET] - #27-003
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-003.txt
+- Added focused compatibility regression tests to lock in the existing unauthorized fatal path, forbidden warning fallback, and generic non-EOF fatal wording while asserting none of them pick up the proxy hint.
+- Added a classifier regression test proving out-of-scope `Post ...: EOF` errors are left undecorated, so the proxy guidance remains limited to the intended scoped `Get ...: EOF` slice.
+- Files changed: `cmd/root_test.go`, `srv/api_errors_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/ralph/.codex-last-message-iter-003.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: compatibility around `handleLoadAndFilterError` is best pinned with message-level tests in `cmd/root_test.go`, because the root command owns the user-facing translation of decorated service errors.
+  - Gotchas encountered: `srv.DecorateError` only scopes the proxy-hint path to surfaced `Get ...: EOF` strings, so out-of-scope EOF regressions should be tested at the decoration boundary rather than by widening root-command branching.
+  - Useful context: the forbidden node path is intentionally non-fatal and should keep returning `true` from `handleLoadAndFilterError` so the caller can continue with pod-derived node names.
+---

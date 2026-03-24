@@ -275,6 +275,92 @@ func TestHandleLoadAndFilterErrorScopedEOFIncludesProxyHintAndOriginalError(t *t
 	require.Contains(t, output.String(), "Get \"https://cluster.example/api/v1/nodes\": EOF")
 }
 
+func TestHandleLoadAndFilterErrorUnauthorizedKeepsExistingFatalMessage(t *testing.T) {
+	originalExitFunc := log.StandardLogger().ExitFunc
+	originalOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.StandardLogger().ExitFunc = originalExitFunc
+		log.SetOutput(originalOutput)
+		log.SetFormatter(originalFormatter)
+	})
+
+	var output bytes.Buffer
+	log.SetOutput(&output)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+		DisableSorting:         true,
+		DisableQuote:           true,
+	})
+	log.StandardLogger().ExitFunc = func(code int) {
+		panic(code)
+	}
+
+	err := srv.DecorateError(errors.New("Unauthorized"))
+
+	require.PanicsWithValue(t, 1, func() {
+		handleLoadAndFilterError(err, "node")
+	})
+	require.Contains(t, output.String(), "you are not authorized; please login to the cloud/cluster before continuing")
+	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+}
+
+func TestHandleLoadAndFilterErrorForbiddenKeepsWarningFallback(t *testing.T) {
+	originalOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.SetOutput(originalOutput)
+		log.SetFormatter(originalFormatter)
+	})
+
+	var output bytes.Buffer
+	log.SetOutput(&output)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+		DisableSorting:         true,
+		DisableQuote:           true,
+	})
+
+	err := srv.DecorateError(errors.New("nodes is forbidden: User \"alice\" cannot list resource \"nodes\""))
+
+	require.True(t, handleLoadAndFilterError(err, "node"))
+	require.Contains(t, output.String(), "access to the node API is forbidden; node names will be extracted from the pod specification if possible")
+	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+}
+
+func TestHandleLoadAndFilterErrorGenericFailureKeepsExistingFatalMessage(t *testing.T) {
+	originalExitFunc := log.StandardLogger().ExitFunc
+	originalOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.StandardLogger().ExitFunc = originalExitFunc
+		log.SetOutput(originalOutput)
+		log.SetFormatter(originalFormatter)
+	})
+
+	var output bytes.Buffer
+	log.SetOutput(&output)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+		DisableSorting:         true,
+		DisableQuote:           true,
+	})
+	log.StandardLogger().ExitFunc = func(code int) {
+		panic(code)
+	}
+
+	err := errors.New("dial tcp 10.0.0.1:443: i/o timeout")
+
+	require.PanicsWithValue(t, 1, func() {
+		handleLoadAndFilterError(err, "pod")
+	})
+	require.Contains(t, output.String(), "loading and filtering of pods failed due to: dial tcp 10.0.0.1:443: i/o timeout")
+	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+}
+
 func TestInitLogSetsLoggerOutputAndLevel(t *testing.T) {
 	var out bytes.Buffer
 

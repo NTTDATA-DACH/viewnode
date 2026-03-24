@@ -38,7 +38,7 @@
         "Generic non-EOF retrieval failures continue to use the existing fatal wording path."
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Scope the new guidance narrowly to Kubernetes API `Get` retrieval failures that surface as EOF."
     },
     {
