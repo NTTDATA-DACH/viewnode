@@ -275,6 +275,40 @@ func TestHandleLoadAndFilterErrorScopedEOFIncludesProxyHintAndOriginalError(t *t
 	require.Contains(t, output.String(), "Get \"https://cluster.example/api/v1/nodes\": EOF")
 }
 
+func TestHandleLoadAndFilterErrorScopedEOFRemainsDeterministicAcrossRepeatedCalls(t *testing.T) {
+	originalExitFunc := log.StandardLogger().ExitFunc
+	originalOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.StandardLogger().ExitFunc = originalExitFunc
+		log.SetOutput(originalOutput)
+		log.SetFormatter(originalFormatter)
+	})
+
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+		DisableSorting:         true,
+		DisableQuote:           true,
+	})
+	log.StandardLogger().ExitFunc = func(code int) {
+		panic(code)
+	}
+
+	err := srv.DecorateError(errors.New("Get \"https://cluster.example/api/v1/nodes\": EOF"))
+	expectedMessage := "level=fatal msg=loading and filtering of nodes failed; proxy configuration may be the cause: scoped eof: Get \"https://cluster.example/api/v1/nodes\": EOF\n"
+
+	for range 2 {
+		var output bytes.Buffer
+		log.SetOutput(&output)
+
+		require.PanicsWithValue(t, 1, func() {
+			handleLoadAndFilterError(err, "node")
+		})
+		require.Equal(t, expectedMessage, output.String())
+	}
+}
+
 func TestHandleLoadAndFilterErrorUnauthorizedKeepsExistingFatalMessage(t *testing.T) {
 	originalExitFunc := log.StandardLogger().ExitFunc
 	originalOutput := log.StandardLogger().Out

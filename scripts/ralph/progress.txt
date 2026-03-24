@@ -1,5 +1,6 @@
 ## Codebase Patterns
 - Classify Kubernetes API retrieval failures in `srv/api_errors.go` with typed wrappers that implement `Unwrap()`, so `cmd/root.go` can branch with `errors.As` while preserving the original low-level error for `errors.Is` and fatal output.
+- For exact fatal/warn log assertions in `cmd/root_test.go`, pin Logrus to a `TextFormatter` with quoting and timestamps disabled; otherwise embedded URLs and quotes make the captured output unstable.
 
 # Ralph Progress Log
 Started: Tue Mar 24 17:06:47 CET 2026
@@ -33,4 +34,14 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: compatibility around `handleLoadAndFilterError` is best pinned with message-level tests in `cmd/root_test.go`, because the root command owns the user-facing translation of decorated service errors.
   - Gotchas encountered: `srv.DecorateError` only scopes the proxy-hint path to surfaced `Get ...: EOF` strings, so out-of-scope EOF regressions should be tested at the decoration boundary rather than by widening root-command branching.
   - Useful context: the forbidden node path is intentionally non-fatal and should keep returning `true` from `handleLoadAndFilterError` so the caller can continue with pod-derived node names.
+---
+## [2026-03-24 17:16:24 CET] - #27-004
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-004.txt
+- Added a repeated-call regression test for `handleLoadAndFilterError` that asserts the scoped EOF proxy-hint fatal output is emitted identically on each occurrence.
+- Validated the stateless behavior with `go test ./cmd` and repository-level `make test`.
+- Files changed: `cmd/root_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/ralph/.codex-last-message-iter-004.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: repeated fatal-path behavior in `cmd/root.go` can be locked down by invoking the handler multiple times in one test while reusing the same decorated error value.
+  - Gotchas encountered: for deterministic Logrus assertions, reset the output buffer inside the loop but keep the formatter fixed; that isolates repeated-call output without introducing logger state drift.
+  - Useful context: the scoped EOF path is already stateless, so this story is covered by regression proof rather than production-code changes.
 ---

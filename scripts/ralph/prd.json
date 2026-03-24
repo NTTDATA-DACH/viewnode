@@ -51,7 +51,7 @@
         "No new per-run or per-session suppression state is introduced."
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Keep repeated failures stateless so watch-mode and repeated invocations remain predictable."
     },
     {
