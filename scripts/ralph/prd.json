@@ -12,7 +12,7 @@
         "Non-EOF retrieval failures are not classified as the new scoped EOF error."
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse the existing typed error-decoration pattern already used for unauthorized and forbidden retrieval failures."
     },
     {
