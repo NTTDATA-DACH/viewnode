@@ -56,3 +56,13 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Gotchas encountered: a raw `errors.New("Post ...: EOF")` value is enough for the out-of-scope root-path regression because the proxy hint is only gated by decorated `srv.ScopedEOFError` values.
   - Useful context: story `#27-005` did not require production-code changes because the existing handler behavior already matched the intended scope; the missing artifact was regression proof.
 ---
+## [2026-03-24 17:20:54 CET] - #27-006
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-006.txt
+- Reviewed `specs/27-handle-get-eof/quickstart.md` and `specs/27-handle-get-eof/contracts/eof-error-guidance-contract.md` against the implemented EOF guidance behavior and confirmed they already matched the shipped root-path wording.
+- Re-ran `go test ./srv ./cmd` and the repository gate `make test`, both passing before marking the story complete.
+- Files changed: `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/ralph/.codex-last-message-iter-006.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: validation-only Ralph stories still require the full traceability update set together: the PRD pass flag, an appended progress-log entry, and a matching `.codex-last-message-iter-*.txt` artifact.
+  - Gotchas encountered: `make test` can exit successfully after cached package output without printing an extra completion banner, so rely on the exit code rather than waiting for more terminal text.
+  - Useful context: for issue `#27`, the spec quickstart and contract were already aligned with implementation, so repository proof was the only remaining work.
+---
