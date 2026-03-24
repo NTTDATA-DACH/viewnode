@@ -395,6 +395,37 @@ func TestHandleLoadAndFilterErrorGenericFailureKeepsExistingFatalMessage(t *test
 	require.NotContains(t, output.String(), "proxy configuration may be the cause")
 }
 
+func TestHandleLoadAndFilterErrorOutOfScopeEOFKeepsExistingFatalMessage(t *testing.T) {
+	originalExitFunc := log.StandardLogger().ExitFunc
+	originalOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.StandardLogger().ExitFunc = originalExitFunc
+		log.SetOutput(originalOutput)
+		log.SetFormatter(originalFormatter)
+	})
+
+	var output bytes.Buffer
+	log.SetOutput(&output)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp:       true,
+		DisableLevelTruncation: true,
+		DisableSorting:         true,
+		DisableQuote:           true,
+	})
+	log.StandardLogger().ExitFunc = func(code int) {
+		panic(code)
+	}
+
+	err := errors.New("Post \"https://cluster.example/api/v1/nodes\": EOF")
+
+	require.PanicsWithValue(t, 1, func() {
+		handleLoadAndFilterError(err, "node")
+	})
+	require.Contains(t, output.String(), "loading and filtering of nodes failed due to: Post \"https://cluster.example/api/v1/nodes\": EOF")
+	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+}
+
 func TestInitLogSetsLoggerOutputAndLevel(t *testing.T) {
 	var out bytes.Buffer
 

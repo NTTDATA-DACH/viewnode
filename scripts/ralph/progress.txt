@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - Classify Kubernetes API retrieval failures in `srv/api_errors.go` with typed wrappers that implement `Unwrap()`, so `cmd/root.go` can branch with `errors.As` while preserving the original low-level error for `errors.Is` and fatal output.
 - For exact fatal/warn log assertions in `cmd/root_test.go`, pin Logrus to a `TextFormatter` with quoting and timestamps disabled; otherwise embedded URLs and quotes make the captured output unstable.
+- Compatibility coverage for new retrieval-error handling belongs in both layers: keep classifier-scope assertions in `srv/api_errors_test.go`, and add root-level message assertions in `cmd/root_test.go` for any path that must not change user-facing wording.
 
 # Ralph Progress Log
 Started: Tue Mar 24 17:06:47 CET 2026
@@ -44,4 +45,14 @@ Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/
   - Patterns discovered: repeated fatal-path behavior in `cmd/root.go` can be locked down by invoking the handler multiple times in one test while reusing the same decorated error value.
   - Gotchas encountered: for deterministic Logrus assertions, reset the output buffer inside the loop but keep the formatter fixed; that isolates repeated-call output without introducing logger state drift.
   - Useful context: the scoped EOF path is already stateless, so this story is covered by regression proof rather than production-code changes.
+---
+## [2026-03-24 17:22:00 CET] - #27-005
+Codex output: /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/scripts/ralph/.codex-last-message-iter-005.txt
+- Added the missing root-command regression that proves an out-of-scope `Post ...: EOF` failure keeps the existing generic fatal wording and does not pick up the proxy-configuration hint.
+- Re-ran focused regression suites for `./cmd` and `./srv`, then validated the repository requirement with `make test`.
+- Files changed: `cmd/root_test.go`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/ralph/.codex-last-message-iter-005.txt`
+- **Learnings for future iterations:**
+  - Patterns discovered: compatibility for narrow error classifiers should be proven at the root-message layer with a concrete out-of-scope example, not only at the classifier boundary.
+  - Gotchas encountered: a raw `errors.New("Post ...: EOF")` value is enough for the out-of-scope root-path regression because the proxy hint is only gated by decorated `srv.ScopedEOFError` values.
+  - Useful context: story `#27-005` did not require production-code changes because the existing handler behavior already matched the intended scope; the missing artifact was regression proof.
 ---

@@ -64,7 +64,7 @@
         "Tests cover non-EOF and out-of-scope EOF compatibility behavior."
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Prefer regression coverage in the existing `cmd/root_test.go` and `srv` test files rather than introducing a new test structure."
     },
     {
