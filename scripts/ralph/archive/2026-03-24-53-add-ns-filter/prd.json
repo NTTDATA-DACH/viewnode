@@ -1,0 +1,84 @@
+{
+  "branchName": "27-handle-get-eof",
+  "overview": "Improve the root `viewnode` failure path so scoped Kubernetes API `Get` requests that surface as EOF produce a clearer fatal message that hints proxy configuration may be involved, while preserving the original low-level error details and leaving non-EOF or out-of-scope EOF failures unchanged.",
+  "userStories": [
+    {
+      "id": "#27-001",
+      "title": "Classify scoped EOF retrieval failures",
+      "description": "Add a dedicated decorated error for scoped Kubernetes API `Get` EOF failures so the root command can distinguish them from other retrieval errors.",
+      "acceptanceCriteria": [
+        "`srv/api_errors.go` defines a dedicated decorated error type for the scoped EOF case.",
+        "The decorated error preserves the original wrapped error details.",
+        "Non-EOF retrieval failures are not classified as the new scoped EOF error."
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Reuse the existing typed error-decoration pattern already used for unauthorized and forbidden retrieval failures."
+    },
+    {
+      "id": "#27-002",
+      "title": "Add proxy guidance to the root fatal path",
+      "description": "Update the root command so the scoped EOF error produces a clearer fatal message that mentions proxy configuration as a possible cause.",
+      "acceptanceCriteria": [
+        "The root command handles the scoped EOF decorated error before the generic fatal fallback path.",
+        "The user-facing fatal message states that proxy configuration may be the cause.",
+        "The user-facing fatal message still includes the original low-level EOF detail."
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Keep the root command as the place where internal errors are translated into user-facing fatal messages."
+    },
+    {
+      "id": "#27-003",
+      "title": "Keep unrelated failure paths unchanged",
+      "description": "Preserve existing unauthorized, forbidden, non-EOF, and out-of-scope EOF behavior so the new guidance appears only for the intended failure slice.",
+      "acceptanceCriteria": [
+        "Unauthorized and forbidden retrieval failures continue to use their current message paths.",
+        "An EOF outside the scoped retrieval pattern does not receive the proxy hint from this feature.",
+        "Generic non-EOF retrieval failures continue to use the existing fatal wording path."
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Scope the new guidance narrowly to Kubernetes API `Get` retrieval failures that surface as EOF."
+    },
+    {
+      "id": "#27-004",
+      "title": "Keep repeated scoped EOF failures deterministic",
+      "description": "Ensure repeated occurrences of the same scoped EOF failure continue to show the same guidance each time without introducing session-state suppression.",
+      "acceptanceCriteria": [
+        "Repeated scoped EOF failures in the same run or session continue to emit the proxy hint each time.",
+        "The repeated message remains stable and deterministic across occurrences.",
+        "No new per-run or per-session suppression state is introduced."
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Keep repeated failures stateless so watch-mode and repeated invocations remain predictable."
+    },
+    {
+      "id": "#27-005",
+      "title": "Add regression coverage for scoped and compatibility behavior",
+      "description": "Add automated tests that cover scoped EOF classification, root fatal output, and compatibility for non-scoped failures.",
+      "acceptanceCriteria": [
+        "Tests cover successful recognition of the scoped EOF retrieval pattern.",
+        "Tests cover root fatal output for the proxy-guidance message and retained low-level details.",
+        "Tests cover non-EOF and out-of-scope EOF compatibility behavior."
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Prefer regression coverage in the existing `cmd/root_test.go` and `srv` test files rather than introducing a new test structure."
+    },
+    {
+      "id": "#27-006",
+      "title": "Validate the feature with repository-level proof",
+      "description": "Complete the feature with repository-aligned validation so the new behavior is proven rather than only described.",
+      "acceptanceCriteria": [
+        "Quickstart and contract artifacts remain aligned with the implemented behavior.",
+        "Repository validation includes `make test`.",
+        "The final implementation matches the traceable behavior defined by the Speckit artifacts."
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Keep validation aligned with the issue-backed traceability recorded in the PRD."
+    }
+  ]
+}
