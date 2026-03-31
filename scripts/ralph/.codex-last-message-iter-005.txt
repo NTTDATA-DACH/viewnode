@@ -1,0 +1,1 @@
+Added the missing regression coverage for story #27-005 by proving an out-of-scope `Post ...: EOF` stays on the generic fatal path in `cmd/root_test.go` and never receives the scoped proxy hint. Validation passed with `go test ./cmd`, `go test ./srv`, and `make test`.

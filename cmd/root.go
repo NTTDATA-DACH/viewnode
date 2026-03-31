@@ -139,19 +139,8 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 		vns, err = f.LoadAndFilter(vns)
 		if err != nil {
 			log.Debugf("ERROR: %s", err.Error())
-			switch {
-			case errors.As(err, &srv.UnauthorizedError{}):
-				log.Fatalln("you are not authorized; please login to the cloud/cluster before continuing")
-			case errors.As(err, &srv.NodesIsForbiddenError{}):
-				log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
+			if handleLoadAndFilterError(err, f.ResourceName()) {
 				continue
-			case errors.Is(err, srv.ErrMetricsServerNotInstalled):
-				log.Warnf("loading of metrics for %ss failed; %s", f.ResourceName(), err.Error())
-				continue
-			case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
-				log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", f.ResourceName())
-			default:
-				log.Fatalf("loading and filtering of %ss failed due to: %s", f.ResourceName(), err.Error())
 			}
 		}
 		log.Tracef("finished loading and filtering of %ss", f.ResourceName())
@@ -188,6 +177,27 @@ func handleErrors(errCh <-chan error) {
 			log.Fatalln(err)
 		}
 	}
+}
+
+func handleLoadAndFilterError(err error, resourceName string) bool {
+	switch {
+	case errors.As(err, &srv.UnauthorizedError{}):
+		log.Fatalln("you are not authorized; please login to the cloud/cluster before continuing")
+	case errors.As(err, &srv.NodesIsForbiddenError{}):
+		log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
+		return true
+	case errors.Is(err, srv.ErrMetricsServerNotInstalled):
+		log.Warnf("loading of metrics for %ss failed; %s", resourceName, err.Error())
+		return true
+	case errors.As(err, &srv.ScopedEOFError{}):
+		log.Fatalf("loading and filtering of %ss failed; proxy configuration may be the cause: %s", resourceName, err.Error())
+	case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
+		log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", resourceName)
+	default:
+		log.Fatalf("loading and filtering of %ss failed due to: %s", resourceName, err.Error())
+	}
+
+	return false
 }
 
 func init() {

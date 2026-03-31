@@ -12,7 +12,7 @@
         "Non-EOF retrieval failures are not classified as the new scoped EOF error."
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "Reuse the existing typed error-decoration pattern already used for unauthorized and forbidden retrieval failures."
     },
     {
@@ -25,7 +25,7 @@
         "The user-facing fatal message still includes the original low-level EOF detail."
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "Keep the root command as the place where internal errors are translated into user-facing fatal messages."
     },
     {
@@ -38,7 +38,7 @@
         "Generic non-EOF retrieval failures continue to use the existing fatal wording path."
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "Scope the new guidance narrowly to Kubernetes API `Get` retrieval failures that surface as EOF."
     },
     {
@@ -51,7 +51,7 @@
         "No new per-run or per-session suppression state is introduced."
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "Keep repeated failures stateless so watch-mode and repeated invocations remain predictable."
     },
     {
@@ -64,7 +64,7 @@
         "Tests cover non-EOF and out-of-scope EOF compatibility behavior."
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": "Prefer regression coverage in the existing `cmd/root_test.go` and `srv` test files rather than introducing a new test structure."
     },
     {
@@ -77,7 +77,7 @@
         "The final implementation matches the traceable behavior defined by the Speckit artifacts."
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": "Keep validation aligned with the issue-backed traceability recorded in the PRD."
     }
   ]
