@@ -81,7 +81,10 @@ printf '%s\n' "$TAG" > "$VERSION_MARKER_FILE"
 if [ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]; then
     git -C "$REPO_ROOT" add -A
 
-    mapfile -t modified_files < <(git -C "$REPO_ROOT" diff --cached --name-only)
+    modified_files=()
+    while IFS= read -r modified_file; do
+        modified_files+=("$modified_file")
+    done < <(git -C "$REPO_ROOT" diff --cached --name-only)
     commit_message="chore(ai): install ai-tooling $TAG"
 
     if [ "${#modified_files[@]}" -gt 0 ]; then
