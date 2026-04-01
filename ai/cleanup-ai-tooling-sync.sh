@@ -44,7 +44,7 @@ fi
 
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(CDPATH="" cd "$SCRIPT_DIR/.." && pwd)"
-DEFAULT_LOCAL_AI_TOOLING_REPO="/Users/adam.boczek/Development/Workspace/Boczek/Projects/ai-tooling"
+DEFAULT_LOCAL_AI_TOOLING_REPO="$(CDPATH="" cd "$REPO_ROOT/../.." && pwd)/ai-tooling"
 
 if [ -n "${AI_TOOLING_REPO:-}" ]; then
     SOURCE_ROOT="$AI_TOOLING_REPO"

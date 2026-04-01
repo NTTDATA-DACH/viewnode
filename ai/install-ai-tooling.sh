@@ -21,7 +21,7 @@ fi
 
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(CDPATH="" cd "$SCRIPT_DIR/.." && pwd)"
-DEFAULT_LOCAL_AI_TOOLING_REPO="/Users/adam.boczek/Development/Workspace/Boczek/Projects/ai-tooling"
+DEFAULT_LOCAL_AI_TOOLING_REPO="$(CDPATH="" cd "$REPO_ROOT/../.." && pwd)/ai-tooling"
 VERSION_MARKER_FILE="$REPO_ROOT/ai/installed-ai-tooling-version"
 
 if [ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]; then
