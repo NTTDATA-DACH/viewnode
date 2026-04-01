@@ -1,1 +1,0 @@
-Implemented story #27-004 by adding a regression test in cmd/root_test.go that invokes the scoped EOF fatal path twice and asserts the emitted Logrus message is identical on each call. This proves the proxy-hint handling remains deterministic and that no suppression or per-session state was introduced. Validation passed with go test ./cmd and make test.

@@ -1,1 +1,0 @@
-Implemented story `#27-001` by adding a dedicated `srv.ScopedEOFError` decorator for scoped Kubernetes API `Get ...: EOF` retrieval failures, preserving wrapped low-level errors with `Unwrap()`, and covering the new classifier with focused `srv` tests. Validation passed with `go test ./srv ./cmd` and `make test`.

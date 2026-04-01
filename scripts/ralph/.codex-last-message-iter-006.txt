@@ -1,1 +1,0 @@
-Validated story `#27-006` on branch `27-handle-get-eof` by reviewing the feature quickstart and contract against the implemented EOF guidance path, then running `go test ./srv ./cmd` and `make test`, both of which passed. Updated `scripts/ralph/prd.json` to mark the story complete and appended the repository-proof entry to `scripts/ralph/progress.txt`.

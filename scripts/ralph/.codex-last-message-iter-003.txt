@@ -1,1 +1,0 @@
-Implemented `#27-003` by adding compatibility regression coverage around the root fatal-path translation and the EOF classifier boundary. The new tests prove unauthorized, forbidden, and generic failures keep their existing behavior, while out-of-scope EOF errors remain undecorated and therefore never receive the proxy hint. `make test` passes.
