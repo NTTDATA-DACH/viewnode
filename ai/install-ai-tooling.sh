@@ -78,9 +78,21 @@ git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" "$CLONE
 
 printf '%s\n' "$TAG" > "$VERSION_MARKER_FILE"
 
-if [ -n "$(git -C "$REPO_ROOT" status --porcelain -- "$VERSION_MARKER_FILE")" ]; then
-    git -C "$REPO_ROOT" add "$VERSION_MARKER_FILE"
-    git -C "$REPO_ROOT" commit -m "chore(ai): install ai-tooling $TAG"
+if [ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]; then
+    git -C "$REPO_ROOT" add -A
+
+    mapfile -t modified_files < <(git -C "$REPO_ROOT" diff --cached --name-only)
+    commit_message="chore(ai): install ai-tooling $TAG"
+
+    if [ "${#modified_files[@]}" -gt 0 ]; then
+        commit_message+=$'\n\nModified files:\n'
+
+        for modified_file in "${modified_files[@]}"; do
+            commit_message+="- ${modified_file}"$'\n'
+        done
+    fi
+
+    git -C "$REPO_ROOT" commit -m "$commit_message"
 fi
 
 echo "Installed ai-tooling $TAG from $RESOLVED_AI_TOOLING_REPO"
