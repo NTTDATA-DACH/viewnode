@@ -50,3 +50,18 @@ Started: 2026-04-02 17:18:52
 - The grouped renderer already preserved unscheduled pods, node totals, and scoped inline namespace rows; the missing coverage was around locking those branches against future regressions.
 - Inline and tree container modes both continue to hang off `printPod`, so grouped namespace rendering can be regression-tested without branching the container formatter.
 ---
+## Iteration 3 - 2026-04-02 17:40:00 CEST
+**User Story**: US3 - Learn the grouped output from docs and examples
+**Tasks Completed**:
+- [x] T013: Verify README examples and command reference match the grouped output contract
+- [x] T014: Update all-namespaces node output examples and related command reference text
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- README.md
+- specs/57-all-namespaces-tree-view/tasks.md
+- specs/57-all-namespaces-tree-view/progress.md
+**Learnings**:
+- The README now needs two explicit all-namespaces touchpoints to stay aligned with behavior: the `--all-namespaces` flag description and a concrete `viewnode -A` example that shows namespace headings.
+- Scoped multi-namespace examples must remain flat so the docs keep the distinction between `-A` grouped output and `--namespace a,b` inline namespace prefixes clear.
+---

@@ -83,11 +83,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T013 [P] [US3] Verify README examples and command reference match the grouped output contract in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T013 [P] [US3] Verify README examples and command reference match the grouped output contract in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Update all-namespaces node output examples and related command reference text in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T014 [US3] Update all-namespaces node output examples and related command reference text in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 **Checkpoint**: Users can discover the grouped all-namespaces output behavior from the maintained documentation.
 
