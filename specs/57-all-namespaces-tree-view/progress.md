@@ -65,3 +65,17 @@ Started: 2026-04-02 17:18:52
 - The README now needs two explicit all-namespaces touchpoints to stay aligned with behavior: the `--all-namespaces` flag description and a concrete `viewnode -A` example that shows namespace headings.
 - Scoped multi-namespace examples must remain flat so the docs keep the distinction between `-A` grouped output and `--namespace a,b` inline namespace prefixes clear.
 ---
+## Iteration 4 - 2026-04-02 17:45:00 CEST
+**User Story**: Polish & Cross-Cutting Concerns
+**Tasks Completed**:
+- [x] T015: Run full repository validation with make test
+- [x] T016: Review final behavior against the contract and quickstart
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- specs/57-all-namespaces-tree-view/tasks.md
+- specs/57-all-namespaces-tree-view/progress.md
+**Learnings**:
+- `make test` is sufficient as the feature-level quality gate because the grouped rendering coverage lives in `srv/view_test.go` and exercises the all-namespaces, scoped, and container-output branches together.
+- The contract, quickstart, README, and implementation now align on the key distinction: only `viewnode -A` uses namespace heading rows, while explicit namespace selection keeps the flat pod-row format.
+---
