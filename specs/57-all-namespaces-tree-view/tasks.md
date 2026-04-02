@@ -62,14 +62,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US2] Add regression coverage for grouped output with node summaries and unscheduled pod sections in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T009 [P] [US2] Add regression coverage for grouped output with inline and tree container rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T010 [P] [US2] Add regression coverage that scoped namespace output remains on the flat pod-row path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T008 [P] [US2] Add regression coverage for grouped output with node summaries and unscheduled pod sections in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T009 [P] [US2] Add regression coverage for grouped output with inline and tree container rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T010 [P] [US2] Add regression coverage that scoped namespace output remains on the flat pod-row path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Preserve current summary, unscheduled pod, and scoped-output branches while integrating grouped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T012 [US2] Keep grouped pod rows compatible with existing inline and tree container formatting in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T011 [US2] Preserve current summary, unscheduled pod, and scoped-output branches while integrating grouped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T012 [US2] Keep grouped pod rows compatible with existing inline and tree container formatting in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
 
 **Checkpoint**: Grouped rendering coexists with existing view behavior and does not regress adjacent output modes.
 

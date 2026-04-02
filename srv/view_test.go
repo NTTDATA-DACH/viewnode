@@ -141,6 +141,43 @@ func TestViewNodeDataPrintoutAllNamespacesShowsSingleNamespaceGroup(t *testing.T
 	require.Contains(t, output, "        └── worker-0 (running)\n")
 }
 
+func TestViewNodeDataPrintoutAllNamespacesPreservesSummariesAndUnscheduledPods(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+		},
+		Nodes: []ViewNode{
+			{
+				Name: "",
+				Pods: []ViewPod{
+					{Name: "pending-0", Phase: "Pending"},
+					{Name: "pending-1", Phase: "Running"},
+				},
+			},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "api-0", Namespace: "team-a", Phase: "Running"},
+					{Name: "dns-0", Namespace: "kube-system", Phase: "Running"},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "4 pod(s) in total\n")
+	require.Contains(t, output, "2 unscheduled pod(s):\n")
+	require.Contains(t, output, "  ├── pending-0 (pending)\n")
+	require.Contains(t, output, "  └── pending-1 (running)\n")
+	require.Contains(t, output, "1 running node(s) with 2 scheduled pod(s):\n")
+	require.Contains(t, output, "└── worker-a running 2 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, output, "    ├── kube-system\n")
+	require.Contains(t, output, "    └── team-a\n")
+}
+
 func TestViewNodeDataPrintoutScopedNamespacesRemainInline(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{
@@ -167,7 +204,7 @@ func TestViewNodeDataPrintoutScopedNamespacesRemainInline(t *testing.T) {
 	require.NotContains(t, output, "    ├── alpha\n")
 }
 
-func TestViewNodeDataPrintoutGroupedNamespacesKeepContainerOutput(t *testing.T) {
+func TestViewNodeDataPrintoutGroupedNamespacesKeepTreeContainerOutput(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{
 			ShowNamespaces:       true,
@@ -202,4 +239,38 @@ func TestViewNodeDataPrintoutGroupedNamespacesKeepContainerOutput(t *testing.T) 
 	require.Contains(t, output, "        └── api-0 (running/Thu Jan  1 00:00:00 UTC 1970) 2 container/s:\n")
 	require.Contains(t, output, "            ├── 0: web (running)\n")
 	require.Contains(t, output, "            └── 1: sidecar (waiting)\n")
+}
+
+func TestViewNodeDataPrintoutGroupedNamespacesKeepInlineContainerOutput(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+			ShowContainers:       true,
+			ContainerViewType:    Inline,
+			ShowReqLimits:        true,
+		},
+		Nodes: []ViewNode{
+			{Name: ""},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{
+						Name:      "api-0",
+						Namespace: "team-a",
+						Phase:     "Running",
+						Containers: []ViewContainer{
+							{Name: "web", State: "Running", CpuReq: "100m", CpuLimit: "200m", MemoryReq: "128Mi", MemoryLimit: "256Mi"},
+						},
+					},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "    └── team-a\n")
+	require.Contains(t, output, "        └── api-0 (running) (1: web/running [cr:100m<200m mr:128Mi<256Mi])\n")
 }

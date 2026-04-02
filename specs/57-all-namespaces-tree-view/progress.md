@@ -32,3 +32,21 @@ Started: 2026-04-02 17:18:52
 - A dedicated all-namespaces grouping flag is required because `ShowNamespaces` is also used for scoped multi-namespace output that must stay on the flat render path.
 - Rendering helpers keep container indentation correct when pod rows move under namespace headings.
 ---
+## Iteration 2 - 2026-04-02 17:31:49 CEST
+**User Story**: US2 - Preserve readable totals and node summaries
+**Tasks Completed**:
+- [x] T008: Add regression coverage for grouped output with node summaries and unscheduled pod sections
+- [x] T009: Add regression coverage for grouped output with inline and tree container rendering
+- [x] T010: Add regression coverage that scoped namespace output remains on the flat pod-row path
+- [x] T011: Preserve current summary, unscheduled pod, and scoped-output branches while integrating grouped rendering
+- [x] T012: Keep grouped pod rows compatible with existing inline and tree container formatting
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- srv/view_test.go
+- specs/57-all-namespaces-tree-view/tasks.md
+- specs/57-all-namespaces-tree-view/progress.md
+**Learnings**:
+- The grouped renderer already preserved unscheduled pods, node totals, and scoped inline namespace rows; the missing coverage was around locking those branches against future regressions.
+- Inline and tree container modes both continue to hang off `printPod`, so grouped namespace rendering can be regression-tested without branching the container formatter.
+---
