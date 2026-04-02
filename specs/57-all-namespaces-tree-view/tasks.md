@@ -17,7 +17,7 @@
 
 **Purpose**: Align implementation and validation work with the approved rendering contract before code changes begin.
 
-- [ ] T001 Review implementation scope, rendering constraints, and verification targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/57-all-namespaces-tree-view/plan.md
+- [x] T001 Review implementation scope, rendering constraints, and verification targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/57-all-namespaces-tree-view/plan.md
 
 ---
 
@@ -27,8 +27,8 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T002 Create helper logic for per-node alphabetical namespace grouping in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T003 [P] Add focused helper-level coverage for alphabetical grouping and preserved pod order in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T002 Create helper logic for per-node alphabetical namespace grouping in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T003 [P] Add focused helper-level coverage for alphabetical grouping and preserved pod order in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 **Checkpoint**: Namespace grouping rules are defined and regression-tested before user-facing output changes are completed.
 
@@ -42,13 +42,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Add grouped all-namespaces printout coverage for multi-namespace nodes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T005 [P] [US1] Add grouped all-namespaces printout coverage for single-namespace nodes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T004 [P] [US1] Add grouped all-namespaces printout coverage for multi-namespace nodes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T005 [P] [US1] Add grouped all-namespaces printout coverage for single-namespace nodes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Refactor scheduled pod rendering to print namespace grouping rows instead of repeated inline namespace prefixes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T007 [US1] Preserve minimal namespace-display gating for grouped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
+- [x] T006 [US1] Refactor scheduled pod rendering to print namespace grouping rows instead of repeated inline namespace prefixes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T007 [US1] Preserve minimal namespace-display gating for grouped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
 
 **Checkpoint**: `viewnode --all-namespaces` shows grouped namespace tree output and remains independently testable.
 

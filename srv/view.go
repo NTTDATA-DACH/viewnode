@@ -3,6 +3,7 @@ package srv
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 	"viewnode/utils"
@@ -56,17 +57,23 @@ const (
 )
 
 type ViewNodeDataConfig struct {
-	ShowNamespaces bool
-	ShowContainers bool
-	ShowTimes      bool
-	ShowReqLimits  bool
-	ShowMetrics    bool
+	ShowNamespaces       bool
+	GroupPodsByNamespace bool
+	ShowContainers       bool
+	ShowTimes            bool
+	ShowReqLimits        bool
+	ShowMetrics          bool
 
 	ContainerViewType ViewType
 }
 
 type View interface {
 	Printout(cls bool) error
+}
+
+type namespaceGroup struct {
+	Namespace string
+	Pods      []ViewPod
 }
 
 func (vnd ViewNodeData) Printout(cls bool) error {
@@ -122,72 +129,116 @@ func (vnd ViewNodeData) Printout(cls bool) error {
 			fmt.Printf(" | mem: %s", utils.ByteCountIEC(n.Metrics.Memory))
 		}
 		fmt.Println(")")
+		if vnd.Config.GroupPodsByNamespace {
+			vnd.printNamespaceGroupedPods(n.Pods, podIndent)
+			continue
+		}
 		for pi, p := range n.Pods {
-			podPrefix := "├──"
-			containerIndent := podIndent + "│   "
-			if pi == len(n.Pods)-1 {
-				podPrefix = "└──"
-				containerIndent = podIndent + "    "
-			}
-			fmt.Printf("%s%s ", podIndent, podPrefix)
-			if vnd.Config.ShowNamespaces {
-				fmt.Printf("%s: %s (%s", p.Namespace, p.Name, strings.ToLower(p.Phase))
-			} else {
-				fmt.Printf("%s (%s", p.Name, strings.ToLower(p.Phase))
-			}
-			if vnd.Config.ShowTimes {
-				fmt.Printf("/%s", p.StartTime.Format(time.UnixDate))
-			}
-			if vnd.Config.ShowMetrics {
-				fmt.Printf(" | mem usage: %s", utils.ByteCountIEC(p.Metrics.Memory))
-			}
-			fmt.Printf(")")
-			if vnd.Config.ShowContainers {
-				switch vnd.Config.ContainerViewType {
-				case Inline:
-					fmt.Printf(" (%d:", len(p.Containers))
-					for _, c := range p.Containers {
-						fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
-						if vnd.Config.ShowReqLimits {
-							fmt.Printf(" [cr:%s mr:%s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
-						}
-						if vnd.Config.ShowMetrics {
-							fmt.Printf(" mu:%s", utils.ByteCountIEC(c.Metrics.Memory))
-						}
-						if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
-							fmt.Printf("]")
-						}
-					}
-					fmt.Printf(")")
-				case Tree:
-					fmt.Printf(" %d container/s:", len(p.Containers))
-					for i, c := range p.Containers {
-						containerPrefix := "├──"
-						if i == len(p.Containers)-1 {
-							containerPrefix = "└──"
-						}
-						fmt.Printf("\n%s%s %d: %s (%s)", containerIndent, containerPrefix, i, c.Name, strings.ToLower(c.State))
-						if vnd.Config.ShowReqLimits {
-							fmt.Printf(" [cpu: %s | mem: %s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
-						}
-						if vnd.Config.ShowMetrics {
-							if vnd.Config.ShowReqLimits {
-								fmt.Printf(" | ")
-							} else {
-								fmt.Printf(" [")
-							}
-							fmt.Printf("mem usage: %s", utils.ByteCountIEC(c.Metrics.Memory))
-						}
-						if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
-							fmt.Printf("]")
-						}
-					}
-				}
-			}
-			fmt.Println()
+			vnd.printPod(p, podIndent, pi == len(n.Pods)-1, vnd.Config.ShowNamespaces)
 		}
 	}
 	return nil
+}
+
+func (vnd ViewNodeData) printNamespaceGroupedPods(pods []ViewPod, podIndent string) {
+	groups := groupPodsByNamespace(pods)
+	for gi, group := range groups {
+		namespacePrefix := "├──"
+		namespacePodIndent := podIndent + "│   "
+		if gi == len(groups)-1 {
+			namespacePrefix = "└──"
+			namespacePodIndent = podIndent + "    "
+		}
+		fmt.Printf("%s%s %s\n", podIndent, namespacePrefix, group.Namespace)
+		for pi, pod := range group.Pods {
+			vnd.printPod(pod, namespacePodIndent, pi == len(group.Pods)-1, false)
+		}
+	}
+}
+
+func groupPodsByNamespace(pods []ViewPod) []namespaceGroup {
+	groupsByNamespace := make(map[string][]ViewPod, len(pods))
+	namespaces := make([]string, 0, len(pods))
+	for _, pod := range pods {
+		if _, ok := groupsByNamespace[pod.Namespace]; !ok {
+			namespaces = append(namespaces, pod.Namespace)
+		}
+		groupsByNamespace[pod.Namespace] = append(groupsByNamespace[pod.Namespace], pod)
+	}
+	sort.Strings(namespaces)
+	groups := make([]namespaceGroup, 0, len(namespaces))
+	for _, namespace := range namespaces {
+		groups = append(groups, namespaceGroup{
+			Namespace: namespace,
+			Pods:      groupsByNamespace[namespace],
+		})
+	}
+	return groups
+}
+
+func (vnd ViewNodeData) printPod(p ViewPod, podIndent string, isLast bool, showNamespaceInline bool) {
+	podPrefix := "├──"
+	containerIndent := podIndent + "│   "
+	if isLast {
+		podPrefix = "└──"
+		containerIndent = podIndent + "    "
+	}
+	fmt.Printf("%s%s ", podIndent, podPrefix)
+	if showNamespaceInline {
+		fmt.Printf("%s: %s (%s", p.Namespace, p.Name, strings.ToLower(p.Phase))
+	} else {
+		fmt.Printf("%s (%s", p.Name, strings.ToLower(p.Phase))
+	}
+	if vnd.Config.ShowTimes {
+		fmt.Printf("/%s", p.StartTime.Format(time.UnixDate))
+	}
+	if vnd.Config.ShowMetrics {
+		fmt.Printf(" | mem usage: %s", utils.ByteCountIEC(p.Metrics.Memory))
+	}
+	fmt.Printf(")")
+	if vnd.Config.ShowContainers {
+		switch vnd.Config.ContainerViewType {
+		case Inline:
+			fmt.Printf(" (%d:", len(p.Containers))
+			for _, c := range p.Containers {
+				fmt.Printf(" %s/%s", c.Name, strings.ToLower(c.State))
+				if vnd.Config.ShowReqLimits {
+					fmt.Printf(" [cr:%s mr:%s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+				}
+				if vnd.Config.ShowMetrics {
+					fmt.Printf(" mu:%s", utils.ByteCountIEC(c.Metrics.Memory))
+				}
+				if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
+					fmt.Printf("]")
+				}
+			}
+			fmt.Printf(")")
+		case Tree:
+			fmt.Printf(" %d container/s:", len(p.Containers))
+			for i, c := range p.Containers {
+				containerPrefix := "├──"
+				if i == len(p.Containers)-1 {
+					containerPrefix = "└──"
+				}
+				fmt.Printf("\n%s%s %d: %s (%s)", containerIndent, containerPrefix, i, c.Name, strings.ToLower(c.State))
+				if vnd.Config.ShowReqLimits {
+					fmt.Printf(" [cpu: %s | mem: %s", fmtRes(c.CpuReq, c.CpuLimit), fmtRes(c.MemoryReq, c.MemoryLimit))
+				}
+				if vnd.Config.ShowMetrics {
+					if vnd.Config.ShowReqLimits {
+						fmt.Printf(" | ")
+					} else {
+						fmt.Printf(" [")
+					}
+					fmt.Printf("mem usage: %s", utils.ByteCountIEC(c.Metrics.Memory))
+				}
+				if vnd.Config.ShowReqLimits || vnd.Config.ShowMetrics {
+					fmt.Printf("]")
+				}
+			}
+		}
+	}
+	fmt.Println()
 }
 
 func (vnd ViewNodeData) getNumberOfUnscheduledPods() int {
