@@ -151,6 +151,7 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 		Nodes:      vns,
 	}
 	vnd.Config.ShowNamespaces = allNamespacesFlag
+	vnd.Config.GroupPodsByNamespace = allNamespacesFlag
 	if len(selectedNamespaces) > 1 {
 		vnd.Config.ShowNamespaces = true
 	}

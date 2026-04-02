@@ -53,6 +53,7 @@
 - Kubeconfig files plus live Kubernetes API data for namespace and node/pod discovery (53-add-ns-filter)
 - Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/sirupsen/logrus`, `github.com/stretchr/testify` (27-handle-get-eof)
 - Kubeconfig files plus live Kubernetes API data for node and pod retrieval (27-handle-get-eof)
+- Kubeconfig files plus live Kubernetes API data for node and pod discovery (57-all-namespaces-tree-view)
 
 ## Recent Changes
 - 48-refactor-ctx-list-ns-list-commands: Added Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`

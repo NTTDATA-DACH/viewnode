@@ -20,7 +20,7 @@ Available Commands:
   version     Plugin Version
 
 Flags:
-  -A, --all-namespaces             use all namespaces
+  -A, --all-namespaces             use all namespaces and group scheduled pods by namespace beneath each node
   -b, --container-tree-view        format containers in tree view, otherwise inline
   -h, --help                       help for viewnode
       --kubeconfig string          kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)
@@ -144,6 +144,30 @@ namespace(s): jenkins-onprem
     ├── docker-in-the-cloud-339-4x9dq-0xd3q (running)
     ├── docker-in-the-cloud-342-r5khq-9cx2w (running)
     └── liveness-test-4-boom (failed)
+```
+Showing nodes across all namespaces:
+```
+$ viewnode -A
+8 pod(s) in total
+0 unscheduled pod(s)
+3 running node(s) with 8 scheduled pod(s):
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
+│   ├── default
+│   │   └── docker-in-the-cloud-86-822pd-d6p3d (running)
+│   └── jenkins-onprem
+│       └── docker-in-the-cloud-341-ffkt5-2k64t (running)
+├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
+│   ├── default
+│   │   └── docker-in-the-cloud-340-cms5r-pxxq7 (running)
+│   └── jenkins-onprem
+│       └── docker-in-the-cloud-338-3wc8r-n1t7z (running)
+└── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
+    ├── default
+    │   ├── docker-in-the-cloud-339-4x9dq-0xd3q (running)
+    │   └── liveness-test-4-boom (failed)
+    └── jenkins-onprem
+        ├── docker-in-the-cloud-337-4c4lm-q3mtp (running)
+        └── docker-in-the-cloud-342-r5khq-9cx2w (running)
 ```
 You can also aggregate pods from selected namespaces only:
 ```
