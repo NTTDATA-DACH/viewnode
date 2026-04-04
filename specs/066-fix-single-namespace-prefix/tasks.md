@@ -17,7 +17,7 @@
 
 **Purpose**: Align implementation with the approved single-namespace output contract before changing code.
 
-- [ ] T001 Review implementation scope, single-namespace output contract, and validation targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/066-fix-single-namespace-prefix/plan.md
+- [x] T001 Review implementation scope, single-namespace output contract, and validation targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/066-fix-single-namespace-prefix/plan.md
 
 ---
 
@@ -27,8 +27,8 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T002 Confirm the single-namespace flat render path and formatter seam in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T003 [P] Review the existing single-namespace regression coverage and affected expectations in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T002 Confirm the single-namespace flat render path and formatter seam in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T003 [P] Review the existing single-namespace regression coverage and affected expectations in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 **Checkpoint**: The exact implementation seam and regression surface are identified before behavior changes begin.
 
@@ -42,13 +42,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Update single-namespace flat-output regression expectations in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T005 [P] [US1] Add regression coverage that the namespace header remains visible while pod rows omit the inline namespace prefix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T004 [P] [US1] Update single-namespace flat-output regression expectations in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T005 [P] [US1] Add regression coverage that the namespace header remains visible while pod rows omit the inline namespace prefix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Refine the flat single-namespace pod-row formatter to omit the redundant inline namespace prefix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T007 [US1] Preserve existing pod-row phase rendering and flat single-namespace structure while applying the formatter change in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T006 [US1] Refine the flat single-namespace pod-row formatter to omit the redundant inline namespace prefix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T007 [US1] Preserve existing pod-row phase rendering and flat single-namespace structure while applying the formatter change in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
 
 **Checkpoint**: Single-namespace output no longer repeats the namespace on every pod row and remains independently testable.
 

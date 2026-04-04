@@ -519,7 +519,7 @@ func TestViewNodeDataPrintoutScopedNamespacesKeepSummaryCountsAndUnscheduledPods
 	require.NotContains(t, output, "    └── team-a\n")
 }
 
-func TestViewNodeDataPrintoutSingleScopedNamespaceStaysFlat(t *testing.T) {
+func TestViewNodeDataPrintoutSingleScopedNamespaceOmitsInlineNamespacePrefix(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{
 			ShowNamespaces:     true,
@@ -542,9 +542,40 @@ func TestViewNodeDataPrintoutSingleScopedNamespaceStaysFlat(t *testing.T) {
 	})
 
 	require.Contains(t, output, "namespace(s): team-a\n")
-	require.Contains(t, output, "    ├── team-a: api-0 (running)\n")
-	require.Contains(t, output, "    └── team-a: worker-0 (pending)\n")
+	require.Contains(t, output, "1 running node(s) with 2 scheduled pod(s):\n")
+	require.Contains(t, output, "└── worker-a running 2 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, output, "    ├── api-0 (running)\n")
+	require.Contains(t, output, "    └── worker-0 (pending)\n")
+	require.NotContains(t, output, "team-a: api-0")
+	require.NotContains(t, output, "team-a: worker-0")
 	require.NotContains(t, output, "    └── team-a\n")
+}
+
+func TestViewNodeDataPrintoutSingleScopedNamespaceKeepsHeaderVisible(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:     true,
+			SelectedNamespaces: []string{"kube-system"},
+		},
+		Namespace: "kube-system",
+		Nodes: []ViewNode{
+			{Name: ""},
+			{
+				Name:             "control-plane",
+				Os:               "linux",
+				Arch:             "arm64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "coredns-0", Namespace: "kube-system", Phase: "Running"},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "namespace(s): kube-system\n")
+	require.Contains(t, output, "└── control-plane running 1 pod(s) (linux/arm64/containerd://2.2.0)\n")
+	require.Contains(t, output, "    └── coredns-0 (running)\n")
+	require.NotContains(t, output, "kube-system: coredns-0")
 }
 
 func TestViewNodeDataPrintoutScopedNamespacesKeepTreeContainerRenderingCompatibility(t *testing.T) {
