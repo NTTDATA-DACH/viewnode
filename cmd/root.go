@@ -54,6 +54,15 @@ func parseNamespaces(value string) []string {
 	return namespaces
 }
 
+func buildViewNodeDataConfig(allNamespaces bool, selectedNamespaces []string) srv.ViewNodeDataConfig {
+	config := srv.ViewNodeDataConfig{
+		ShowNamespaces:       allNamespaces || len(selectedNamespaces) > 0,
+		GroupPodsByNamespace: allNamespaces || len(selectedNamespaces) > 1,
+		SelectedNamespaces:   selectedNamespaces,
+	}
+	return config
+}
+
 var RootCmd = &cobra.Command{
 	Use:   "viewnode",
 	Short: "'viewnode' displays nodes with their pods and containers.",
@@ -150,11 +159,7 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 		NodeFilter: nodeFilter,
 		Nodes:      vns,
 	}
-	vnd.Config.ShowNamespaces = allNamespacesFlag
-	vnd.Config.GroupPodsByNamespace = allNamespacesFlag
-	if len(selectedNamespaces) > 1 {
-		vnd.Config.ShowNamespaces = true
-	}
+	vnd.Config = buildViewNodeDataConfig(allNamespacesFlag, selectedNamespaces)
 	vnd.Config.ShowContainers = showContainersFlag
 	vnd.Config.ShowTimes = showTimesFlag
 	vnd.Config.ShowReqLimits = showReqLimitsFlag

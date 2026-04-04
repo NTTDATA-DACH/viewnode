@@ -59,3 +59,10 @@
 ## Issue-specific guidance
 - Issue-specific requirements belong in the issue, feature artifacts, and PRD.
 - Do not add changing issue-specific details to this file unless they become stable reusable repository rules.
+
+## Active Technologies
+- Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/sirupsen/logrus`, `github.com/stretchr/testify` (059-namespace-view-output)
+- Kubeconfig files plus live Kubernetes API data for node and pod discovery (059-namespace-view-output)
+
+## Recent Changes
+- 059-namespace-view-output: Added Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/sirupsen/logrus`, `github.com/stretchr/testify`

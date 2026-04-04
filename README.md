@@ -176,16 +176,35 @@ $ viewnode --namespace jenkins-onprem,default
 0 unscheduled pod(s)
 3 running node(s) with 8 scheduled pod(s):
 ├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-8fws running 2 pod(s) (linux/amd64)
-│   ├── default: docker-in-the-cloud-86-822pd-d6p3d (running)
-│   └── jenkins-onprem: docker-in-the-cloud-341-ffkt5-2k64t (running)
+│   ├── default
+│   │   └── docker-in-the-cloud-86-822pd-d6p3d (running)
+│   └── jenkins-onprem
+│       └── docker-in-the-cloud-341-ffkt5-2k64t (running)
 ├── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-b0np running 2 pod(s) (linux/amd64)
-│   ├── default: docker-in-the-cloud-340-cms5r-pxxq7 (running)
-│   └── jenkins-onprem: docker-in-the-cloud-338-3wc8r-n1t7z (running)
+│   ├── default
+│   │   └── docker-in-the-cloud-340-cms5r-pxxq7 (running)
+│   └── jenkins-onprem
+│       └── docker-in-the-cloud-338-3wc8r-n1t7z (running)
 └── gke-dcgsecigke001-dcgsecigke001-linux-1cd8c3b9-v1vr running 4 pod(s) (linux/amd64)
-    ├── default: docker-in-the-cloud-339-4x9dq-0xd3q (running)
-    ├── default: liveness-test-4-boom (failed)
-    ├── jenkins-onprem: docker-in-the-cloud-337-4c4lm-q3mtp (running)
-    └── jenkins-onprem: docker-in-the-cloud-342-r5khq-9cx2w (running)
+    ├── default
+    │   ├── docker-in-the-cloud-339-4x9dq-0xd3q (running)
+    │   └── liveness-test-4-boom (failed)
+    └── jenkins-onprem
+        ├── docker-in-the-cloud-337-4c4lm-q3mtp (running)
+        └── docker-in-the-cloud-342-r5khq-9cx2w (running)
+```
+Selected namespaces continue to show the existing totals, unscheduled pod summary, and node pod counts while using the same grouped tree layout as `--all-namespaces`.
+Empty selected namespaces are rendered as grouping rows when a displayed node has no matching pods:
+```
+$ viewnode --namespace default,team-a
+3 pod(s) in total
+0 unscheduled pod(s)
+1 running node(s) with 3 scheduled pod(s):
+└── worker-a running 3 pod(s) (linux/amd64)
+    ├── default
+    │   ├── api-0 (running)
+    │   └── web-0 (running)
+    └── team-a
 ```
 Very popular is combining `viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
 ```
