@@ -98,9 +98,9 @@
 
 **Purpose**: Final verification across the completed stories.
 
-- [ ] T016 Run focused regression validation with `go test ./srv ./cmd` from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode
-- [ ] T017 Run full repository validation with `make test` from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
-- [ ] T018 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/contracts/namespace-filter-node-view-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/quickstart.md
+- [x] T016 Run focused regression validation with `go test ./srv ./cmd` from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode
+- [x] T017 Run full repository validation with `make test` from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
+- [x] T018 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/contracts/namespace-filter-node-view-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/quickstart.md
 
 ---
 

@@ -71,3 +71,19 @@ Started: 2026-04-04 18:28:40
 - `groupPodsByNamespace` already provided the shared non-empty namespace-group contract for both `--all-namespaces` and grouped scoped output; US3 mainly needed explicit regression proof rather than renderer changes.
 - The flat single-namespace path depends on `GroupPodsByNamespace` staying false for one selected namespace, so the regression is strongest when `SelectedNamespaces` is set explicitly in the test fixture.
 ---
+
+## Iteration 4 - 2026-04-04 18:37:23 CEST
+**User Story**: Final polish & cross-cutting concerns
+**Tasks Completed**:
+- [x] T016: Run focused regression validation with `go test ./srv ./cmd`
+- [x] T017: Run full repository validation with `make test`
+- [x] T018: Review final behavior against the contract and quickstart guidance
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- specs/061-fix-namespace-empty/tasks.md
+- specs/061-fix-namespace-empty/progress.md
+**Learnings**:
+- The final renderer and README behavior matches the feature contract without further code changes; this iteration was purely verification and tracking.
+- Repository validation currently completes from cached Go test results after the earlier story work, so the final polish pass is fast when no files under test have changed.
+---
