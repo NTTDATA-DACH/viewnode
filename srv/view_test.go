@@ -578,6 +578,107 @@ func TestViewNodeDataPrintoutSingleScopedNamespaceKeepsHeaderVisible(t *testing.
 	require.NotContains(t, output, "kube-system: coredns-0")
 }
 
+func TestViewNodeDataPrintoutSingleScopedNamespacePreservesCountsNodesAndPodOrder(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:     true,
+			SelectedNamespaces: []string{"team-a"},
+		},
+		Namespace: "team-a",
+		Nodes: []ViewNode{
+			{
+				Name: "",
+				Pods: []ViewPod{
+					{Name: "pending-0", Phase: "Pending"},
+				},
+			},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "api-0", Namespace: "team-a", Phase: "Running"},
+					{Name: "api-1", Namespace: "team-a", Phase: "Pending"},
+				},
+			},
+			{
+				Name:             "worker-b",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "jobs-0", Namespace: "team-a", Phase: "Running"},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "namespace(s): team-a\n")
+	require.Contains(t, output, "4 pod(s) in total\n")
+	require.Contains(t, output, "1 unscheduled pod(s):\n")
+	require.Contains(t, output, "  └── pending-0 (pending)\n")
+	require.Contains(t, output, "2 running node(s) with 3 scheduled pod(s):\n")
+	require.Contains(t, output, "├── worker-a running 2 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, output, "└── worker-b running 1 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Less(t, strings.Index(output, "api-0 (running)"), strings.Index(output, "api-1 (pending)"))
+	require.Less(t, strings.Index(output, "├── worker-a running 2 pod(s)"), strings.Index(output, "└── worker-b running 1 pod(s)"))
+	require.NotContains(t, output, "team-a: api-0")
+	require.NotContains(t, output, "team-a: api-1")
+	require.NotContains(t, output, "team-a: jobs-0")
+	require.NotContains(t, output, "    ├── team-a\n")
+	require.NotContains(t, output, "    └── team-a\n")
+}
+
+func TestViewNodeDataPrintoutSingleScopedNamespaceKeepsAuxiliaryPodDetails(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:     true,
+			SelectedNamespaces: []string{"team-a"},
+			ShowContainers:     true,
+			ShowTimes:          true,
+			ShowReqLimits:      true,
+			ShowMetrics:        true,
+			ContainerViewType:  Inline,
+		},
+		Namespace: "team-a",
+		Nodes: []ViewNode{
+			{Name: ""},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Metrics:          ViewMetrics{Memory: 2048},
+				Pods: []ViewPod{
+					{
+						Name:      "api-0",
+						Namespace: "team-a",
+						Phase:     "Running",
+						StartTime: time.Unix(0, 0).UTC(),
+						Metrics:   ViewMetrics{Memory: 1024},
+						Containers: []ViewContainer{
+							{
+								Name:        "app",
+								State:       "Running",
+								CpuReq:      "10m",
+								CpuLimit:    "100m",
+								MemoryReq:   "32Mi",
+								MemoryLimit: "128Mi",
+								Metrics:     ViewMetrics{Memory: 512},
+							},
+						},
+					},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "└── worker-a running 1 pod(s) (linux/amd64/containerd://2.2.0 | mem: 2.0 KiB)\n")
+	require.Contains(t, output, "    └── api-0 (running/Thu Jan  1 00:00:00 UTC 1970 | mem usage: 1.0 KiB) (1: app/running [cr:10m<100m mr:32Mi<128Mi mu:512 B])\n")
+	require.NotContains(t, output, "team-a: api-0")
+}
+
 func TestViewNodeDataPrintoutScopedNamespacesKeepTreeContainerRenderingCompatibility(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{

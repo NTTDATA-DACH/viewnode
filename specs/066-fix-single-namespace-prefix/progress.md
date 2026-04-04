@@ -32,3 +32,21 @@ Started: 2026-04-04 22:28:17
 - The bug was isolated to the inline namespace toggle, so the fix stayed in one helper without changing pod formatting itself.
 - Existing grouped namespace tests already protected all-namespaces and multi-namespace behavior, which made the single-namespace regression safe to narrow.
 ---
+## Iteration 2 - 2026-04-04 22:40:00 CEST
+**User Story**: US2 - Preserve Existing Single-Namespace Layout Semantics
+**Tasks Completed**:
+- [x] T008: Add regression coverage that single-namespace counts, node sections, and pod ordering remain unchanged in srv/view_test.go
+- [x] T009: Add regression coverage that container, timing, or metrics-capable pod rows remain compatible after prefix removal in srv/view_test.go
+- [x] T010: Preserve auxiliary pod-row detail rendering in the single-namespace flat path after removing the prefix in srv/view.go
+- [x] T011: Verify no command configuration changes are needed for the corrected single-namespace flat path in cmd/root.go
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- srv/view_test.go
+- cmd/root_test.go
+- specs/066-fix-single-namespace-prefix/tasks.md
+- specs/066-fix-single-namespace-prefix/progress.md
+**Learnings**:
+- Single-namespace flat rendering already preserved timing, metrics, and container detail output once the inline namespace toggle was corrected; additional coverage was enough to lock that in.
+- `cmd/buildViewNodeDataConfig` already keeps single-namespace selections flat (`GroupPodsByNamespace=false`), so no CLI wiring change was needed for the renderer fix.
+---

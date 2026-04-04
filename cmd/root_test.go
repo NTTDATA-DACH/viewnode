@@ -28,6 +28,14 @@ func TestBuildViewNodeDataConfigScopedNamespaceSelection(t *testing.T) {
 	require.Equal(t, []string{"team-a"}, config.SelectedNamespaces)
 }
 
+func TestBuildViewNodeDataConfigSingleNamespaceRemainsFlatForScopedRendering(t *testing.T) {
+	config := buildViewNodeDataConfig(false, parseNamespaces(" team-a, team-a "))
+
+	require.True(t, config.ShowNamespaces)
+	require.False(t, config.GroupPodsByNamespace)
+	require.Equal(t, []string{"team-a"}, config.SelectedNamespaces)
+}
+
 func TestBuildViewNodeDataConfigMultiNamespaceSelection(t *testing.T) {
 	config := buildViewNodeDataConfig(false, []string{"team-a", "team-b"})
 

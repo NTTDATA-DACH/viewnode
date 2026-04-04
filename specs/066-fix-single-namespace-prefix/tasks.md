@@ -62,13 +62,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US2] Add regression coverage that single-namespace counts, node sections, and pod ordering remain unchanged in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T009 [P] [US2] Add regression coverage that container, timing, or metrics-capable pod rows remain compatible after prefix removal in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T008 [P] [US2] Add regression coverage that single-namespace counts, node sections, and pod ordering remain unchanged in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T009 [P] [US2] Add regression coverage that container, timing, or metrics-capable pod rows remain compatible after prefix removal in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Preserve auxiliary pod-row detail rendering in the single-namespace flat path after removing the prefix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T011 [US2] Verify no command configuration changes are needed for the corrected single-namespace flat path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
+- [x] T010 [US2] Preserve auxiliary pod-row detail rendering in the single-namespace flat path after removing the prefix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T011 [US2] Verify no command configuration changes are needed for the corrected single-namespace flat path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
 
 **Checkpoint**: The single-namespace cleanup is isolated to the redundant prefix and does not alter adjacent output behavior.
 
