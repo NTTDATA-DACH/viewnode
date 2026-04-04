@@ -377,6 +377,89 @@ func TestViewNodeDataPrintoutScopedNamespacesPreserveSummariesAndUnscheduledPods
 	require.Contains(t, output, "        └── job-0 (failed)\n")
 }
 
+func TestViewNodeDataPrintoutScopedNamespacesKeepNodesVisibleWithoutRenderedNamespaceHeadings(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+			SelectedNamespaces:   []string{"default", "team-a"},
+		},
+		Namespace: "default,team-a",
+		Nodes: []ViewNode{
+			{Name: ""},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "api-0", Namespace: "default", Phase: "Running"},
+				},
+			},
+			{
+				Name:             "worker-b",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+			},
+		},
+	})
+
+	require.Contains(t, output, "├── worker-a running 1 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, output, "│   └── default\n")
+	require.Contains(t, output, "│       └── api-0 (running)\n")
+	require.Contains(t, output, "└── worker-b running 0 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.NotContains(t, output, "    ├── default\n")
+	require.NotContains(t, output, "    └── default\n")
+	require.NotContains(t, output, "    ├── team-a\n")
+	require.NotContains(t, output, "    └── team-a\n")
+}
+
+func TestViewNodeDataPrintoutScopedNamespacesKeepSummaryCountsAndUnscheduledPodsWhenNodeHasNoMatchingGroups(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+			SelectedNamespaces:   []string{"default", "team-a"},
+		},
+		Namespace: "default,team-a",
+		Nodes: []ViewNode{
+			{
+				Name: "",
+				Pods: []ViewPod{
+					{Name: "pending-0", Phase: "Pending"},
+				},
+			},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "api-0", Namespace: "default", Phase: "Running"},
+				},
+			},
+			{
+				Name:             "worker-b",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+			},
+		},
+	})
+
+	require.Contains(t, output, "2 pod(s) in total\n")
+	require.Contains(t, output, "1 unscheduled pod(s):\n")
+	require.Contains(t, output, "  └── pending-0 (pending)\n")
+	require.Contains(t, output, "2 running node(s) with 1 scheduled pod(s):\n")
+	require.Contains(t, output, "├── worker-a running 1 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, output, "└── worker-b running 0 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.NotContains(t, output, "    ├── default\n")
+	require.NotContains(t, output, "    └── default\n")
+	require.NotContains(t, output, "    ├── team-a\n")
+	require.NotContains(t, output, "    └── team-a\n")
+}
+
 func TestViewNodeDataPrintoutSingleScopedNamespaceStaysFlat(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{

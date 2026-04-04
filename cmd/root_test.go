@@ -44,6 +44,15 @@ func TestBuildViewNodeDataConfigAllNamespacesIgnoresScopedSelectionCount(t *test
 	require.Nil(t, config.SelectedNamespaces)
 }
 
+func TestBuildViewNodeDataConfigUsesParsedNamespacesForGroupedScopedRendering(t *testing.T) {
+	selectedNamespaces := parseNamespaces(" team-a,team-b, team-a ")
+	config := buildViewNodeDataConfig(false, selectedNamespaces)
+
+	require.True(t, config.ShowNamespaces)
+	require.True(t, config.GroupPodsByNamespace)
+	require.Equal(t, []string{"team-a", "team-b"}, config.SelectedNamespaces)
+}
+
 func resetRootCommandState() {
 	namespace = ""
 	allNamespacesFlag = false

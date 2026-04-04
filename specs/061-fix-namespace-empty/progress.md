@@ -8,6 +8,7 @@ Started: 2026-04-04 18:28:40
 - `cmd/root.go` already scopes grouped renderer activation and passes deduplicated `SelectedNamespaces`; renderer fixes should stay in `srv/view.go`.
 - `groupPodsByNamespace` is the shared namespace-heading contract for both all-namespaces and multi-namespace scoped output, so helper tests can lock in grouping rules before printout assertions.
 - Scoped grouped-output assertions are sensitive to tree-branch prefixes, so tests should assert the single-group `└──` shape when empty namespace headings are omitted.
+- `ViewNodeData.Printout` always emits the node line before grouped pod rendering, so an empty namespace-group result naturally produces a node-only section without extra renderer branching.
 
 ---
 
@@ -31,4 +32,23 @@ Started: 2026-04-04 18:28:40
 **Learnings**:
 - The helper was the only place manufacturing empty scoped namespace headings; the printout path already rendered whatever groups it received.
 - Existing scoped grouped tests covered most of the output contract, but several branch-prefix expectations needed to switch from `├──` to `└──` once empty groups disappeared.
+---
+
+## Iteration 2 - 2026-04-04 18:33:13 CEST
+**User Story**: US2 - Keep nodes visible without matching pods
+**Tasks Completed**:
+- [x] T008: Add grouped scoped printout coverage for nodes that remain visible without rendered namespace headings
+- [x] T009: Add grouped scoped printout coverage that summary counts and unscheduled pods remain unchanged when a node has no matching namespace groups
+- [x] T010: Preserve node-line rendering when grouped namespace output is empty for a node
+- [x] T011: Verify grouped render activation and namespace selection plumbing remain compatible with the corrected renderer behavior
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- cmd/root_test.go
+- srv/view_test.go
+- specs/061-fix-namespace-empty/tasks.md
+- specs/061-fix-namespace-empty/progress.md
+**Learnings**:
+- The existing renderer already satisfied the node-visibility contract because grouped namespace output is additive beneath an already-printed node line.
+- `cmd/root.go` still matches the corrected behavior because multi-namespace scoped runs are the only scoped path that enables grouped namespace rendering, while parsed namespace selections remain deduplicated and ordered.
 ---

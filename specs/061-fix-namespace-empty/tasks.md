@@ -62,13 +62,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US2] Add grouped scoped printout coverage for nodes that remain visible without rendered namespace headings in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T009 [P] [US2] Add grouped scoped printout coverage that summary counts and unscheduled pods remain unchanged when a node has no matching namespace groups in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T008 [P] [US2] Add grouped scoped printout coverage for nodes that remain visible without rendered namespace headings in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T009 [P] [US2] Add grouped scoped printout coverage that summary counts and unscheduled pods remain unchanged when a node has no matching namespace groups in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Preserve node-line rendering when grouped namespace output is empty for a node in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T011 [US2] Verify grouped render activation and namespace selection plumbing remain compatible with the corrected renderer behavior in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
+- [x] T010 [US2] Preserve node-line rendering when grouped namespace output is empty for a node in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T011 [US2] Verify grouped render activation and namespace selection plumbing remain compatible with the corrected renderer behavior in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
 
 **Checkpoint**: Nodes still appear even when no selected namespaces match, and adjacent output behavior remains stable.
 
