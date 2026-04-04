@@ -84,13 +84,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T014 [P] [US3] Add regression coverage for grouped scoped output with node summaries and unscheduled pod sections in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T015 [P] [US3] Verify README command reference and grouped scoped example match the output contract in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T014 [P] [US3] Add regression coverage for grouped scoped output with node summaries and unscheduled pod sections in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T015 [P] [US3] Verify README command reference and grouped scoped example match the output contract in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 ### Implementation for User Story 3
 
-- [ ] T016 [US3] Preserve summary-line, unscheduled-pod, and node-count behavior while integrating grouped scoped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T017 [US3] Update scoped namespace command reference and grouped output examples in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T016 [US3] Preserve summary-line, unscheduled-pod, and node-count behavior while integrating grouped scoped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T017 [US3] Update scoped namespace command reference and grouped output examples in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 **Checkpoint**: Grouped scoped rendering preserves adjacent output behavior and the documentation reflects the shipped contract.
 

@@ -8,6 +8,7 @@ Started: 2026-04-04 13:04:08
 - `cmd/root.go` owns namespace parsing and should pass already-trimmed, deduplicated selections into `srv.ViewNodeData` instead of making the renderer reparse display text.
 - `srv/view.go` keeps namespace grouping as a presentation concern; helper functions should preserve existing pod order and only sort the namespace headings.
 - Scoped `viewnode --namespace <single-ns>` runs still need `ShowNamespaces` enabled for the legacy flat `<namespace>: <pod>` rows, while grouped rendering remains reserved for multi-namespace selection and `--all-namespaces`.
+- Summary totals, unscheduled pod rows, and node pod counts are emitted outside the grouped scheduled-pod branch in `srv/view.go`, so scoped grouping changes should be locked down with output-level regressions instead of duplicating summary code.
 
 ---
 
@@ -69,4 +70,23 @@ Started: 2026-04-04 13:04:08
 **Learnings**:
 - The renderer’s flat scoped path is controlled by `ShowNamespaces` independently of `GroupPodsByNamespace`, so single-namespace regressions are best prevented by centralizing config construction in `cmd/root.go`.
 - Grouped scoped container coverage should assert the repository’s existing request/limit formatting (`req<limit`) instead of inventing a new display style.
+---
+
+## Iteration 4 - 2026-04-04 13:32:00 CEST
+**User Story**: US3 - Preserve summary clarity while changing the tree layout
+**Tasks Completed**:
+- [x] T014: Add regression coverage for grouped scoped output with node summaries and unscheduled pod sections
+- [x] T015: Verify README command reference and grouped scoped example match the output contract
+- [x] T016: Preserve summary-line, unscheduled-pod, and node-count behavior while integrating grouped scoped rendering
+- [x] T017: Update scoped namespace command reference and grouped output examples in `README.md`
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- README.md
+- specs/059-namespace-view-output/progress.md
+- specs/059-namespace-view-output/tasks.md
+- srv/view_test.go
+**Learnings**:
+- The current renderer already preserved scoped summary and unscheduled behavior; the missing protection was a focused grouped-scope regression that exercises both populated and empty selected namespace rows alongside the summary lines.
+- The README needed both the grouped multi-namespace example and an empty-selected-namespace example to match the scoped output contract without forcing users to infer behavior from the `--all-namespaces` section.
 ---
