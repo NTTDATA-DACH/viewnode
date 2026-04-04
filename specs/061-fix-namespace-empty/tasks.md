@@ -82,13 +82,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T012 [P] [US3] Add regression coverage for grouped scoped parity with the all-namespaces inclusion rule in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T013 [P] [US3] Add regression coverage that single-namespace scoped output remains on the flat path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T012 [P] [US3] Add regression coverage for grouped scoped parity with the all-namespaces inclusion rule in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T013 [P] [US3] Add regression coverage that single-namespace scoped output remains on the flat path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Preserve grouped all-namespaces rendering behavior while applying the same non-empty-group rule to scoped output in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T015 [US3] Update namespace-filtered grouped output examples and explanatory text in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T014 [US3] Preserve grouped all-namespaces rendering behavior while applying the same non-empty-group rule to scoped output in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T015 [US3] Update namespace-filtered grouped output examples and explanatory text in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 **Checkpoint**: Scoped grouped output matches the intended all-namespaces parity rule and the README reflects shipped behavior.
 

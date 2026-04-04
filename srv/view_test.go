@@ -321,6 +321,65 @@ func TestViewNodeDataPrintoutScopedNamespacesKeepPodOrderParityWithAllNamespaces
 	require.Less(t, strings.Index(allNamespacesOutput, "team-b-1 (running)"), strings.Index(allNamespacesOutput, "team-b-2 (pending)"))
 }
 
+func TestViewNodeDataPrintoutScopedNamespacesMatchAllNamespacesPerNodeInclusionRule(t *testing.T) {
+	podsByNode := []ViewNode{
+		{Name: ""},
+		{
+			Name:             "worker-a",
+			Os:               "linux",
+			Arch:             "amd64",
+			ContainerRuntime: "containerd://2.2.0",
+			Pods: []ViewPod{
+				{Name: "default-a-0", Namespace: "default", Phase: "Running"},
+				{Name: "ops-a-0", Namespace: "ops", Phase: "Running"},
+			},
+		},
+		{
+			Name:             "worker-b",
+			Os:               "linux",
+			Arch:             "amd64",
+			ContainerRuntime: "containerd://2.2.0",
+			Pods: []ViewPod{
+				{Name: "team-a-b-0", Namespace: "team-a", Phase: "Running"},
+			},
+		},
+	}
+
+	allNamespacesOutput := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+		},
+		Nodes: podsByNode,
+	})
+	scopedOutput := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+			SelectedNamespaces:   []string{"default", "team-a"},
+		},
+		Namespace: "default,team-a",
+		Nodes:     podsByNode,
+	})
+
+	require.Contains(t, allNamespacesOutput, "├── worker-a running 2 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, allNamespacesOutput, "│   ├── default\n")
+	require.NotContains(t, allNamespacesOutput, "│   └── team-a\n")
+	require.Contains(t, allNamespacesOutput, "└── worker-b running 1 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, allNamespacesOutput, "    └── team-a\n")
+	require.NotContains(t, allNamespacesOutput, "    ├── default\n")
+
+	require.Contains(t, scopedOutput, "namespace(s): default,team-a\n")
+	require.Contains(t, scopedOutput, "├── worker-a running 2 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, scopedOutput, "│   └── default\n")
+	require.NotContains(t, scopedOutput, "│   ├── team-a\n")
+	require.NotContains(t, scopedOutput, "│   └── team-a\n")
+	require.Contains(t, scopedOutput, "└── worker-b running 1 pod(s) (linux/amd64/containerd://2.2.0)\n")
+	require.Contains(t, scopedOutput, "    └── team-a\n")
+	require.NotContains(t, scopedOutput, "    ├── default\n")
+	require.NotContains(t, scopedOutput, "    └── default\n")
+}
+
 func TestViewNodeDataPrintoutScopedNamespacesPreserveSummariesAndUnscheduledPods(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{
@@ -463,7 +522,8 @@ func TestViewNodeDataPrintoutScopedNamespacesKeepSummaryCountsAndUnscheduledPods
 func TestViewNodeDataPrintoutSingleScopedNamespaceStaysFlat(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{
-			ShowNamespaces: true,
+			ShowNamespaces:     true,
+			SelectedNamespaces: []string{"team-a"},
 		},
 		Namespace: "team-a",
 		Nodes: []ViewNode{

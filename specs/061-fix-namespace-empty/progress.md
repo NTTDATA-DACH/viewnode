@@ -52,3 +52,22 @@ Started: 2026-04-04 18:28:40
 - The existing renderer already satisfied the node-visibility contract because grouped namespace output is additive beneath an already-printed node line.
 - `cmd/root.go` still matches the corrected behavior because multi-namespace scoped runs are the only scoped path that enables grouped namespace rendering, while parsed namespace selections remain deduplicated and ordered.
 ---
+
+## Iteration 3 - 2026-04-04 18:35:50 CEST
+**User Story**: US3 - Preserve filtered view consistency
+**Tasks Completed**:
+- [x] T012: Add regression coverage for grouped scoped parity with the all-namespaces inclusion rule
+- [x] T013: Add regression coverage that single-namespace scoped output remains on the flat path
+- [x] T014: Preserve grouped all-namespaces rendering behavior while applying the same non-empty-group rule to scoped output
+- [x] T015: Update namespace-filtered grouped output examples and explanatory text
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- README.md
+- srv/view_test.go
+- specs/061-fix-namespace-empty/tasks.md
+- specs/061-fix-namespace-empty/progress.md
+**Learnings**:
+- `groupPodsByNamespace` already provided the shared non-empty namespace-group contract for both `--all-namespaces` and grouped scoped output; US3 mainly needed explicit regression proof rather than renderer changes.
+- The flat single-namespace path depends on `GroupPodsByNamespace` staying false for one selected namespace, so the regression is strongest when `SelectedNamespaces` is set explicitly in the test fixture.
+---

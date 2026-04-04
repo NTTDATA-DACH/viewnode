@@ -194,17 +194,17 @@ $ viewnode --namespace jenkins-onprem,default
         └── docker-in-the-cloud-342-r5khq-9cx2w (running)
 ```
 Selected namespaces continue to show the existing totals, unscheduled pod summary, and node pod counts while using the same grouped tree layout as `--all-namespaces`.
-Empty selected namespaces are rendered as grouping rows when a displayed node has no matching pods:
+Per-node namespace grouping follows the same inclusion rule as `--all-namespaces`: only namespaces with matching pods on that node are rendered, while nodes without matches still stay visible:
 ```
 $ viewnode --namespace default,team-a
 3 pod(s) in total
 0 unscheduled pod(s)
-1 running node(s) with 3 scheduled pod(s):
-└── worker-a running 3 pod(s) (linux/amd64)
-    ├── default
-    │   ├── api-0 (running)
-    │   └── web-0 (running)
-    └── team-a
+2 running node(s) with 3 scheduled pod(s):
+├── worker-a running 3 pod(s) (linux/amd64)
+│   └── default
+│       ├── api-0 (running)
+│       └── web-0 (running)
+└── worker-b running 0 pod(s) (linux/amd64)
 ```
 Very popular is combining `viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
 ```
