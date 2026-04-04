@@ -17,7 +17,7 @@
 
 **Purpose**: Align the implementation with the approved renderer contract and validation targets before editing code.
 
-- [ ] T001 Review implementation scope, corrected namespace-group contract, and validation targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/plan.md
+- [x] T001 Review implementation scope, corrected namespace-group contract, and validation targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/plan.md
 
 ---
 
@@ -27,8 +27,8 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T002 Add helper-level regression coverage for omitting empty namespace groups in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T003 [P] Review grouped namespace construction in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/data-model.md
+- [x] T002 Add helper-level regression coverage for omitting empty namespace groups in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T003 [P] Review grouped namespace construction in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/061-fix-namespace-empty/data-model.md
 
 **Checkpoint**: Shared grouped-rendering rules are explicit and ready for story-specific implementation.
 
@@ -42,13 +42,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Add grouped scoped printout coverage for omitting empty selected namespace headings in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T005 [P] [US1] Add grouped scoped printout coverage for rendering multiple matching namespace headings alphabetically in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T004 [P] [US1] Add grouped scoped printout coverage for omitting empty selected namespace headings in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T005 [P] [US1] Add grouped scoped printout coverage for rendering multiple matching namespace headings alphabetically in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Refine grouped namespace construction so only namespaces with matching pods are returned in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T007 [US1] Update grouped pod printout to omit zero-pod namespace headings while preserving grouped pod nesting in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T006 [US1] Refine grouped namespace construction so only namespaces with matching pods are returned in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T007 [US1] Update grouped pod printout to omit zero-pod namespace headings while preserving grouped pod nesting in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
 
 **Checkpoint**: Multi-namespace `viewnode --namespace ...` no longer shows empty namespace headings and remains independently testable.
 
