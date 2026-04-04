@@ -17,7 +17,7 @@
 
 **Purpose**: Align implementation and validation work with the approved scoped-rendering contract before code changes begin.
 
-- [ ] T001 Review implementation scope, scoped grouping constraints, and verification targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/059-namespace-view-output/plan.md
+- [x] T001 Review implementation scope, scoped grouping constraints, and verification targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/059-namespace-view-output/plan.md
 
 ---
 
@@ -27,8 +27,8 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T002 Extend the view context to carry selected namespace values for grouped scoped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T003 [P] Add focused helper-level coverage for alphabetical namespace grouping, empty selected namespaces, and preserved pod order in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T002 Extend the view context to carry selected namespace values for grouped scoped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T003 [P] Add focused helper-level coverage for alphabetical namespace grouping, empty selected namespaces, and preserved pod order in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 **Checkpoint**: Scoped namespace grouping rules are defined and regression-tested before user-facing output changes are completed.
 

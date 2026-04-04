@@ -59,6 +59,7 @@ const (
 type ViewNodeDataConfig struct {
 	ShowNamespaces       bool
 	GroupPodsByNamespace bool
+	SelectedNamespaces   []string
 	ShowContainers       bool
 	ShowTimes            bool
 	ShowReqLimits        bool
@@ -141,7 +142,7 @@ func (vnd ViewNodeData) Printout(cls bool) error {
 }
 
 func (vnd ViewNodeData) printNamespaceGroupedPods(pods []ViewPod, podIndent string) {
-	groups := groupPodsByNamespace(pods)
+	groups := groupPodsByNamespace(pods, vnd.Config.SelectedNamespaces)
 	for gi, group := range groups {
 		namespacePrefix := "├──"
 		namespacePodIndent := podIndent + "│   "
@@ -156,14 +157,23 @@ func (vnd ViewNodeData) printNamespaceGroupedPods(pods []ViewPod, podIndent stri
 	}
 }
 
-func groupPodsByNamespace(pods []ViewPod) []namespaceGroup {
+func groupPodsByNamespace(pods []ViewPod, selectedNamespaces []string) []namespaceGroup {
 	groupsByNamespace := make(map[string][]ViewPod, len(pods))
-	namespaces := make([]string, 0, len(pods))
+	namespaces := make([]string, 0, len(pods)+len(selectedNamespaces))
+	seenNamespaces := make(map[string]struct{}, len(pods)+len(selectedNamespaces))
 	for _, pod := range pods {
-		if _, ok := groupsByNamespace[pod.Namespace]; !ok {
+		if _, ok := seenNamespaces[pod.Namespace]; !ok {
 			namespaces = append(namespaces, pod.Namespace)
+			seenNamespaces[pod.Namespace] = struct{}{}
 		}
 		groupsByNamespace[pod.Namespace] = append(groupsByNamespace[pod.Namespace], pod)
+	}
+	for _, namespace := range selectedNamespaces {
+		if _, ok := seenNamespaces[namespace]; ok {
+			continue
+		}
+		namespaces = append(namespaces, namespace)
+		seenNamespaces[namespace] = struct{}{}
 	}
 	sort.Strings(namespaces)
 	groups := make([]namespaceGroup, 0, len(namespaces))

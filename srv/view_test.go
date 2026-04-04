@@ -67,7 +67,7 @@ func TestGroupPodsByNamespaceOrdersNamespacesAndPreservesPodOrder(t *testing.T) 
 		{Name: "alpha-1", Namespace: "alpha"},
 		{Name: "zeta-2", Namespace: "zeta"},
 		{Name: "beta-1", Namespace: "beta"},
-	})
+	}, nil)
 
 	require.Len(t, groups, 3)
 	require.Equal(t, "alpha", groups[0].Namespace)
@@ -79,6 +79,30 @@ func TestGroupPodsByNamespaceOrdersNamespacesAndPreservesPodOrder(t *testing.T) 
 		{Name: "zeta-1", Namespace: "zeta"},
 		{Name: "zeta-2", Namespace: "zeta"},
 	}, groups[2].Pods)
+}
+
+func TestGroupPodsByNamespaceIncludesSelectedNamespacesWithoutPods(t *testing.T) {
+	groups := groupPodsByNamespace([]ViewPod{
+		{Name: "api-0", Namespace: "team-a"},
+	}, []string{"team-b", "team-a", "team-c"})
+
+	require.Len(t, groups, 3)
+	require.Equal(t, "team-a", groups[0].Namespace)
+	require.Equal(t, []ViewPod{{Name: "api-0", Namespace: "team-a"}}, groups[0].Pods)
+	require.Equal(t, "team-b", groups[1].Namespace)
+	require.Empty(t, groups[1].Pods)
+	require.Equal(t, "team-c", groups[2].Namespace)
+	require.Empty(t, groups[2].Pods)
+}
+
+func TestGroupPodsByNamespaceDeduplicatesRepeatedSelectedNamespaces(t *testing.T) {
+	groups := groupPodsByNamespace(nil, []string{"team-b", "team-a", "team-b", "team-a"})
+
+	require.Len(t, groups, 2)
+	require.Equal(t, "team-a", groups[0].Namespace)
+	require.Empty(t, groups[0].Pods)
+	require.Equal(t, "team-b", groups[1].Namespace)
+	require.Empty(t, groups[1].Pods)
 }
 
 func TestViewNodeDataPrintoutAllNamespacesGroupsPodsByNamespace(t *testing.T) {

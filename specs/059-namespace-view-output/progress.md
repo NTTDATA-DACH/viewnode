@@ -1,0 +1,29 @@
+# Ralph Progress Log
+
+Feature: 059-namespace-view-output
+Started: 2026-04-04 13:04:08
+
+## Codebase Patterns
+
+- `cmd/root.go` owns namespace parsing and should pass already-trimmed, deduplicated selections into `srv.ViewNodeData` instead of making the renderer reparse display text.
+- `srv/view.go` keeps namespace grouping as a presentation concern; helper functions should preserve existing pod order and only sort the namespace headings.
+
+---
+
+## Iteration 1 - 2026-04-04 13:24:00
+**User Story**: Foundational prerequisites for US1
+**Tasks Completed**:
+- [x] T001: Review implementation scope, scoped grouping constraints, and verification targets
+- [x] T002: Extend the view context to carry selected namespace values for grouped scoped rendering
+- [x] T003: Add focused helper-level coverage for alphabetical namespace grouping, empty selected namespaces, and preserved pod order
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- specs/059-namespace-view-output/progress.md
+- specs/059-namespace-view-output/tasks.md
+- srv/view.go
+- srv/view_test.go
+**Learnings**:
+- The existing grouped renderer already preserves pod order within each namespace, so the prerequisite work only needed to merge selected namespaces into the grouping key set.
+- Adding `SelectedNamespaces` to `ViewNodeDataConfig` keeps future scoped grouping work in the view layer and avoids premature root-command behavior changes in this iteration.
+---
