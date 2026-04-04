@@ -63,14 +63,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Add regression coverage that single-namespace scoped output remains on the flat pod-row path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T010 [P] [US2] Add regression coverage for grouped scoped container rendering compatibility in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T011 [P] [US2] Add root-context coverage for grouped rendering activation only on multi-namespace scoped selection in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root_test.go
+- [x] T009 [P] [US2] Add regression coverage that single-namespace scoped output remains on the flat pod-row path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T010 [P] [US2] Add regression coverage for grouped scoped container rendering compatibility in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T011 [P] [US2] Add root-context coverage for grouped rendering activation only on multi-namespace scoped selection in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Preserve `--all-namespaces` grouping parity and current flat scoped behavior while integrating scoped grouped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T013 [US2] Keep root-command namespace display and grouped-render gating minimal and compatible with existing flag behavior in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
+- [x] T012 [US2] Preserve `--all-namespaces` grouping parity and current flat scoped behavior while integrating scoped grouped rendering in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T013 [US2] Keep root-command namespace display and grouped-render gating minimal and compatible with existing flag behavior in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
 
 **Checkpoint**: Scoped grouped rendering matches the existing all-namespaces tree contract without regressing single-namespace or container-output behavior.
 

@@ -7,6 +7,7 @@ Started: 2026-04-04 13:04:08
 
 - `cmd/root.go` owns namespace parsing and should pass already-trimmed, deduplicated selections into `srv.ViewNodeData` instead of making the renderer reparse display text.
 - `srv/view.go` keeps namespace grouping as a presentation concern; helper functions should preserve existing pod order and only sort the namespace headings.
+- Scoped `viewnode --namespace <single-ns>` runs still need `ShowNamespaces` enabled for the legacy flat `<namespace>: <pod>` rows, while grouped rendering remains reserved for multi-namespace selection and `--all-namespaces`.
 
 ---
 
@@ -46,4 +47,26 @@ Started: 2026-04-04 13:04:08
 **Learnings**:
 - Multi-namespace scoped runs can reuse the existing grouped renderer as long as `cmd/root.go` passes the deduplicated selection through `SelectedNamespaces` and flips `GroupPodsByNamespace` only when more than one namespace is selected.
 - The grouped renderer coverage is more robust when it checks namespace heading order and pod-name order rather than hard-coding every tree prefix combination.
+---
+
+## Iteration 3 - 2026-04-04 13:11:31 CEST
+**User Story**: US2 - Keep namespace-filtered output aligned with all-namespaces behavior
+**Tasks Completed**:
+- [x] T009: Add regression coverage that single-namespace scoped output remains on the flat pod-row path
+- [x] T010: Add regression coverage for grouped scoped container rendering compatibility
+- [x] T011: Add root-context coverage for grouped rendering activation only on multi-namespace scoped selection
+- [x] T012: Preserve `--all-namespaces` grouping parity and current flat scoped behavior while integrating scoped grouped rendering
+- [x] T013: Keep root-command namespace display and grouped-render gating minimal and compatible with existing flag behavior
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- cmd/root.go
+- cmd/root_test.go
+- specs/059-namespace-view-output/progress.md
+- specs/059-namespace-view-output/tasks.md
+- srv/view.go
+- srv/view_test.go
+**Learnings**:
+- The renderer’s flat scoped path is controlled by `ShowNamespaces` independently of `GroupPodsByNamespace`, so single-namespace regressions are best prevented by centralizing config construction in `cmd/root.go`.
+- Grouped scoped container coverage should assert the repository’s existing request/limit formatting (`req<limit`) instead of inventing a new display style.
 ---

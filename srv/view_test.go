@@ -319,6 +319,72 @@ func TestViewNodeDataPrintoutScopedNamespacesKeepPodOrderParityWithAllNamespaces
 	require.Less(t, strings.Index(allNamespacesOutput, "team-b-1 (running)"), strings.Index(allNamespacesOutput, "team-b-2 (pending)"))
 }
 
+func TestViewNodeDataPrintoutSingleScopedNamespaceStaysFlat(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces: true,
+		},
+		Namespace: "team-a",
+		Nodes: []ViewNode{
+			{Name: ""},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{Name: "api-0", Namespace: "team-a", Phase: "Running"},
+					{Name: "worker-0", Namespace: "team-a", Phase: "Pending"},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "namespace(s): team-a\n")
+	require.Contains(t, output, "    ├── team-a: api-0 (running)\n")
+	require.Contains(t, output, "    └── team-a: worker-0 (pending)\n")
+	require.NotContains(t, output, "    └── team-a\n")
+}
+
+func TestViewNodeDataPrintoutScopedNamespacesKeepTreeContainerRenderingCompatibility(t *testing.T) {
+	output := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+			SelectedNamespaces:   []string{"team-a", "team-b"},
+			ShowContainers:       true,
+			ShowReqLimits:        true,
+			ContainerViewType:    Tree,
+		},
+		Namespace: "team-a,team-b",
+		Nodes: []ViewNode{
+			{Name: ""},
+			{
+				Name:             "worker-a",
+				Os:               "linux",
+				Arch:             "amd64",
+				ContainerRuntime: "containerd://2.2.0",
+				Pods: []ViewPod{
+					{
+						Name:      "api-0",
+						Namespace: "team-a",
+						Phase:     "Running",
+						Containers: []ViewContainer{
+							{Name: "app", State: "Running", CpuReq: "10m", CpuLimit: "100m", MemoryReq: "32Mi", MemoryLimit: "128Mi"},
+						},
+					},
+				},
+			},
+		},
+	})
+
+	require.Contains(t, output, "    ├── team-a\n")
+	require.Contains(t, output, "    │   └── api-0 (running) 1 container/s:\n")
+	require.Contains(t, output, "    │       └── 0: app (running) [cpu: 10m<100m | mem: 32Mi<128Mi]")
+	require.Contains(t, output, "    └── team-b\n")
+	require.NotContains(t, output, "team-a: api-0")
+}
+
 func TestViewNodeDataPrintoutScopedNamespacesRemainInline(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{

@@ -134,8 +134,9 @@ func (vnd ViewNodeData) Printout(cls bool) error {
 			vnd.printNamespaceGroupedPods(n.Pods, podIndent)
 			continue
 		}
+		showNamespaceInline := vnd.shouldShowNamespaceInline()
 		for pi, p := range n.Pods {
-			vnd.printPod(p, podIndent, pi == len(n.Pods)-1, vnd.Config.ShowNamespaces)
+			vnd.printPod(p, podIndent, pi == len(n.Pods)-1, showNamespaceInline)
 		}
 	}
 	return nil
@@ -184,6 +185,10 @@ func groupPodsByNamespace(pods []ViewPod, selectedNamespaces []string) []namespa
 		})
 	}
 	return groups
+}
+
+func (vnd ViewNodeData) shouldShowNamespaceInline() bool {
+	return vnd.Config.ShowNamespaces && !vnd.Config.GroupPodsByNamespace
 }
 
 func (vnd ViewNodeData) printPod(p ViewPod, podIndent string, isLast bool, showNamespaceInline bool) {

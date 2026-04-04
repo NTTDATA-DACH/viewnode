@@ -20,6 +20,30 @@ func TestParseNamespaces(t *testing.T) {
 	require.Equal(t, []string{"first", "second", "third"}, namespaces)
 }
 
+func TestBuildViewNodeDataConfigScopedNamespaceSelection(t *testing.T) {
+	config := buildViewNodeDataConfig(false, []string{"team-a"})
+
+	require.True(t, config.ShowNamespaces)
+	require.False(t, config.GroupPodsByNamespace)
+	require.Equal(t, []string{"team-a"}, config.SelectedNamespaces)
+}
+
+func TestBuildViewNodeDataConfigMultiNamespaceSelection(t *testing.T) {
+	config := buildViewNodeDataConfig(false, []string{"team-a", "team-b"})
+
+	require.True(t, config.ShowNamespaces)
+	require.True(t, config.GroupPodsByNamespace)
+	require.Equal(t, []string{"team-a", "team-b"}, config.SelectedNamespaces)
+}
+
+func TestBuildViewNodeDataConfigAllNamespacesIgnoresScopedSelectionCount(t *testing.T) {
+	config := buildViewNodeDataConfig(true, nil)
+
+	require.True(t, config.ShowNamespaces)
+	require.True(t, config.GroupPodsByNamespace)
+	require.Nil(t, config.SelectedNamespaces)
+}
+
 func resetRootCommandState() {
 	namespace = ""
 	allNamespacesFlag = false
