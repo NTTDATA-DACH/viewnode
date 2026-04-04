@@ -159,22 +159,24 @@ func (vnd ViewNodeData) printNamespaceGroupedPods(pods []ViewPod, podIndent stri
 }
 
 func groupPodsByNamespace(pods []ViewPod, selectedNamespaces []string) []namespaceGroup {
+	selectedNamespaceSet := make(map[string]struct{}, len(selectedNamespaces))
+	for _, namespace := range selectedNamespaces {
+		selectedNamespaceSet[namespace] = struct{}{}
+	}
 	groupsByNamespace := make(map[string][]ViewPod, len(pods))
-	namespaces := make([]string, 0, len(pods)+len(selectedNamespaces))
-	seenNamespaces := make(map[string]struct{}, len(pods)+len(selectedNamespaces))
+	namespaces := make([]string, 0, len(pods))
+	seenNamespaces := make(map[string]struct{}, len(pods))
 	for _, pod := range pods {
+		if len(selectedNamespaceSet) > 0 {
+			if _, ok := selectedNamespaceSet[pod.Namespace]; !ok {
+				continue
+			}
+		}
 		if _, ok := seenNamespaces[pod.Namespace]; !ok {
 			namespaces = append(namespaces, pod.Namespace)
 			seenNamespaces[pod.Namespace] = struct{}{}
 		}
 		groupsByNamespace[pod.Namespace] = append(groupsByNamespace[pod.Namespace], pod)
-	}
-	for _, namespace := range selectedNamespaces {
-		if _, ok := seenNamespaces[namespace]; ok {
-			continue
-		}
-		namespaces = append(namespaces, namespace)
-		seenNamespaces[namespace] = struct{}{}
 	}
 	sort.Strings(namespaces)
 	groups := make([]namespaceGroup, 0, len(namespaces))
