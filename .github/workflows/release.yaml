@@ -31,3 +31,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  update-krew-index:
+    needs: goreleaser
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Wait for release assets
+        uses: nick-fields/retry@v3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          timeout_minutes: 1
+          max_attempts: 10
+          retry_wait_seconds: 15
+          command: |
+            tag="${GITHUB_REF_NAME}"
+            for suffix in darwin_amd64 darwin_arm64 linux_amd64 windows_amd64; do
+              url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/viewnode_${tag}_${suffix}.tar.gz"
+              echo "Checking ${url}"
+              curl --fail --silent --head "${url}" > /dev/null
+            done
+
+      - name: Update new version in krew-index
+        uses: rajatjindal/krew-release-bot@v0.0.47
