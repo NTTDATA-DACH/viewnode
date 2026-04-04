@@ -100,8 +100,8 @@
 
 **Purpose**: Final verification across all implemented stories.
 
-- [ ] T018 Run full repository validation with make test from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
-- [ ] T019 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/059-namespace-view-output/contracts/namespace-filter-node-view-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/059-namespace-view-output/quickstart.md
+- [x] T018 Run full repository validation with make test from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
+- [x] T019 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/059-namespace-view-output/contracts/namespace-filter-node-view-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/059-namespace-view-output/quickstart.md
 
 ---
 

@@ -90,3 +90,18 @@ Started: 2026-04-04 13:04:08
 - The current renderer already preserved scoped summary and unscheduled behavior; the missing protection was a focused grouped-scope regression that exercises both populated and empty selected namespace rows alongside the summary lines.
 - The README needed both the grouped multi-namespace example and an empty-selected-namespace example to match the scoped output contract without forcing users to infer behavior from the `--all-namespaces` section.
 ---
+
+## Iteration 5 - 2026-04-04 13:15:24 CEST
+**User Story**: Polish & Cross-Cutting Concerns
+**Tasks Completed**:
+- [x] T018: Run full repository validation with `make test`
+- [x] T019: Review final behavior against the contract and quickstart artifacts
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- specs/059-namespace-view-output/progress.md
+- specs/059-namespace-view-output/tasks.md
+**Learnings**:
+- `make test` passes across the repository, including the scoped grouping coverage in `srv/view_test.go` and root wiring coverage in `cmd/root_test.go`.
+- The contract and quickstart expectations map cleanly to the shipped behavior: `cmd/root.go` enables grouped rendering only for multi-namespace scoped runs, `srv/view_test.go` covers alphabetical headings, empty selected namespaces, pod-order parity, container compatibility, and flat single-namespace output, and `README.md` documents the grouped examples.
+---
