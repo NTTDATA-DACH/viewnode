@@ -152,8 +152,10 @@ func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
 	}
 	vnd.Config.ShowNamespaces = allNamespacesFlag
 	vnd.Config.GroupPodsByNamespace = allNamespacesFlag
+	vnd.Config.SelectedNamespaces = selectedNamespaces
 	if len(selectedNamespaces) > 1 {
 		vnd.Config.ShowNamespaces = true
+		vnd.Config.GroupPodsByNamespace = true
 	}
 	vnd.Config.ShowContainers = showContainersFlag
 	vnd.Config.ShowTimes = showTimesFlag

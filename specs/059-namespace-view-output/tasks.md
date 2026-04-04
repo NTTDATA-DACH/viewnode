@@ -42,14 +42,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Add grouped scoped printout coverage for multi-namespace nodes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T005 [P] [US1] Add grouped scoped printout coverage for selected namespaces with no pods on a displayed node in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T006 [P] [US1] Add grouped scoped printout coverage for pod-order parity with `--all-namespaces` in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T004 [P] [US1] Add grouped scoped printout coverage for multi-namespace nodes in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T005 [P] [US1] Add grouped scoped printout coverage for selected namespaces with no pods on a displayed node in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T006 [P] [US1] Add grouped scoped printout coverage for pod-order parity with `--all-namespaces` in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Refactor selected-namespace parsing and grouped-render activation for multi-namespace scoped runs in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
-- [ ] T008 [US1] Refactor scheduled pod rendering to print alphabetical scoped namespace grouping rows, including empty selected namespaces, in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T007 [US1] Refactor selected-namespace parsing and grouped-render activation for multi-namespace scoped runs in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/root.go
+- [x] T008 [US1] Refactor scheduled pod rendering to print alphabetical scoped namespace grouping rows, including empty selected namespaces, in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
 
 **Checkpoint**: Multi-namespace `viewnode --namespace ...` shows grouped namespace tree output and remains independently testable.
 

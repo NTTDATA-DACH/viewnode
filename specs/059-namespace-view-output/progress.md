@@ -27,3 +27,23 @@ Started: 2026-04-04 13:04:08
 - The existing grouped renderer already preserves pod order within each namespace, so the prerequisite work only needed to merge selected namespaces into the grouping key set.
 - Adding `SelectedNamespaces` to `ViewNodeDataConfig` keeps future scoped grouping work in the view layer and avoids premature root-command behavior changes in this iteration.
 ---
+
+## Iteration 2 - 2026-04-04 13:45:00
+**User Story**: US1 - Group filtered pods under namespaces
+**Tasks Completed**:
+- [x] T004: Add grouped scoped printout coverage for multi-namespace nodes
+- [x] T005: Add grouped scoped printout coverage for selected namespaces with no pods on a displayed node
+- [x] T006: Add grouped scoped printout coverage for pod-order parity with `--all-namespaces`
+- [x] T007: Refactor selected-namespace parsing and grouped-render activation for multi-namespace scoped runs
+- [x] T008: Refactor scheduled pod rendering to print alphabetical scoped namespace grouping rows, including empty selected namespaces
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- cmd/root.go
+- specs/059-namespace-view-output/progress.md
+- specs/059-namespace-view-output/tasks.md
+- srv/view_test.go
+**Learnings**:
+- Multi-namespace scoped runs can reuse the existing grouped renderer as long as `cmd/root.go` passes the deduplicated selection through `SelectedNamespaces` and flips `GroupPodsByNamespace` only when more than one namespace is selected.
+- The grouped renderer coverage is more robust when it checks namespace heading order and pod-name order rather than hard-coding every tree prefix combination.
+---
