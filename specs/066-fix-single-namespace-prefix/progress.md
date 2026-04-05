@@ -69,3 +69,18 @@ Started: 2026-04-04 22:28:17
 - The single-vs-multi namespace split is fully controlled by `GroupPodsByNamespace` plus the selected namespace count, so one regression can lock both display modes together.
 - README examples were already visually correct; the missing piece was explicit wording that single-namespace stays flat while multi-namespace and all-namespaces stay grouped.
 ---
+## Iteration 4 - 2026-04-05 08:31:00 CEST
+**User Story**: Polish & Cross-Cutting Concerns
+**Tasks Completed**:
+- [x] T016: Run focused regression validation with `go test ./srv ./cmd`
+- [x] T017: Run full repository validation with `make test`
+- [x] T018: Review final behavior against the single-namespace output contract and quickstart
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- specs/066-fix-single-namespace-prefix/tasks.md
+- specs/066-fix-single-namespace-prefix/progress.md
+**Learnings**:
+- The focused `./srv` and `./cmd` test gate and the repository-wide `make test` gate both pass without requiring follow-up code changes.
+- The contract and quickstart remain aligned with the shipped behavior: the namespace header stays visible for single-namespace output while pod rows omit the redundant inline namespace prefix.
+---
