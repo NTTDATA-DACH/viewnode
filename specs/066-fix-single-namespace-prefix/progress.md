@@ -50,3 +50,22 @@ Started: 2026-04-04 22:28:17
 - Single-namespace flat rendering already preserved timing, metrics, and container detail output once the inline namespace toggle was corrected; additional coverage was enough to lock that in.
 - `cmd/buildViewNodeDataConfig` already keeps single-namespace selections flat (`GroupPodsByNamespace=false`), so no CLI wiring change was needed for the renderer fix.
 ---
+## Iteration 3 - 2026-04-05 08:21:06 CEST
+**User Story**: US3 - Keep Single-Namespace Output Consistent With Other Views
+**Tasks Completed**:
+- [x] T012: Add regression coverage that grouped multi-namespace behavior remains unchanged while single-namespace output uses the corrected flat row format in srv/view_test.go
+- [x] T013: Review and align single-namespace documentation examples with the corrected output in README.md
+- [x] T014: Keep multi-namespace and all-namespaces rendering behavior unchanged while finalizing the single-namespace formatter fix in srv/view.go
+- [x] T015: Update single-namespace examples and explanatory text in README.md
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- README.md
+- srv/view.go
+- srv/view_test.go
+- specs/066-fix-single-namespace-prefix/tasks.md
+- specs/066-fix-single-namespace-prefix/progress.md
+**Learnings**:
+- The single-vs-multi namespace split is fully controlled by `GroupPodsByNamespace` plus the selected namespace count, so one regression can lock both display modes together.
+- README examples were already visually correct; the missing piece was explicit wording that single-namespace stays flat while multi-namespace and all-namespaces stay grouped.
+---

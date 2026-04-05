@@ -679,6 +679,64 @@ func TestViewNodeDataPrintoutSingleScopedNamespaceKeepsAuxiliaryPodDetails(t *te
 	require.NotContains(t, output, "team-a: api-0")
 }
 
+func TestViewNodeDataPrintoutSingleNamespaceStaysFlatWhileMultiNamespaceRemainsGrouped(t *testing.T) {
+	nodes := []ViewNode{
+		{Name: ""},
+		{
+			Name:             "worker-a",
+			Os:               "linux",
+			Arch:             "amd64",
+			ContainerRuntime: "containerd://2.2.0",
+			Pods: []ViewPod{
+				{Name: "api-0", Namespace: "team-a", Phase: "Running"},
+				{Name: "jobs-0", Namespace: "team-b", Phase: "Pending"},
+			},
+		},
+	}
+
+	singleNamespaceOutput := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:     true,
+			SelectedNamespaces: []string{"team-a"},
+		},
+		Namespace: "team-a",
+		Nodes: []ViewNode{
+			nodes[0],
+			{
+				Name:             nodes[1].Name,
+				Os:               nodes[1].Os,
+				Arch:             nodes[1].Arch,
+				ContainerRuntime: nodes[1].ContainerRuntime,
+				Pods: []ViewPod{
+					nodes[1].Pods[0],
+				},
+			},
+		},
+	})
+	multiNamespaceOutput := captureViewOutput(t, ViewNodeData{
+		Config: ViewNodeDataConfig{
+			ShowNamespaces:       true,
+			GroupPodsByNamespace: true,
+			SelectedNamespaces:   []string{"team-a", "team-b"},
+		},
+		Namespace: "team-a,team-b",
+		Nodes:     nodes,
+	})
+
+	require.Contains(t, singleNamespaceOutput, "namespace(s): team-a\n")
+	require.Contains(t, singleNamespaceOutput, "    └── api-0 (running)\n")
+	require.NotContains(t, singleNamespaceOutput, "    └── team-a\n")
+	require.NotContains(t, singleNamespaceOutput, "team-a: api-0")
+
+	require.Contains(t, multiNamespaceOutput, "namespace(s): team-a,team-b\n")
+	require.Contains(t, multiNamespaceOutput, "    ├── team-a\n")
+	require.Contains(t, multiNamespaceOutput, "    │   └── api-0 (running)\n")
+	require.Contains(t, multiNamespaceOutput, "    └── team-b\n")
+	require.Contains(t, multiNamespaceOutput, "        └── jobs-0 (pending)\n")
+	require.NotContains(t, multiNamespaceOutput, "team-a: api-0")
+	require.NotContains(t, multiNamespaceOutput, "team-b: jobs-0")
+}
+
 func TestViewNodeDataPrintoutScopedNamespacesKeepTreeContainerRenderingCompatibility(t *testing.T) {
 	output := captureViewOutput(t, ViewNodeData{
 		Config: ViewNodeDataConfig{

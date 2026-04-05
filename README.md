@@ -75,6 +75,7 @@ namespace(s): jenkins-onprem
     ├── docker-in-the-cloud-342-r5khq-9cx2w (running)
     └── liveness-test-4-boom (failed)
 ```
+When exactly one namespace is in scope, `viewnode` prints that namespace once in the header and keeps pod rows flat without repeating `<namespace>: ` before each pod name.
 Showing nodes, pods and containers:
 ```
 $ viewnode --show-containers
@@ -193,6 +194,7 @@ $ viewnode --namespace jenkins-onprem,default
         ├── docker-in-the-cloud-337-4c4lm-q3mtp (running)
         └── docker-in-the-cloud-342-r5khq-9cx2w (running)
 ```
+When more than one namespace is selected, `viewnode` switches to the grouped namespace tree shown above so the multi-namespace and `--all-namespaces` layouts stay consistent.
 Selected namespaces continue to show the existing totals, unscheduled pod summary, and node pod counts while using the same grouped tree layout as `--all-namespaces`.
 Per-node namespace grouping follows the same inclusion rule as `--all-namespaces`: only namespaces with matching pods on that node are rendered, while nodes without matches still stay visible:
 ```

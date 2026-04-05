@@ -82,13 +82,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T012 [P] [US3] Add regression coverage that grouped multi-namespace behavior remains unchanged while single-namespace output uses the corrected flat row format in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
-- [ ] T013 [P] [US3] Review and align single-namespace documentation examples with the corrected output in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T012 [P] [US3] Add regression coverage that grouped multi-namespace behavior remains unchanged while single-namespace output uses the corrected flat row format in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view_test.go
+- [x] T013 [P] [US3] Review and align single-namespace documentation examples with the corrected output in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Keep multi-namespace and all-namespaces rendering behavior unchanged while finalizing the single-namespace formatter fix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
-- [ ] T015 [US3] Update single-namespace examples and explanatory text in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T014 [US3] Keep multi-namespace and all-namespaces rendering behavior unchanged while finalizing the single-namespace formatter fix in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/srv/view.go
+- [x] T015 [US3] Update single-namespace examples and explanatory text in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 **Checkpoint**: The fix is consistent with other namespace display modes and the README matches shipped behavior.
 

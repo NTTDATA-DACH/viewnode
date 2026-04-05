@@ -190,13 +190,13 @@ func groupPodsByNamespace(pods []ViewPod, selectedNamespaces []string) []namespa
 }
 
 func (vnd ViewNodeData) shouldShowNamespaceInline() bool {
-	if !vnd.Config.ShowNamespaces || vnd.Config.GroupPodsByNamespace {
+	if !vnd.Config.ShowNamespaces {
 		return false
 	}
-	if len(vnd.Config.SelectedNamespaces) == 1 {
+	if vnd.Config.GroupPodsByNamespace {
 		return false
 	}
-	return true
+	return len(vnd.Config.SelectedNamespaces) != 1
 }
 
 func (vnd ViewNodeData) printPod(p ViewPod, podIndent string, isLast bool, showNamespaceInline bool) {
