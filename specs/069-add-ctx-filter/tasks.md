@@ -96,8 +96,8 @@
 
 **Purpose**: Final verification across all implemented stories.
 
-- [ ] T014 Run full repository validation with make test from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
-- [ ] T015 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/contracts/ctx-filter-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/quickstart.md
+- [x] T014 Run full repository validation with make test from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
+- [x] T015 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/contracts/ctx-filter-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/quickstart.md
 
 ---
 

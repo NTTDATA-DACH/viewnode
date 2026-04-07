@@ -67,3 +67,18 @@ Started: 2026-04-07 09:35:13
 - The README keeps command discovery compact by showing `ctx list` examples inline with `get-current` and `set-current`, so the new filter behavior fits best as additional context-list examples plus one short explanatory sentence.
 - `ctx ls` was already an implemented alias but missing from the context command alias list, so documenting it here keeps the README aligned with the CLI surface while updating the filter examples.
 ---
+
+## Iteration 4 - 2026-04-07 09:45 CEST
+**User Story**: Polish & Cross-Cutting Concerns
+**Tasks Completed**:
+- [x] T014 Run full repository validation with make test from /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/Makefile
+- [x] T015 Review final behavior against /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/contracts/ctx-filter-contract.md and /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/quickstart.md
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- specs/069-add-ctx-filter/tasks.md
+- specs/069-add-ctx-filter/progress.md
+**Learnings**:
+- `make test` is the right final gate for this feature because the change touches command logic, command tests, and README documentation without expanding beyond the existing repo-native surfaces.
+- The final contract review is traceable directly in repository artifacts: `cmd/ctx/list.go`, `cmd/ctx/ctx_test.go`, and `README.md` all match the exact no-match wording, case-insensitive filtering semantics, and filtered-out active-context behavior described in the feature contract and quickstart.
+---
