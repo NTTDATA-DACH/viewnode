@@ -1,0 +1,9 @@
+description = "Run the ralph autonomous implementation loop"
+
+prompt = """
+Activate the `speckit-ralph-run` skill and follow its instructions to process the following input:
+
+```text
+$ARGUMENTS
+```
+"""
