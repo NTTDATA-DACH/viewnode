@@ -1,0 +1,9 @@
+description = "Create or update a Speckit feature specification from a GitHub issue URL or issue-backed feature request, while forcing the feature number to match the issue number."
+
+prompt = """
+Please activate the `gvb-ghissue-to-speckit` skill and follow its instructions to process the following GitHub issue and feature description:
+
+```text
+$ARGUMENTS
+```
+"""
