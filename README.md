@@ -221,6 +221,16 @@ $ viewnode ctx list
 [*] dev-cluster
 [ ] staging-cluster
 
+$ viewnode ctx list --filter prod
+[ ] prod-admin
+[*] prod-cluster
+
+$ viewnode ctx list -f staging
+[ ] staging-cluster
+
+$ viewnode ctx list -f does-not-exist
+no contexts matched filter "does-not-exist"
+
 $ viewnode ctx get-current
 dev-cluster
 
@@ -228,7 +238,10 @@ $ viewnode ctx set-current staging-cluster
 current context set to staging-cluster
 ```
 
+`viewnode ctx list --filter` and `viewnode ctx list -f` apply a case-insensitive substring match to context names. An empty filter behaves like `viewnode ctx list`.
+
 Aliases:
+- `viewnode ctx ls`
 - `viewnode ctx getcurrent`
 - `viewnode ctx setcurrent staging-cluster`
 
