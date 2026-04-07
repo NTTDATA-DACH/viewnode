@@ -51,3 +51,19 @@ Started: 2026-04-07 09:35:13
 - The filtered no-match path belongs in `cmd/ctx/list.go` rather than shared listing helpers because it is specific to the `ctx list` command contract and must return success without rendering any rows.
 - Existing filtered-output behavior already omitted the active marker when the current context was excluded, so the story only needed the explicit no-match success path plus regression coverage to lock the contract in place.
 ---
+
+## Iteration 3 - 2026-04-07 09:43 CEST
+**User Story**: US3 - Learn the new option from documentation
+**Tasks Completed**:
+- [x] T012 [P] [US3] Verify README context command examples align with the CLI contract
+- [x] T013 [US3] Update context command reference and usage examples for `viewnode ctx list --filter` / `-f`
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- README.md
+- specs/069-add-ctx-filter/tasks.md
+- specs/069-add-ctx-filter/progress.md
+**Learnings**:
+- The README keeps command discovery compact by showing `ctx list` examples inline with `get-current` and `set-current`, so the new filter behavior fits best as additional context-list examples plus one short explanatory sentence.
+- `ctx ls` was already an implemented alias but missing from the context command alias list, so documenting it here keeps the README aligned with the CLI surface while updating the filter examples.
+---

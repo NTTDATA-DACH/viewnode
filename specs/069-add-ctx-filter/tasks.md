@@ -82,11 +82,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T012 [P] [US3] Verify README context command examples align with /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/contracts/ctx-filter-contract.md in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T012 [P] [US3] Verify README context command examples align with /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/contracts/ctx-filter-contract.md in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] Update context command reference and usage examples for `viewnode ctx list --filter` / `-f` in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
+- [x] T013 [US3] Update context command reference and usage examples for `viewnode ctx list --filter` / `-f` in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/README.md
 
 **Checkpoint**: Users can discover the new context filtering behavior from the maintained CLI documentation alone.
 
