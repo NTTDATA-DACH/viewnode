@@ -17,7 +17,7 @@
 
 **Purpose**: Align implementation work with the approved spec, plan, and CLI contract before code changes begin.
 
-- [ ] T001 Review implementation scope and verification targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/plan.md
+- [x] T001 Review implementation scope and verification targets in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/specs/069-add-ctx-filter/plan.md
 
 ---
 
@@ -27,8 +27,8 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T002 Create context filter normalization and case-insensitive matching helpers in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
-- [ ] T003 [P] Add focused helper coverage for empty and case-insensitive context filters in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
+- [x] T002 Create context filter normalization and case-insensitive matching helpers in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
+- [x] T003 [P] Add focused helper coverage for empty and case-insensitive context filters in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
 
 **Checkpoint**: Context filtering rules are defined and regression-tested before user-facing command changes.
 
@@ -42,13 +42,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Add command-tree coverage for `viewnode ctx list --filter` long-flag matching in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
-- [ ] T005 [P] [US1] Add command-tree coverage for `viewnode ctx list -f` shorthand matching and empty-filter fallback in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
+- [x] T004 [P] [US1] Add command-tree coverage for `viewnode ctx list --filter` long-flag matching in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
+- [x] T005 [P] [US1] Add command-tree coverage for `viewnode ctx list -f` shorthand matching and empty-filter fallback in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Add local `--filter` / `-f` flag wiring and case-insensitive context filtering to /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
-- [ ] T007 [US1] Preserve filtered context ordering and active-context rendering through the existing entry preparation path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
+- [x] T006 [US1] Add local `--filter` / `-f` flag wiring and case-insensitive context filtering to /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
+- [x] T007 [US1] Preserve filtered context ordering and active-context rendering through the existing entry preparation path in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
 
 **Checkpoint**: `viewnode ctx list` supports filter-driven context narrowing and remains independently testable.
 
