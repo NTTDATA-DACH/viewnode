@@ -63,6 +63,8 @@
 ## Active Technologies
 - Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/sirupsen/logrus`, `github.com/stretchr/testify` (059-namespace-view-output)
 - Kubeconfig files plus live Kubernetes API data for node and pod discovery (059-namespace-view-output)
+- Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/stretchr/testify`, `github.com/sirupsen/logrus` (069-add-ctx-filter)
+- Kubeconfig files for raw context discovery and current-context selection state (069-add-ctx-filter)
 
 ## Recent Changes
 - 059-namespace-view-output: Added Go 1.25.0 (toolchain go1.25.7) + `github.com/spf13/cobra`, `k8s.io/client-go`, `k8s.io/apimachinery`, `github.com/sirupsen/logrus`, `github.com/stretchr/testify`
