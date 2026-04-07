@@ -42,6 +42,10 @@ var listCmd = &cobra.Command{
 			ctxs = append(ctxs, k)
 		}
 		ctxs = filterContextNames(ctxs, filterValue)
+		if filterValue != "" && len(ctxs) == 0 {
+			fmt.Printf("no contexts matched filter %q\n", filterValue)
+			return nil
+		}
 
 		for _, entry := range listing.PrepareContextEntries(ctxs, rawConfig.CurrentContext) {
 			marker := " "

@@ -62,13 +62,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US2] Add no-match success-path coverage for `viewnode ctx list --filter` in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
-- [ ] T009 [P] [US2] Add filtered-out-current-context coverage for active-marker omission in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
+- [x] T008 [P] [US2] Add no-match success-path coverage for `viewnode ctx list --filter` in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
+- [x] T009 [P] [US2] Add filtered-out-current-context coverage for active-marker omission in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/ctx_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Add the exact success-path no-match message `no contexts matched filter "<value>"` to /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
-- [ ] T011 [US2] Preserve matching-only filtered output when the current context is excluded in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
+- [x] T010 [US2] Add the exact success-path no-match message `no contexts matched filter "<value>"` to /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
+- [x] T011 [US2] Preserve matching-only filtered output when the current context is excluded in /Users/adam.boczek/Development/Workspace/NTTDATA/viewnode/cmd/ctx/list.go
 
 **Checkpoint**: Filtered no-match and current-context-filtered-out outcomes are clear, successful, and covered by regression tests.
 

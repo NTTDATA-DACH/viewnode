@@ -356,6 +356,45 @@ func TestListCmdRunETreatsEmptyFilterLikeNoFilter(t *testing.T) {
 	require.Equal(t, "[*] dev-cluster\n[ ] staging-cluster\n", output)
 }
 
+func TestListCmdRunEPrintsNoMatchMessageForFilteredContexts(t *testing.T) {
+	originalInitializeConfig := initializeConfig
+	originalCurrentSetup := currentSetup
+	t.Cleanup(func() {
+		initializeConfig = originalInitializeConfig
+		currentSetup = originalCurrentSetup
+	})
+
+	rawConfig, err := clientcmd.Load([]byte(kubeConfigFixture))
+	require.NoError(t, err)
+
+	setup := &config.Setup{
+		ClientConfig: clientcmd.NewDefaultClientConfig(*rawConfig, &clientcmd.ConfigOverrides{}),
+	}
+	initializeConfig = func(cmd *cobra.Command) (*config.Setup, error) {
+		return setup, nil
+	}
+	currentSetup = func() *config.Setup {
+		return setup
+	}
+
+	rootCmd := &cobra.Command{Use: "viewnode"}
+	rootCmd.PersistentFlags().String("kubeconfig", "", "")
+	rootCmd.Flags().StringP("node-filter", "f", "", "")
+	ctxCmd := &cobra.Command{Use: "ctx"}
+	testListCmd := &cobra.Command{Use: "list", RunE: listCmd.RunE}
+	testListCmd.Flags().StringVarP(&contextFilter, "filter", "f", "", "show only contexts according to filter")
+	ctxCmd.AddCommand(testListCmd)
+	rootCmd.AddCommand(ctxCmd)
+
+	output := captureStdout(t, func() {
+		rootCmd.SetArgs([]string{"ctx", "list", "--filter", "does-not-exist"})
+		err := rootCmd.Execute()
+		require.NoError(t, err)
+	})
+
+	require.Equal(t, "no contexts matched filter \"does-not-exist\"\n", output)
+}
+
 func TestListCmdRunEOmitsActiveMarkerWhenCurrentContextIsFilteredOut(t *testing.T) {
 	originalInitializeConfig := initializeConfig
 	originalCurrentSetup := currentSetup
