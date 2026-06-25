@@ -40,7 +40,20 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Stable CLI Contracts**: Document any command, flag, alias, exit behavior, or
+  terminal output change. Confirm README/help updates are planned for
+  user-facing changes.
+- **Kubernetes Compatibility Boundaries**: Identify kubeconfig, context,
+  namespace, node, pod, container, metrics, permission, and empty-result behavior
+  in scope. Justify any change to Kubernetes library versions or access patterns.
+- **Test-Backed Behavior Changes**: List nearby Go tests that will be added or
+  updated for behavior changes, bug fixes, and refactors. Explain any test
+  omission for documentation-only or generated metadata changes.
+- **Small, Traceable Delivery**: Confirm user stories are independently
+  verifiable, task paths are exact, and no parallel command/configuration/service
+  structure is introduced without justification.
+- **Documentation and Operability Parity**: Identify README, CLI help, examples,
+  warnings, fatal errors, or logging updates needed for the change.
 
 ## Project Structure
 
