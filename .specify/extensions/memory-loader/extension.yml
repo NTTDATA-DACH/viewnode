@@ -1,0 +1,61 @@
+schema_version: "1.0"
+
+extension:
+  id: "memory-loader"
+  name: "Memory Loader"
+  version: "1.0.0"
+  description: "Loads .specify/memory/ files before spec-kit lifecycle commands so LLM agents have project governance context"
+  author: "KevinBrown5280"
+  repository: "https://github.com/KevinBrown5280/spec-kit-memory-loader"
+  license: "MIT"
+  homepage: "https://github.com/KevinBrown5280/spec-kit-memory-loader"
+
+requires:
+  speckit_version: ">=0.6.0"
+
+provides:
+  commands:
+    - name: "speckit.memory-loader.load"
+      file: "commands/speckit.memory-loader.load.md"
+      description: "Read all project memory files and output their contents for context"
+
+hooks:
+  before_specify:
+    command: "speckit.memory-loader.load"
+    optional: false
+    description: "Load project memory files before specification"
+
+  before_plan:
+    command: "speckit.memory-loader.load"
+    optional: false
+    description: "Load project memory files before planning"
+
+  before_tasks:
+    command: "speckit.memory-loader.load"
+    optional: false
+    description: "Load project memory files before task generation"
+
+  before_implement:
+    command: "speckit.memory-loader.load"
+    optional: false
+    description: "Load project memory files before implementation"
+
+  before_clarify:
+    command: "speckit.memory-loader.load"
+    optional: false
+    description: "Load project memory files before clarification"
+
+  before_checklist:
+    command: "speckit.memory-loader.load"
+    optional: false
+    description: "Load project memory files before checklist generation"
+
+  before_analyze:
+      command: "speckit.memory-loader.load"
+      optional: false
+      description: "Load project memory files before analysis"
+
+tags:
+  - "memory"
+  - "context"
+  - "governance"

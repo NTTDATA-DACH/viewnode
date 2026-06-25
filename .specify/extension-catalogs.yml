@@ -1,0 +1,6 @@
+catalogs:
+  - name: ai-tooling-speckit
+    url: https://raw.githubusercontent.com/grafvonb/ai-tooling-speckit/main/extensions/catalog.json
+    priority: 1
+    install_allowed: true
+    description: Curated ai-tooling Speckit extension catalog

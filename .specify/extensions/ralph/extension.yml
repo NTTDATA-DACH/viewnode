@@ -1,0 +1,52 @@
+schema_version: "1.0"
+
+extension:
+  id: "ralph"
+  name: "Ralph Loop"
+  version: "1.2.0"
+  description: "Autonomous implementation loop using AI agent CLI"
+  author: "Rubiss"
+  repository: "https://github.com/Rubiss/spec-kit-ralph"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.1.0"
+  tools:
+    - name: "git"
+      required: true
+
+provides:
+  commands:
+    - name: "speckit.ralph.run"
+      file: "commands/run.md"
+      description: "Run the ralph autonomous implementation loop"
+
+    - name: "speckit.ralph.iterate"
+      file: "commands/iterate.md"
+      description: "Execute a single ralph loop iteration (one work unit)"
+
+  config:
+    - name: "ralph-config.yml"
+      template: "ralph-config.template.yml"
+      description: "Ralph loop configuration (model, iterations, agent CLI)"
+      required: false
+
+hooks:
+  after_tasks:
+    command: "speckit.ralph.run"
+    optional: true
+    prompt: "Run ralph loop to implement tasks?"
+    description: "Start autonomous implementation after task generation"
+
+tags:
+  - "implementation"
+  - "automation"
+  - "loop"
+  - "copilot"
+  - "codex"
+
+defaults:
+  model: "claude-sonnet-4.6"
+  max_iterations: 10
+  agent_cli: "copilot"
+  agent_backend: "auto"

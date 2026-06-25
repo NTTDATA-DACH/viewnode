@@ -1,0 +1,123 @@
+installed:
+- agent-governance
+- arch
+- doctor
+- memory-loader
+- ralph
+- staff-review
+- status
+- verify
+- verify-tasks
+settings:
+  auto_execute_hooks: true
+hooks:
+  after_tasks:
+  - extension: agent-governance
+    command: speckit.agent-governance.refresh
+    enabled: true
+    optional: true
+    prompt: Refresh agent governance after task generation?
+    description: Keeps the active agent platform governance file aligned
+    condition: null
+  - extension: ralph
+    command: speckit.ralph.run
+    enabled: true
+    optional: true
+    prompt: Run ralph loop to implement tasks?
+    description: Start autonomous implementation after task generation
+    condition: null
+  before_specify:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before specification
+    condition: null
+  before_plan:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before planning
+    condition: null
+  before_tasks:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before task generation
+    condition: null
+  before_implement:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before implementation
+    condition: null
+  before_clarify:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before clarification
+    condition: null
+  before_checklist:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before checklist generation
+    condition: null
+  before_analyze:
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before analysis
+    condition: null
+  after_implement:
+  - extension: verify-tasks
+    command: speckit.verify-tasks.run
+    enabled: true
+    optional: true
+    prompt: Run verify-tasks in a fresh session to check for phantom completions
+    description: Post-implementation phantom completion detector
+    condition: null
+  - extension: verify
+    command: speckit.verify.run
+    enabled: true
+    optional: true
+    prompt: Run verify to validate implementation against specification?
+    description: Post-implementation verification gate
+    condition: null
+  - extension: staff-review
+    command: speckit.staff-review.run
+    enabled: true
+    optional: true
+    prompt: Run staff-level code review?
+    description: Reviews implementation changes against spec for correctness, security,
+      and quality
+    condition: null
+  after_constitution:
+  - extension: agent-governance
+    command: speckit.agent-governance.refresh
+    enabled: true
+    optional: true
+    prompt: Refresh agent governance after constitution changes?
+    description: Generates the active agent platform governance file
+    condition: null
+  after_plan:
+  - extension: agent-governance
+    command: speckit.agent-governance.refresh
+    enabled: true
+    optional: true
+    prompt: Refresh agent governance after planning?
+    description: Keeps the active agent platform governance file aligned
+    condition: null
