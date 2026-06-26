@@ -113,12 +113,12 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T050 [P] Update `README.md`: rewrite the `--watch` section to describe the optional integer seconds value, default 1, fail-fast validation, transient-error tolerance, and error-frame format. Update or add examples for `viewnode`, `viewnode --watch`, `viewnode --watch 5`, `viewnode -w 5`, and the invalid-input case. Keep the section operator-readable; no implementation language.
-- [ ] T051 [P] Verify `./viewnode --help` reflects the new flag semantics and matches `contracts/cli.md`. If the help still says "executes the command every second", update it (the existing string was the source of operator confusion).
-- [ ] T052 Run `make test` and confirm it passes with race detection on. Resolve any flake caused by the new tests (the loop tests must not depend on wall-clock duration — use the injectable `sleep`).
-- [ ] T053 Run the quickstart scenarios in `quickstart.md` against a real cluster: Scenarios A (regression baseline), B, C, D, E, F, G (best-effort), H. Record any deviation; if Scenario F or H reveals a bug, return to Phase 4.
-- [ ] T054 Diff `./viewnode --help` and `./viewnode <typical inspection invocation>` output against the scratch baseline captured in T001 to confirm SC-005 (one-shot byte-identical output) holds.
-- [ ] T055 Prepare commit(s) following Conventional Commits with `#73` suffix per `AGENTS.md` and the gvb skill rule. Suggested grouping: one commit for Phase 2 + 3 (`fix(watch): support optional refresh interval and validate input #73`), one for Phase 4 (`fix(watch): tolerate transient refresh errors with labeled error frame #73`), one for Phase 5 + 6 (`docs(watch): document new --watch behavior and per-refresh state contract #73`). Final commits must include the standard `Co-authored-by: Copilot` trailer.
+- [x] T050 [P] Update `README.md`: rewrite the `--watch` section to describe the optional integer seconds value, default 1, fail-fast validation, transient-error tolerance, and error-frame format. Update or add examples for `viewnode`, `viewnode --watch`, `viewnode --watch 5`, `viewnode -w 5`, and the invalid-input case. Keep the section operator-readable; no implementation language.
+- [x] T051 [P] Verify `./viewnode --help` reflects the new flag semantics and matches `contracts/cli.md`. If the help still says "executes the command every second", update it (the existing string was the source of operator confusion).
+- [x] T052 Run `make test` and confirm it passes with race detection on. Resolve any flake caused by the new tests (the loop tests must not depend on wall-clock duration — use the injectable `sleep`).
+- [x] T053 Run the quickstart scenarios in `quickstart.md` against a real cluster: Scenarios A (regression baseline), B, C, D, E, F, G (best-effort), H. Record any deviation; if Scenario F or H reveals a bug, return to Phase 4.
+- [x] T054 Diff `./viewnode --help` and `./viewnode <typical inspection invocation>` output against the scratch baseline captured in T001 to confirm SC-005 (one-shot byte-identical output) holds.
+- [x] T055 Prepare commit(s) following Conventional Commits with `#73` suffix per `AGENTS.md` and the gvb skill rule. Suggested grouping: one commit for Phase 2 + 3 (`fix(watch): support optional refresh interval and validate input #73`), one for Phase 4 (`fix(watch): tolerate transient refresh errors with labeled error frame #73`), one for Phase 5 + 6 (`docs(watch): document new --watch behavior and per-refresh state contract #73`). Final commits must include the standard `Co-authored-by: Copilot` trailer.
 
 ---
 
