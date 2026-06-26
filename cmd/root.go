@@ -40,6 +40,10 @@ var runOnceFunc func(context.Context) error
 var runWatchFunc func(context.Context, time.Duration, func(context.Context) error, func(context.Context, time.Duration) error) error
 var sleepFunc func(context.Context, time.Duration) error
 var withSignalNotifyContext = signal.NotifyContext
+var handleRootCommandError = func(err error) error {
+	log.Fatal(err)
+	return nil
+}
 
 func parseNamespaces(value string) []string {
 	if value == "" {
@@ -100,9 +104,8 @@ You can find the source code and usage documentation at GitHub: https://github.c
 		defer stop()
 
 		if err := executeRootCommand(ctx); err != nil {
-			log.Fatal(err)
+			return handleRootCommandError(err)
 		}
-
 		return nil
 	},
 }

@@ -82,6 +82,9 @@ func resetRootCommandState() {
 	runOnceFunc = runOnce
 	runWatchFunc = runWatch
 	sleepFunc = productionSleep
+	handleRootCommandError = func(err error) error {
+		return err
+	}
 	resetFlagSet(RootCmd.Flags())
 	resetFlagSet(RootCmd.PersistentFlags())
 }

@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
+
 	"viewnode/cmd/config"
 	"viewnode/srv"
 
@@ -28,6 +30,7 @@ func runOnce(ctx context.Context) error {
 	return executePrintOut(vnd)
 }
 
+// runWatch is entered only after the first refresh has already succeeded via runOnce in RootCmd.RunE.
 func runWatch(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error {
 	for {
 		if err := sleep(ctx, interval); err != nil {
@@ -36,10 +39,26 @@ func runWatch(ctx context.Context, interval time.Duration, runOnce func(context.
 			}
 			return err
 		}
+		start := time.Now()
 		if err := runOnce(ctx); err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			renderRefreshError(start, err)
+			continue
+		}
+		if err := ctx.Err(); err != nil {
+			if errors.Is(err, context.Canceled) {
+				return nil
+			}
 			return err
 		}
 	}
+}
+
+func renderRefreshError(start time.Time, err error) {
+	fmt.Fprint(os.Stdout, "\033[2J\033[0;0H")
+	fmt.Fprintf(os.Stdout, "[%s] watch refresh failed: %s\n", start.Format(time.RFC3339), err.Error())
 }
 
 func productionSleep(ctx context.Context, interval time.Duration) error {

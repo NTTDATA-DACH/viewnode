@@ -3,9 +3,13 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"errors"
+	"io"
+	"strings"
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -212,4 +216,101 @@ func TestRunWatchSleepsAfterEachCompletedRefresh(t *testing.T) {
 	require.Equal(t, interval, sleepCalls[0].interval)
 	require.Equal(t, interval, sleepCalls[1].interval)
 	require.False(t, sleepCalls[1].at.Before(runEnds[0]))
+}
+
+func TestRunWatchRendersTransientErrorsAndContinues(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	interval := 10 * time.Millisecond
+	outcomes := []error{
+		nil,
+		errors.New("conn refused"),
+		errors.New("api timeout"),
+		nil,
+	}
+
+	var (
+		events   []string
+		runCount int
+	)
+
+	output := captureStdout(t, func() {
+		err := runWatch(ctx, interval, func(context.Context) error {
+			events = append(events, "run")
+			err := outcomes[runCount]
+			runCount++
+			if runCount == len(outcomes) {
+				cancel()
+			}
+			return err
+		}, func(ctx context.Context, duration time.Duration) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			require.Equal(t, interval, duration)
+			events = append(events, "sleep")
+			return nil
+		})
+
+		require.NoError(t, err)
+	})
+
+	require.Equal(t, 4, runCount)
+	require.Equal(t, []string{"sleep", "run", "sleep", "run", "sleep", "run", "sleep", "run"}, events)
+	require.Equal(t, 2, strings.Count(output, "watch refresh failed:"))
+	require.Contains(t, output, "watch refresh failed: conn refused")
+	require.Contains(t, output, "watch refresh failed: api timeout")
+}
+
+func TestRootCmdWatchFirstRefreshFailureReturnsUnderlyingErrorAndSkipsWatchLoop(t *testing.T) {
+	resetRootCommandState()
+
+	originalLoggerOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.SetOutput(originalLoggerOutput)
+		log.SetFormatter(originalFormatter)
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	var (
+		output          bytes.Buffer
+		watchLoopCalled bool
+		expectedErr     = errors.New("first refresh failed")
+	)
+
+	log.SetOutput(io.Discard)
+	log.SetFormatter(&log.TextFormatter{DisableTimestamp: true})
+	handleRootCommandError = func(err error) error {
+		return err
+	}
+	runOnceFunc = func(_ context.Context) error {
+		return expectedErr
+	}
+	runWatchFunc = func(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error {
+		watchLoopCalled = true
+		return nil
+	}
+
+	RootCmd.SetErr(&output)
+	RootCmd.SetArgs([]string{"--watch"})
+
+	err := RootCmd.Execute()
+
+	require.ErrorIs(t, err, expectedErr)
+	require.False(t, watchLoopCalled)
+}
+
+func TestRenderRefreshErrorMatchesContract(t *testing.T) {
+	start := time.Date(2026, time.June, 26, 10, 15, 0, 0, time.UTC)
+
+	output := captureStdout(t, func() {
+		renderRefreshError(start, errors.New("decorated failure"))
+	})
+
+	require.Equal(t, "\033[2J\033[0;0H[2026-06-26T10:15:00Z] watch refresh failed: decorated failure\n", output)
 }

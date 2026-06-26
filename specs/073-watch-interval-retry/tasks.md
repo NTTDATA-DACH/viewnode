@@ -75,20 +75,20 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
 
 **Independent Test**: Start `./viewnode -w 2` against a reachable cluster; between refreshes, make the cluster unreachable; observe the error frame and the loop continuing; restore connectivity and observe normal frames; press Ctrl-C and observe exit 0.
 
-- [ ] T030 [US2] In `cmd/watch.go`, implement the loop-state logic in `runWatch`:
+- [x] T030 [US2] In `cmd/watch.go`, implement the loop-state logic in `runWatch`:
   - Treat the **first** `runOnce` call as part of the foundational handoff in `RootCmd.Run` (already done in T021 — first refresh runs through the single-run path and its error returns to the caller before `runWatch` is entered). Document in a code comment that `runWatch` is entered only after the first refresh succeeded.
   - Inside `runWatch`, every `runOnce` error must be rendered as an error frame (via T031) and the loop must continue with `sleep(ctx, interval)`. The loop exits only when `ctx.Done()` fires.
-- [ ] T031 [US2] Add an `renderRefreshError(start time.Time, err error)` helper in `cmd/watch.go` that writes a single block to stderr (or the same stream existing refresh output uses; mirror the current writer) in the exact format from `contracts/cli.md`:
+- [x] T031 [US2] Add an `renderRefreshError(start time.Time, err error)` helper in `cmd/watch.go` that writes a single block to stderr (or the same stream existing refresh output uses; mirror the current writer) in the exact format from `contracts/cli.md`:
 
   ```
   [<RFC3339 timestamp>] watch refresh failed: <decorated error text>
   ```
 
   Where `<decorated error text>` is `err.Error()` (errors from `srv` are already decorated by `srv.DecorateError`). Do not append a rolling log; this single block replaces the failing refresh's normal frame.
-- [ ] T032 [P] [US2] Add a unit test in `cmd/watch_test.go` for transient-error tolerance (FR-008, SC-002):
+- [x] T032 [P] [US2] Add a unit test in `cmd/watch_test.go` for transient-error tolerance (FR-008, SC-002):
   - Script `runOnce` to return a sequence: success, error("conn refused"), error("api timeout"), success, then cancel `ctx`.
   - Assert: `runWatch` returns `nil` (clean exit from cancellation); both errors were rendered via `renderRefreshError` to the captured writer; the loop made all four `runOnce` calls; `sleep` was called between each pair.
-- [ ] T033 [P] [US2] Add a unit test in `cmd/watch_test.go` for the first-refresh-failure path (clarification Q1): drive `RootCmd.Run` with a stubbed `runOnce` that fails on its first call; assert the process path returns the underlying error to Cobra (so `log.Fatal` / Cobra's error reporting produce the same non-zero exit as one-shot), and `runWatch` was never entered. Use a small test seam (export `runOnce` via package-level variable for tests, or refactor `RootCmd.Run` into a thin wrapper around a testable function — pick whichever keeps the diff smallest).
+- [x] T033 [P] [US2] Add a unit test in `cmd/watch_test.go` for the first-refresh-failure path (clarification Q1): drive `RootCmd.Run` with a stubbed `runOnce` that fails on its first call; assert the process path returns the underlying error to Cobra (so `log.Fatal` / Cobra's error reporting produce the same non-zero exit as one-shot), and `runWatch` was never entered. Use a small test seam (export `runOnce` via package-level variable for tests, or refactor `RootCmd.Run` into a thin wrapper around a testable function — pick whichever keeps the diff smallest).
 
 **Checkpoint**: US1 + US2 deliver the complete monitoring story end-to-end.
 
