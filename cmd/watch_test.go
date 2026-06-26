@@ -263,6 +263,44 @@ func TestRunWatchRendersTransientErrorsAndContinues(t *testing.T) {
 	require.Contains(t, output, "watch refresh failed: api timeout")
 }
 
+func TestRunWatchReevaluatesMutableStateOnEachRefresh(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	interval := 10 * time.Millisecond
+	state := struct {
+		generation int
+	}{generation: 1}
+
+	var (
+		events []string
+		seen   []int
+	)
+
+	err := runWatch(ctx, interval, func(context.Context) error {
+		events = append(events, "run")
+		seen = append(seen, state.generation)
+		if len(seen) == 2 {
+			cancel()
+		}
+		return nil
+	}, func(ctx context.Context, duration time.Duration) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		require.Equal(t, interval, duration)
+		events = append(events, "sleep")
+		if len(seen) == 1 {
+			state.generation = 2
+		}
+		return nil
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, []string{"sleep", "run", "sleep", "run"}, events)
+	require.Equal(t, []int{1, 2}, seen)
+}
+
 func TestRootCmdWatchFirstRefreshFailureReturnsUnderlyingErrorAndSkipsWatchLoop(t *testing.T) {
 	resetRootCommandState()
 

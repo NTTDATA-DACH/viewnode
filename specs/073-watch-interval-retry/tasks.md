@@ -100,12 +100,12 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
 
 **Independent Test**: Start a watch session, change a flag-relevant kubeconfig setting (e.g., switch current namespace via `viewnode ns set-current` in a second terminal), wait for the next refresh, confirm the refresh reflects the change (subject to anything the single-run path already re-reads).
 
-- [ ] T040 [US3] Audit `runOnce` (T013) and confirm that everything that today happens inside the existing `executeLoadAndFilter` boundary on a fresh invocation runs again on every call. Concretely:
+- [x] T040 [US3] Audit `runOnce` (T013) and confirm that everything that today happens inside the existing `executeLoadAndFilter` boundary on a fresh invocation runs again on every call. Concretely:
   - `config.Initialize(cmd)` runs once per `runOnce` (the same as today's single-run code path);
   - `getViewNodeDataConfig` is recomputed per call;
   - no module-level cached `Setup`/`Api` clients persist across calls.
   If any caching slipped in during T013/T020, move construction inside `runOnce`. Document the boundary in a short comment on `runOnce`.
-- [ ] T041 [P] [US3] Add a unit test in `cmd/watch_test.go` that verifies the per-refresh re-evaluation contract: inject a `runOnce` that captures a per-call view of a mutable struct (e.g., a counter incremented from the test between calls) and assert that successive refreshes observe the latest mutation. This test enforces the architectural contract from `architecture-process-view.md` ("Process Gaps" → per-refresh re-load boundary).
+- [x] T041 [P] [US3] Add a unit test in `cmd/watch_test.go` that verifies the per-refresh re-evaluation contract: inject a `runOnce` that captures a per-call view of a mutable struct (e.g., a counter incremented from the test between calls) and assert that successive refreshes observe the latest mutation. This test enforces the architectural contract from `architecture-process-view.md` ("Process Gaps" → per-refresh re-load boundary).
 
 **Checkpoint**: All three user stories complete. Behavior matches spec.md and all three clarification answers.
 

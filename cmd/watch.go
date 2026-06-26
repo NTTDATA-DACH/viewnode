@@ -14,16 +14,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// runOnce refreshes command state and renders exactly one frame for one-shot and watch mode.
+// runOnce reruns the full root-command load boundary so each refresh observes current command and kubeconfig state.
 func runOnce(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if _, err := config.Initialize(currentRootCommand()); err != nil {
+	setup, err := config.Initialize(currentRootCommand())
+	if err != nil {
 		return err
 	}
 
-	vnd, err := executeLoadAndFilter()
+	vnd, err := executeLoadAndFilter(setup)
 	if err != nil {
 		return err
 	}
@@ -80,8 +81,7 @@ func productionSleep(ctx context.Context, interval time.Duration) error {
 	}
 }
 
-func executeLoadAndFilter() (srv.ViewNodeData, error) {
-	setup := config.GetConfig()
+func executeLoadAndFilter(setup *config.Setup) (srv.ViewNodeData, error) {
 	selectedNamespaces := parseNamespaces(namespace)
 	if namespace != "" {
 		setup.Namespace = strings.Join(selectedNamespaces, ",")
