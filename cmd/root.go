@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	"errors"
+	"context"
+	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"strconv"
 	"strings"
-	"sync"
 	"time"
-	"viewnode/cmd/config"
 	"viewnode/cmd/ctx"
 	"viewnode/cmd/ns"
 	"viewnode/srv"
@@ -30,7 +31,15 @@ var showReqLimitsFlag bool
 var showMetricsFlag bool
 var verbosity string
 var kubeconfig string
-var watchOn bool
+var watchInterval int
+var watchEnabled bool
+
+var activeRootCommand *cobra.Command
+
+var runOnceFunc func(context.Context) error
+var runWatchFunc func(context.Context, time.Duration, func(context.Context) error, func(context.Context, time.Duration) error) error
+var sleepFunc func(context.Context, time.Duration) error
+var withSignalNotifyContext = signal.NotifyContext
 
 func parseNamespaces(value string) []string {
 	if value == "" {
@@ -68,26 +77,33 @@ var RootCmd = &cobra.Command{
 	Short: "'viewnode' displays nodes with their pods and containers.",
 	Long: `
 The 'viewnode' displays nodes with their pods and containers.
+Use --watch / -w to refresh every N seconds; when set without a value it defaults to 1 second, values must be >= 1, and invalid values fail before watch mode starts.
 You can find the source code and usage documentation at GitHub: https://github.com/NTTDATA-DACH/viewnode.`,
 	Args: cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		_, err := config.Initialize(cmd)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		activeRootCommand = cmd
+		if err := resolveWatchIntervalArgument(cmd.Flags().Changed("watch"), args); err != nil {
+			return err
+		}
+		var err error
+		watchEnabled, err = validateWatchInterval(cmd.Flags().Changed("watch"), watchInterval)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if !showContainersFlag && (showReqLimitsFlag || containerViewTypeTreeFlag || containerViewTypeBlockFlag) {
 			log.Fatalln("you must not use -r (--show-requests-and-limits) or -b (--container-tree-view) flag without -c (--show-containers) flag")
 		}
-		stopCh := make(chan bool)
-		errCh := make(chan error)
-		go handleErrors(errCh)
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go schedule(&wg, stopCh, errCh)
-		if !watchOn {
-			close(stopCh)
+
+		ctx, stop := context.WithCancel(context.Background())
+		ctx, signalStop := withSignalNotifyContext(ctx, watchSignals()...)
+		defer signalStop()
+		defer stop()
+
+		if err := executeRootCommand(ctx); err != nil {
+			log.Fatal(err)
 		}
-		wg.Wait()
+
+		return nil
 	},
 }
 
@@ -95,118 +111,50 @@ func Execute() {
 	cobra.CheckErr(RootCmd.Execute())
 }
 
-func schedule(wg *sync.WaitGroup, stop <-chan bool, errCh chan<- error) {
-	defer wg.Done()
-	ticker := time.NewTicker(1 * time.Second)
-	vnd := executeLoadAndFilter(errCh)
-	executePrintOut(vnd, errCh)
-	for {
-		select {
-		case <-stop:
-			ticker.Stop()
-			return
-		case <-ticker.C:
-			vnd = executeLoadAndFilter(errCh)
-			executePrintOut(vnd, errCh)
-		}
+func executeRootCommand(ctx context.Context) error {
+	if err := runOnceFunc(ctx); err != nil {
+		return err
 	}
+	if !watchEnabled {
+		return nil
+	}
+	return runWatchFunc(ctx, time.Duration(watchInterval)*time.Second, runOnceFunc, sleepFunc)
 }
 
-func executeLoadAndFilter(errCh chan<- error) srv.ViewNodeData {
-	setup := config.GetConfig()
-	selectedNamespaces := parseNamespaces(namespace)
-	if namespace != "" {
-		setup.Namespace = strings.Join(selectedNamespaces, ",")
+// validateWatchInterval relies on Cobra to reject non-integer input before RunE executes.
+func validateWatchInterval(present bool, seconds int) (bool, error) {
+	if !present {
+		return false, nil
 	}
-	if allNamespacesFlag {
-		setup.Namespace = ""
-		selectedNamespaces = nil
+	if seconds < 1 {
+		return false, fmt.Errorf("invalid value for --watch: %d (must be >= 1 second)", seconds)
 	}
-	api := srv.KubernetesApi{
-		Setup: setup,
-	}
-	fs := []srv.LoadAndFilter{
-		srv.NodeFilter{
-			SearchText:  nodeFilter,
-			Api:         api,
-			WithMetrics: showMetricsFlag,
-		},
-		srv.PodFilter{
-			Namespace:   setup.Namespace,
-			SearchText:  podFilter,
-			Api:         api,
-			RunningOnly: showRunningFlag,
-			WithMetrics: showMetricsFlag,
-		},
-	}
-	var (
-		vns []srv.ViewNode
-		err error
-	)
-	for _, f := range fs {
-		log.Tracef("starting loading and filtering of %ss", f.ResourceName())
-		vns, err = f.LoadAndFilter(vns)
-		if err != nil {
-			log.Debugf("ERROR: %s", err.Error())
-			if handleLoadAndFilterError(err, f.ResourceName()) {
-				continue
-			}
-		}
-		log.Tracef("finished loading and filtering of %ss", f.ResourceName())
-	}
-	vnd := srv.ViewNodeData{
-		Namespace:  setup.Namespace,
-		NodeFilter: nodeFilter,
-		Nodes:      vns,
-	}
-	vnd.Config = buildViewNodeDataConfig(allNamespacesFlag, selectedNamespaces)
-	vnd.Config.ShowContainers = showContainersFlag
-	vnd.Config.ShowTimes = showTimesFlag
-	vnd.Config.ShowReqLimits = showReqLimitsFlag
-	vnd.Config.ShowMetrics = showMetricsFlag
-	vnd.Config.ContainerViewType = getContainerViewType(containerViewTypeTreeFlag || containerViewTypeBlockFlag)
-
-	return vnd
+	return true, nil
 }
 
-func executePrintOut(vnd srv.ViewNodeData, errCh chan<- error) {
-	err := vnd.Printout(watchOn)
+func resolveWatchIntervalArgument(present bool, args []string) error {
+	if !present || len(args) == 0 {
+		return nil
+	}
+
+	interval, err := strconv.Atoi(args[0])
 	if err != nil {
-		errCh <- err
-		return
+		return fmt.Errorf("invalid argument %q for \"--watch\": %w", args[0], err)
 	}
+
+	watchInterval = interval
+	return nil
 }
 
-func handleErrors(errCh <-chan error) {
-	for err := range errCh {
-		if err != nil {
-			log.Fatalln(err)
-		}
-	}
-}
-
-func handleLoadAndFilterError(err error, resourceName string) bool {
-	switch {
-	case errors.As(err, &srv.UnauthorizedError{}):
-		log.Fatalln("you are not authorized; please login to the cloud/cluster before continuing")
-	case errors.As(err, &srv.NodesIsForbiddenError{}):
-		log.Warnln("access to the node API is forbidden; node names will be extracted from the pod specification if possible")
-		return true
-	case errors.Is(err, srv.ErrMetricsServerNotInstalled):
-		log.Warnf("loading of metrics for %ss failed; %s", resourceName, err.Error())
-		return true
-	case errors.As(err, &srv.ScopedEOFError{}):
-		log.Fatalf("loading and filtering of %ss failed; proxy configuration may be the cause: %s", resourceName, err.Error())
-	case strings.Contains(err.Error(), "net/http: TLS handshake timeout"):
-		log.Fatalf("loading and filtering of %ss failed; is the cluster up and running?", resourceName)
-	default:
-		log.Fatalf("loading and filtering of %ss failed due to: %s", resourceName, err.Error())
-	}
-
-	return false
+func currentRootCommand() *cobra.Command {
+	return activeRootCommand
 }
 
 func init() {
+	activeRootCommand = RootCmd
+	runOnceFunc = runOnce
+	runWatchFunc = runWatch
+	sleepFunc = productionSleep
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		log.SetFormatter(&nested.Formatter{
@@ -232,7 +180,8 @@ func init() {
 	RootCmd.Flags().BoolVarP(&showTimesFlag, "show-pod-start-times", "t", false, "show start times of pods")
 	RootCmd.Flags().BoolVar(&showRunningFlag, "show-running-only", false, "show running pods only")
 	RootCmd.Flags().BoolVarP(&showMetricsFlag, "show-metrics", "m", false, "show memory footprint of nodes, pods and containers")
-	RootCmd.Flags().BoolVarP(&watchOn, "watch", "w", false, "executes the command every second so that changes can be observed")
+	RootCmd.Flags().IntVarP(&watchInterval, "watch", "w", 0, "refresh every N seconds; defaults to 1 when set without a value (must be >= 1)")
+	RootCmd.Flag("watch").NoOptDefVal = "1"
 	RootCmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)")
 	RootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.WarnLevel.String(), "defines log level (debug, info, warn, error, fatal, panic)")
 

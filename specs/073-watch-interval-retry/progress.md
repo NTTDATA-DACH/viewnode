@@ -1,0 +1,42 @@
+# Ralph Progress Log
+
+Feature: 073-watch-interval-retry
+Started: 2026-06-26 11:53:13
+
+## Codebase Patterns
+
+- Root command execution is easiest to test by stubbing package-level `runOnce` / `runWatch` hooks while still driving `RootCmd.Execute()` through Cobra's real flag parsing.
+- The existing CLI keeps root behavior in `cmd/` with small helper files instead of new packages; build-tagged platform helpers are acceptable for signal differences.
+- Cobra `NoOptDefVal` on the optional `--watch` int flag leaves space-separated values like `--watch 5` in `args`, so the root command needs a small normalization step before validation to preserve the documented CLI contract.
+
+---
+
+## Iteration 1 - 2026-06-26 11:59 CEST
+**User Story**: US1 - Configurable refresh interval for `--watch`
+**Tasks Completed**:
+- [x] T001: Confirm baseline `make test` is green on `develop` and capture root help output into a scratch file
+- [x] T010: Replace the boolean watch flag with `watchInterval` and derived `watchEnabled`
+- [x] T011: Add watch interval validation
+- [x] T012: Introduce signal-aware root context with Unix `SIGTERM` support
+- [x] T013: Extract the single-refresh path into `runOnce`
+- [x] T020: Move watch helpers into `cmd/watch.go` and add `runWatch` plus injectable sleep
+- [x] T021: Rewire the root command to `runOnce` + sleep-after-refresh watch loop
+- [x] T022: Update root help text for the optional seconds watch flag
+- [x] T023: Add watch flag parsing and validation tests
+- [x] T024: Add sleep-after-refresh loop invariant test
+- [x] T025: Update existing root tests for the new watch state
+**Tasks Remaining in Story**: None - story complete
+**Commit**: Recorded in Git history for this iteration
+**Files Changed**:
+- cmd/root.go
+- cmd/root_test.go
+- cmd/watch.go
+- cmd/watch_test.go
+- cmd/signal_unix.go
+- cmd/signal_windows.go
+- specs/073-watch-interval-retry/tasks.md
+- specs/073-watch-interval-retry/progress.md
+**Learnings**:
+- `runOnce` can safely own `config.Initialize(cmd)` without changing one-shot behavior, which also sets up the later per-refresh state re-read contract.
+- Returning formatted errors from the load/filter path preserves the existing fatal output while making the single-run path reusable by the watch loop.
+---

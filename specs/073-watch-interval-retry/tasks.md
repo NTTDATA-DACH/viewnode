@@ -24,7 +24,7 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm baseline `make test` is green on `develop` before starting and capture the current `./viewnode --help` output for the root command into a scratch file (working dir only, not committed) for SC-005 regression diff in T030. Note: no new dependency or tooling changes required by this feature.
+- [x] T001 Confirm baseline `make test` is green on `develop` before starting and capture the current `./viewnode --help` output for the root command into a scratch file (working dir only, not committed) for SC-005 regression diff in T030. Note: no new dependency or tooling changes required by this feature.
 
 ---
 
@@ -32,14 +32,14 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
 
 **Purpose**: Establish the shared seams used by all three user stories — interval type/validation, the single-run path, and the signal-driven context — without changing observable behavior yet.
 
-- [ ] T010 Replace the global flag declaration in `cmd/root.go`: remove `var watchOn bool`; introduce `var watchInterval int` (seconds, validated separately) and a derived `var watchEnabled bool` set after flag parsing. Register the flag with `RootCmd.Flags().IntVarP(&watchInterval, "watch", "w", 0, "...")` and set `RootCmd.Flag("watch").NoOptDefVal = "1"` so `--watch` / `-w` default to 1 when present with no value. Keep the help text aligned with `contracts/cli.md` (mention seconds, default 1, `>= 1`).
-- [ ] T011 [P] Add an interval validator function (e.g., `validateWatchInterval(present bool, seconds int) (bool, error)`) in `cmd/root.go` (or a new `cmd/watch.go` if extracted in T020) that:
+- [x] T010 Replace the global flag declaration in `cmd/root.go`: remove `var watchOn bool`; introduce `var watchInterval int` (seconds, validated separately) and a derived `var watchEnabled bool` set after flag parsing. Register the flag with `RootCmd.Flags().IntVarP(&watchInterval, "watch", "w", 0, "...")` and set `RootCmd.Flag("watch").NoOptDefVal = "1"` so `--watch` / `-w` default to 1 when present with no value. Keep the help text aligned with `contracts/cli.md` (mention seconds, default 1, `>= 1`).
+- [x] T011 [P] Add an interval validator function (e.g., `validateWatchInterval(present bool, seconds int) (bool, error)`) in `cmd/root.go` (or a new `cmd/watch.go` if extracted in T020) that:
   - returns `(false, nil)` when the flag is absent (one-shot mode);
   - returns `(true, nil)` when present with `seconds >= 1`;
   - returns a usage error when present with `seconds <= 0`.
   Cobra rejects non-integer input itself; document that in a code comment so reviewers don't add duplicate checks.
-- [ ] T012 [P] Introduce `signal.NotifyContext`-based cancellation in `cmd/root.go`: build a `ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)` at the start of `RootCmd.Run`, register `SIGTERM` additionally on non-Windows via a small Unix-only helper, and `defer stop()`. Do NOT yet wire the loop to it — wiring happens in T021. Keep behavior unchanged for one-shot mode.
-- [ ] T013 [P] Extract the existing per-refresh work (current `executeLoadAndFilter` + `executePrintOut` in `cmd/root.go`) into a single function `runOnce(ctx context.Context) error` that performs exactly one refresh end-to-end and returns the first error encountered. Preserve current logging and exit semantics for one-shot mode. This is the single-run path that one-shot mode and the watch loop will both call.
+- [x] T012 [P] Introduce `signal.NotifyContext`-based cancellation in `cmd/root.go`: build a `ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)` at the start of `RootCmd.Run`, register `SIGTERM` additionally on non-Windows via a small Unix-only helper, and `defer stop()`. Do NOT yet wire the loop to it — wiring happens in T021. Keep behavior unchanged for one-shot mode.
+- [x] T013 [P] Extract the existing per-refresh work (current `executeLoadAndFilter` + `executePrintOut` in `cmd/root.go`) into a single function `runOnce(ctx context.Context) error` that performs exactly one refresh end-to-end and returns the first error encountered. Preserve current logging and exit semantics for one-shot mode. This is the single-run path that one-shot mode and the watch loop will both call.
 
 **Checkpoint**: After Phase 2, `viewnode` (no flag) and `viewnode --watch` still behave as today (the loop has not yet been replaced); `make test` is green; the flag is registered with its new type but only one-shot mode is fully wired.
 
@@ -51,10 +51,10 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
 
 **Independent Test**: Run `./viewnode`, `./viewnode --watch`, `./viewnode -w`, `./viewnode --watch 5`, `./viewnode -w 5`, and `./viewnode --watch 0` / `./viewnode --watch abc`. Confirm one-shot exits once; default-interval refreshes ~1s; explicit interval refreshes ~Ns; invalid input fails before any refresh.
 
-- [ ] T020 [US1] Create `cmd/watch.go` (new file) and move the existing `schedule`/`handleErrors`/`executeLoadAndFilter`/`executePrintOut` helpers out of `cmd/root.go` into it, alongside a new `runWatch(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error` function. Keep all code in `package cmd`. The default production `sleep` is a small wrapper around `time.NewTimer` that returns immediately when `ctx.Done()` fires; expose it so tests can substitute.
-- [ ] T021 [US1] Rewire `RootCmd.Run` in `cmd/root.go` to use the new wiring: call `validateWatchInterval` (T011) → run `runOnce(ctx)` from T013 → if not in watch mode (or first refresh failed), return its result and exit; otherwise call `runWatch(ctx, time.Duration(watchInterval)*time.Second, runOnce, productionSleep)`. Remove the old ticker-driven `schedule` goroutine and `sync.WaitGroup`. Map errors from `runOnce`/`runWatch` to existing fatal/exit behavior so one-shot exit codes remain byte-identical.
-- [ ] T022 [US1] Update the root command long help and flag help in `cmd/root.go` to match `contracts/cli.md`: explain the optional integer seconds value, default `1`, `>= 1` requirement, and the fail-fast-on-invalid rule. Keep the help text concise and operator-readable; no implementation details.
-- [ ] T023 [P] [US1] Add unit tests in `cmd/watch_test.go` for interval flag parsing and validation:
+- [x] T020 [US1] Create `cmd/watch.go` (new file) and move the existing `schedule`/`handleErrors`/`executeLoadAndFilter`/`executePrintOut` helpers out of `cmd/root.go` into it, alongside a new `runWatch(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error` function. Keep all code in `package cmd`. The default production `sleep` is a small wrapper around `time.NewTimer` that returns immediately when `ctx.Done()` fires; expose it so tests can substitute.
+- [x] T021 [US1] Rewire `RootCmd.Run` in `cmd/root.go` to use the new wiring: call `validateWatchInterval` (T011) → run `runOnce(ctx)` from T013 → if not in watch mode (or first refresh failed), return its result and exit; otherwise call `runWatch(ctx, time.Duration(watchInterval)*time.Second, runOnce, productionSleep)`. Remove the old ticker-driven `schedule` goroutine and `sync.WaitGroup`. Map errors from `runOnce`/`runWatch` to existing fatal/exit behavior so one-shot exit codes remain byte-identical.
+- [x] T022 [US1] Update the root command long help and flag help in `cmd/root.go` to match `contracts/cli.md`: explain the optional integer seconds value, default `1`, `>= 1` requirement, and the fail-fast-on-invalid rule. Keep the help text concise and operator-readable; no implementation details.
+- [x] T023 [P] [US1] Add unit tests in `cmd/watch_test.go` for interval flag parsing and validation:
   - `--watch` absent → `watchEnabled == false`;
   - `--watch` present, no value → `watchInterval == 1`, `watchEnabled == true`;
   - `--watch 5` and `-w 5` → `watchInterval == 5`, `watchEnabled == true`;
@@ -62,8 +62,8 @@ description: "Implementation tasks for issue #73 — Optional Refresh Interval a
   - `--watch -1` → validation error;
   - `--watch abc` → Cobra parse error (assert error type/message contains "invalid argument").
   Use Cobra's `RootCmd.SetArgs` + `Execute` pattern, mirroring the style already used in `cmd/root_test.go`.
-- [ ] T024 [P] [US1] Add a unit test in `cmd/watch_test.go` for the sleep-after-refresh invariant (FR-007, SC-003): inject a `runOnce` that records call timestamps and a `sleep` that records requested durations; assert that for a scripted slow refresh (e.g., `runOnce` sleeps 50ms while interval is 10ms), the next `sleep` call requests the full interval after `runOnce` returned, and that two `runOnce` calls are never back-to-back without a `sleep` in between.
-- [ ] T025 [US1] Update `cmd/root_test.go` for the new flag type: any test that previously set `watchOn = false` or asserted on the boolean flag now uses `watchInterval = 0` / `watchEnabled = false`, or resets state via the flag's `Value.Set`. Confirm `make test` stays green.
+- [x] T024 [P] [US1] Add a unit test in `cmd/watch_test.go` for the sleep-after-refresh invariant (FR-007, SC-003): inject a `runOnce` that records call timestamps and a `sleep` that records requested durations; assert that for a scripted slow refresh (e.g., `runOnce` sleeps 50ms while interval is 10ms), the next `sleep` call requests the full interval after `runOnce` returned, and that two `runOnce` calls are never back-to-back without a `sleep` in between.
+- [x] T025 [US1] Update `cmd/root_test.go` for the new flag type: any test that previously set `watchOn = false` or asserted on the boolean flag now uses `watchInterval = 0` / `watchEnabled = false`, or resets state via the flag's `Value.Set`. Confirm `make test` stays green.
 
 **Checkpoint**: US1 complete and independently demonstrable.
 
