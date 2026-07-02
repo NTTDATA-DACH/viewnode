@@ -50,5 +50,5 @@ func TestVersionCommandPrintsVersionAndCommit(t *testing.T) {
 		versionCmd.Run(versionCmd, nil)
 	})
 
-	require.Equal(t, "viewnode 1.2.3 (abc123) © 2026 NTT DATA Deutschland SE, Adam Boczek | source: https://github.com/NTTDATA-DACH/viewnode\n", output)
+	require.Equal(t, "viewnode 1.2.3 (abc123) © 2026 NTT DATA Deutschland SE, Adam Bogdan Boczek | source: https://github.com/NTTDATA-DACH/viewnode\n", output)
 }
