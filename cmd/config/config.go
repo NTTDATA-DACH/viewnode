@@ -15,19 +15,19 @@ func Initialize(cmd *cobra.Command) (*Setup, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if stp == nil {
-		stp = &Setup{}
-	}
+	setup := &Setup{}
 	if kubeconfigFlag := cmd.Flags().Lookup("kubeconfig"); kubeconfigFlag != nil {
-		stp.KubeCfgPath = kubeconfigFlag.Value.String()
+		setup.KubeCfgPath = kubeconfigFlag.Value.String()
 	} else {
-		stp.KubeCfgPath = ""
+		setup.KubeCfgPath = ""
 	}
-	err := stp.Initialize()
+	err := setup.Initialize()
 	if err != nil {
+		stp = nil
 		return nil, fmt.Errorf("failed to initialize setup (%w)", err)
 	}
-	return stp, nil
+	stp = setup
+	return setup, nil
 }
 
 func GetConfig() *Setup {
