@@ -4,8 +4,6 @@ It is very useful when you need to monitor multiple resources such as nodes, pod
 
 Source code: [GitHub](https://github.com/NTTDATA-DACH/viewnode)
 
-Copyright: © 2026 NTT DATA Deutschland SE, Adam Boczek
-
 ## Usage
 
 ```
@@ -36,26 +34,6 @@ Flags:
   -w, --watch int[=1]              refresh every N seconds; defaults to 1 when set without a value (must be >= 1)
 
 Use "viewnode [command] --help" for more information about a command.
-```
-
-### Watch mode
-
-Use `--watch` / `-w` to keep refreshing the current command instead of wrapping `viewnode` with an external `watch` process.
-
-- `viewnode` runs once and exits.
-- `viewnode --watch` and `viewnode -w` refresh every 1 second.
-- `viewnode --watch 5` and `viewnode -w 5` refresh every 5 seconds.
-- Invalid values such as `--watch 0`, `-w -1`, or `--watch abc` fail fast before the first refresh.
-- After the first successful refresh, transient refresh failures replace the current frame with `[<RFC3339 timestamp>] watch refresh failed: <error>` and the loop retries after the configured interval.
-
-Examples:
-
-```sh
-viewnode
-viewnode --watch
-viewnode --watch 5
-viewnode -w 5
-viewnode --watch 0
 ```
 
 ## Installation
@@ -228,6 +206,26 @@ $ viewnode --namespace default,team-a
 │       └── web-0 (running)
 └── worker-b running 0 pod(s) (linux/amd64)
 ```
+### Watch mode
+
+Use `--watch` / `-w` to keep refreshing the current command instead of wrapping `viewnode` with an external `watch` process.
+
+- `viewnode` runs once and exits.
+- `viewnode --watch` and `viewnode -w` refresh every 1 second.
+- `viewnode --watch 5` and `viewnode -w 5` refresh every 5 seconds.
+- Invalid values such as `--watch 0`, `-w -1`, or `--watch abc` fail fast before the first refresh.
+- After the first successful refresh, transient refresh failures replace the current frame with `[<RFC3339 timestamp>] watch refresh failed: <error>` and the loop retries after the configured interval.
+
+Examples:
+
+```sh
+viewnode
+viewnode --watch
+viewnode --watch 5
+viewnode -w 5
+viewnode --watch 0
+```
+
 You can still wrap `viewnode` with the shell's `watch` command when you want `watch` itself to own the terminal session:
 ```
 watch -n1 viewnode --show-pod-start-times --show-containers
@@ -298,3 +296,6 @@ Aliases:
 It should work with any cloud platform and Kubernetes distribution supported by [client-go](https://github.com/kubernetes/client-go).
 
 Compatibility generally follows the Kubernetes `client-go` policy for nearby cluster versions (for example, same minor version and close minor versions).
+
+## Copyright
+© 2026 NTT DATA Deutschland SE, Adam Bogdan Boczek
