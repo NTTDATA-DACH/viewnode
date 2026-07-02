@@ -20,7 +20,7 @@ Available Commands:
   version     Plugin Version
 
 Flags:
-  -A, --all-namespaces             use all namespaces and group scheduled pods by namespace beneath each node
+  -A, --all-namespaces             use all namespaces
   -b, --container-tree-view        format containers in tree view, otherwise inline
   -h, --help                       help for viewnode
       --kubeconfig string          kubectl configuration file (default: ~/.kube/config or env: $KUBECONFIG)
@@ -33,9 +33,29 @@ Flags:
   -r, --show-requests-and-limits   show requests and limits for containers' cpu and memory (requires -c flag)
       --show-running-only          show running pods only
   -v, --verbosity string           defines log level (debug, info, warn, error, fatal, panic) (default "warning")
-  -w, --watch                      executes the command every second so that changes can be observed
+  -w, --watch int[=1]              refresh every N seconds; defaults to 1 when set without a value (must be >= 1)
 
 Use "viewnode [command] --help" for more information about a command.
+```
+
+### Watch mode
+
+Use `--watch` / `-w` to keep refreshing the current command instead of wrapping `viewnode` with an external `watch` process.
+
+- `viewnode` runs once and exits.
+- `viewnode --watch` and `viewnode -w` refresh every 1 second.
+- `viewnode --watch 5` and `viewnode -w 5` refresh every 5 seconds.
+- Invalid values such as `--watch 0`, `-w -1`, or `--watch abc` fail fast before the first refresh.
+- After the first successful refresh, transient refresh failures replace the current frame with `[<RFC3339 timestamp>] watch refresh failed: <error>` and the loop retries after the configured interval.
+
+Examples:
+
+```sh
+viewnode
+viewnode --watch
+viewnode --watch 5
+viewnode -w 5
+viewnode --watch 0
 ```
 
 ## Installation
@@ -208,7 +228,7 @@ $ viewnode --namespace default,team-a
 │       └── web-0 (running)
 └── worker-b running 0 pod(s) (linux/amd64)
 ```
-Very popular is combining `viewnode` with `watch` command e.g. watching all nodes, pods and containers every second can be configured as follows:
+You can still wrap `viewnode` with the shell's `watch` command when you want `watch` itself to own the terminal session:
 ```
 watch -n1 viewnode --show-pod-start-times --show-containers
 ```

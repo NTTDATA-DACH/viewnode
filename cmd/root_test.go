@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -75,7 +76,15 @@ func resetRootCommandState() {
 	showMetricsFlag = false
 	verbosity = log.WarnLevel.String()
 	kubeconfig = ""
-	watchOn = false
+	watchInterval = 0
+	watchEnabled = false
+	activeRootCommand = RootCmd
+	runOnceFunc = runOnce
+	runWatchFunc = runWatch
+	sleepFunc = productionSleep
+	handleRootCommandError = func(err error) error {
+		return err
+	}
 	resetFlagSet(RootCmd.Flags())
 	resetFlagSet(RootCmd.PersistentFlags())
 }
@@ -138,15 +147,9 @@ func TestRootCmdHelpIncludesNamespaceCommand(t *testing.T) {
 func TestRootCmdExecuteParsesNamespaceFlag(t *testing.T) {
 	resetRootCommandState()
 
-	originalRun := RootCmd.Run
-	originalPersistentPreRunE := RootCmd.PersistentPreRunE
 	t.Cleanup(func() {
-		RootCmd.Run = originalRun
-		RootCmd.PersistentPreRunE = originalPersistentPreRunE
 		resetRootCommandState()
 		RootCmd.SetArgs(nil)
-		RootCmd.SetOut(nil)
-		RootCmd.SetErr(nil)
 	})
 
 	var (
@@ -154,12 +157,10 @@ func TestRootCmdExecuteParsesNamespaceFlag(t *testing.T) {
 		capturedAllNS     bool
 	)
 
-	RootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		return nil
-	}
-	RootCmd.Run = func(cmd *cobra.Command, args []string) {
+	runOnceFunc = func(_ context.Context) error {
 		capturedNamespace = namespace
 		capturedAllNS = allNamespacesFlag
+		return nil
 	}
 
 	RootCmd.SetArgs([]string{"--namespace", "first,second"})
@@ -199,21 +200,15 @@ func TestRootCmdRejectsRequestsAndLimitsWithoutContainers(t *testing.T) {
 func TestExecuteRunsRootCommand(t *testing.T) {
 	resetRootCommandState()
 
-	originalRun := RootCmd.Run
-	originalPersistentPreRunE := RootCmd.PersistentPreRunE
 	t.Cleanup(func() {
-		RootCmd.Run = originalRun
-		RootCmd.PersistentPreRunE = originalPersistentPreRunE
 		resetRootCommandState()
 		RootCmd.SetArgs(nil)
 	})
 
 	called := false
-	RootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		return nil
-	}
-	RootCmd.Run = func(cmd *cobra.Command, args []string) {
+	runOnceFunc = func(_ context.Context) error {
 		called = true
+		return nil
 	}
 	RootCmd.SetArgs([]string{})
 
@@ -225,160 +220,59 @@ func TestExecuteRunsRootCommand(t *testing.T) {
 func TestExecutePrintOutSendsError(t *testing.T) {
 	resetRootCommandState()
 
-	errCh := make(chan error, 1)
-	executePrintOut(srv.ViewNodeData{}, errCh)
-
-	err := <-errCh
+	err := executePrintOut(srv.ViewNodeData{})
 	require.EqualError(t, err, "list of view nodes must not be null")
 }
 
 func TestExecutePrintOutNoError(t *testing.T) {
 	resetRootCommandState()
 
-	errCh := make(chan error, 1)
-	executePrintOut(srv.ViewNodeData{Nodes: []srv.ViewNode{{Name: ""}}}, errCh)
-
-	require.Empty(t, errCh)
+	err := executePrintOut(srv.ViewNodeData{Nodes: []srv.ViewNode{{Name: ""}}})
+	require.NoError(t, err)
 }
 
 func TestExecutePrintOutNodeFilterNoMatchMessage(t *testing.T) {
 	resetRootCommandState()
 
-	errCh := make(chan error, 1)
 	output := captureStdout(t, func() {
-		executePrintOut(srv.ViewNodeData{
+		err := executePrintOut(srv.ViewNodeData{
 			NodeFilter: "worker-a",
 			Nodes: []srv.ViewNode{
 				{Name: ""},
 			},
-		}, errCh)
+		})
+		require.NoError(t, err)
 	})
 
 	require.Equal(t, "no nodes matched filter \"worker-a\"\n", output)
-	require.Empty(t, errCh)
-}
-
-func TestHandleErrorsIgnoresNil(t *testing.T) {
-	errCh := make(chan error, 1)
-	errCh <- nil
-	close(errCh)
-
-	handleErrors(errCh)
-}
-
-func TestHandleErrorsExitsOnError(t *testing.T) {
-	originalExitFunc := log.StandardLogger().ExitFunc
-	t.Cleanup(func() {
-		log.StandardLogger().ExitFunc = originalExitFunc
-	})
-
-	log.StandardLogger().ExitFunc = func(code int) {
-		panic(code)
-	}
-
-	errCh := make(chan error, 1)
-	errCh <- errors.New("boom")
-	close(errCh)
-
-	require.PanicsWithValue(t, 1, func() {
-		handleErrors(errCh)
-	})
 }
 
 func TestHandleLoadAndFilterErrorScopedEOFIncludesProxyHintAndOriginalError(t *testing.T) {
-	originalExitFunc := log.StandardLogger().ExitFunc
-	originalOutput := log.StandardLogger().Out
-	originalFormatter := log.StandardLogger().Formatter
-	t.Cleanup(func() {
-		log.StandardLogger().ExitFunc = originalExitFunc
-		log.SetOutput(originalOutput)
-		log.SetFormatter(originalFormatter)
-	})
-
-	var output bytes.Buffer
-	log.SetOutput(&output)
-	log.SetFormatter(&log.TextFormatter{
-		DisableTimestamp:       true,
-		DisableLevelTruncation: true,
-		DisableSorting:         true,
-		DisableQuote:           true,
-	})
-	log.StandardLogger().ExitFunc = func(code int) {
-		panic(code)
-	}
-
 	err := srv.DecorateError(errors.New("Get \"https://cluster.example/api/v1/nodes\": EOF"))
 
-	require.PanicsWithValue(t, 1, func() {
-		handleLoadAndFilterError(err, "node")
-	})
-	require.Contains(t, output.String(), "loading and filtering of nodes failed; proxy configuration may be the cause")
-	require.Contains(t, output.String(), "Get \"https://cluster.example/api/v1/nodes\": EOF")
+	handled, returnedErr := handleLoadAndFilterError(err, "node")
+	require.False(t, handled)
+	require.ErrorContains(t, returnedErr, "loading and filtering of nodes failed; proxy configuration may be the cause")
+	require.ErrorContains(t, returnedErr, "Get \"https://cluster.example/api/v1/nodes\": EOF")
 }
 
 func TestHandleLoadAndFilterErrorScopedEOFRemainsDeterministicAcrossRepeatedCalls(t *testing.T) {
-	originalExitFunc := log.StandardLogger().ExitFunc
-	originalOutput := log.StandardLogger().Out
-	originalFormatter := log.StandardLogger().Formatter
-	t.Cleanup(func() {
-		log.StandardLogger().ExitFunc = originalExitFunc
-		log.SetOutput(originalOutput)
-		log.SetFormatter(originalFormatter)
-	})
-
-	log.SetFormatter(&log.TextFormatter{
-		DisableTimestamp:       true,
-		DisableLevelTruncation: true,
-		DisableSorting:         true,
-		DisableQuote:           true,
-	})
-	log.StandardLogger().ExitFunc = func(code int) {
-		panic(code)
-	}
-
 	err := srv.DecorateError(errors.New("Get \"https://cluster.example/api/v1/nodes\": EOF"))
-	expectedMessage := "level=fatal msg=loading and filtering of nodes failed; proxy configuration may be the cause: scoped eof: Get \"https://cluster.example/api/v1/nodes\": EOF\n"
+	expectedMessage := "loading and filtering of nodes failed; proxy configuration may be the cause: scoped eof: Get \"https://cluster.example/api/v1/nodes\": EOF"
 
 	for range 2 {
-		var output bytes.Buffer
-		log.SetOutput(&output)
-
-		require.PanicsWithValue(t, 1, func() {
-			handleLoadAndFilterError(err, "node")
-		})
-		require.Equal(t, expectedMessage, output.String())
+		handled, returnedErr := handleLoadAndFilterError(err, "node")
+		require.False(t, handled)
+		require.EqualError(t, returnedErr, expectedMessage)
 	}
 }
 
 func TestHandleLoadAndFilterErrorUnauthorizedKeepsExistingFatalMessage(t *testing.T) {
-	originalExitFunc := log.StandardLogger().ExitFunc
-	originalOutput := log.StandardLogger().Out
-	originalFormatter := log.StandardLogger().Formatter
-	t.Cleanup(func() {
-		log.StandardLogger().ExitFunc = originalExitFunc
-		log.SetOutput(originalOutput)
-		log.SetFormatter(originalFormatter)
-	})
-
-	var output bytes.Buffer
-	log.SetOutput(&output)
-	log.SetFormatter(&log.TextFormatter{
-		DisableTimestamp:       true,
-		DisableLevelTruncation: true,
-		DisableSorting:         true,
-		DisableQuote:           true,
-	})
-	log.StandardLogger().ExitFunc = func(code int) {
-		panic(code)
-	}
-
 	err := srv.DecorateError(errors.New("Unauthorized"))
 
-	require.PanicsWithValue(t, 1, func() {
-		handleLoadAndFilterError(err, "node")
-	})
-	require.Contains(t, output.String(), "you are not authorized; please login to the cloud/cluster before continuing")
-	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+	handled, returnedErr := handleLoadAndFilterError(err, "node")
+	require.False(t, handled)
+	require.EqualError(t, returnedErr, "you are not authorized; please login to the cloud/cluster before continuing")
 }
 
 func TestHandleLoadAndFilterErrorForbiddenKeepsWarningFallback(t *testing.T) {
@@ -400,71 +294,27 @@ func TestHandleLoadAndFilterErrorForbiddenKeepsWarningFallback(t *testing.T) {
 
 	err := srv.DecorateError(errors.New("nodes is forbidden: User \"alice\" cannot list resource \"nodes\""))
 
-	require.True(t, handleLoadAndFilterError(err, "node"))
+	handled, returnedErr := handleLoadAndFilterError(err, "node")
+	require.True(t, handled)
+	require.NoError(t, returnedErr)
 	require.Contains(t, output.String(), "access to the node API is forbidden; node names will be extracted from the pod specification if possible")
 	require.NotContains(t, output.String(), "proxy configuration may be the cause")
 }
 
 func TestHandleLoadAndFilterErrorGenericFailureKeepsExistingFatalMessage(t *testing.T) {
-	originalExitFunc := log.StandardLogger().ExitFunc
-	originalOutput := log.StandardLogger().Out
-	originalFormatter := log.StandardLogger().Formatter
-	t.Cleanup(func() {
-		log.StandardLogger().ExitFunc = originalExitFunc
-		log.SetOutput(originalOutput)
-		log.SetFormatter(originalFormatter)
-	})
-
-	var output bytes.Buffer
-	log.SetOutput(&output)
-	log.SetFormatter(&log.TextFormatter{
-		DisableTimestamp:       true,
-		DisableLevelTruncation: true,
-		DisableSorting:         true,
-		DisableQuote:           true,
-	})
-	log.StandardLogger().ExitFunc = func(code int) {
-		panic(code)
-	}
-
 	err := errors.New("dial tcp 10.0.0.1:443: i/o timeout")
 
-	require.PanicsWithValue(t, 1, func() {
-		handleLoadAndFilterError(err, "pod")
-	})
-	require.Contains(t, output.String(), "loading and filtering of pods failed due to: dial tcp 10.0.0.1:443: i/o timeout")
-	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+	handled, returnedErr := handleLoadAndFilterError(err, "pod")
+	require.False(t, handled)
+	require.EqualError(t, returnedErr, "loading and filtering of pods failed due to: dial tcp 10.0.0.1:443: i/o timeout")
 }
 
 func TestHandleLoadAndFilterErrorOutOfScopeEOFKeepsExistingFatalMessage(t *testing.T) {
-	originalExitFunc := log.StandardLogger().ExitFunc
-	originalOutput := log.StandardLogger().Out
-	originalFormatter := log.StandardLogger().Formatter
-	t.Cleanup(func() {
-		log.StandardLogger().ExitFunc = originalExitFunc
-		log.SetOutput(originalOutput)
-		log.SetFormatter(originalFormatter)
-	})
-
-	var output bytes.Buffer
-	log.SetOutput(&output)
-	log.SetFormatter(&log.TextFormatter{
-		DisableTimestamp:       true,
-		DisableLevelTruncation: true,
-		DisableSorting:         true,
-		DisableQuote:           true,
-	})
-	log.StandardLogger().ExitFunc = func(code int) {
-		panic(code)
-	}
-
 	err := errors.New("Post \"https://cluster.example/api/v1/nodes\": EOF")
 
-	require.PanicsWithValue(t, 1, func() {
-		handleLoadAndFilterError(err, "node")
-	})
-	require.Contains(t, output.String(), "loading and filtering of nodes failed due to: Post \"https://cluster.example/api/v1/nodes\": EOF")
-	require.NotContains(t, output.String(), "proxy configuration may be the cause")
+	handled, returnedErr := handleLoadAndFilterError(err, "node")
+	require.False(t, handled)
+	require.EqualError(t, returnedErr, "loading and filtering of nodes failed due to: Post \"https://cluster.example/api/v1/nodes\": EOF")
 }
 
 func TestInitLogSetsLoggerOutputAndLevel(t *testing.T) {

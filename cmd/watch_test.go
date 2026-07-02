@@ -1,0 +1,354 @@
+package cmd
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"io"
+	"strings"
+	"testing"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/require"
+)
+
+func TestRootCmdWatchFlagAbsentLeavesWatchDisabled(t *testing.T) {
+	resetRootCommandState()
+
+	watchLoopCalled := false
+	runOnceFunc = func(_ context.Context) error {
+		return nil
+	}
+	runWatchFunc = func(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error {
+		watchLoopCalled = true
+		return nil
+	}
+
+	t.Cleanup(func() {
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	RootCmd.SetArgs([]string{})
+
+	err := RootCmd.Execute()
+
+	require.NoError(t, err)
+	require.False(t, watchEnabled)
+	require.Zero(t, watchInterval)
+	require.False(t, watchLoopCalled)
+}
+
+func TestRootCmdWatchFlagDefaultsToOneSecondWhenPresentWithoutValue(t *testing.T) {
+	resetRootCommandState()
+
+	var capturedInterval time.Duration
+	runOnceFunc = func(_ context.Context) error {
+		return nil
+	}
+	runWatchFunc = func(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error {
+		capturedInterval = interval
+		return nil
+	}
+
+	t.Cleanup(func() {
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	RootCmd.SetArgs([]string{"--watch"})
+
+	err := RootCmd.Execute()
+
+	require.NoError(t, err)
+	require.True(t, watchEnabled)
+	require.Equal(t, 1, watchInterval)
+	require.Equal(t, time.Second, capturedInterval)
+}
+
+func TestRootCmdWatchFlagAcceptsExplicitIntervals(t *testing.T) {
+	testCases := []struct {
+		name string
+		args []string
+	}{
+		{name: "long flag", args: []string{"--watch", "5"}},
+		{name: "short flag", args: []string{"-w", "5"}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resetRootCommandState()
+
+			var capturedInterval time.Duration
+			runOnceFunc = func(_ context.Context) error {
+				return nil
+			}
+			runWatchFunc = func(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error {
+				capturedInterval = interval
+				return nil
+			}
+
+			t.Cleanup(func() {
+				resetRootCommandState()
+				RootCmd.SetArgs(nil)
+				RootCmd.SetOut(nil)
+				RootCmd.SetErr(nil)
+			})
+
+			RootCmd.SetArgs(tc.args)
+
+			err := RootCmd.Execute()
+
+			require.NoError(t, err)
+			require.True(t, watchEnabled)
+			require.Equal(t, 5, watchInterval)
+			require.Equal(t, 5*time.Second, capturedInterval)
+		})
+	}
+}
+
+func TestRootCmdWatchFlagRejectsZeroInterval(t *testing.T) {
+	resetRootCommandState()
+
+	var output bytes.Buffer
+	t.Cleanup(func() {
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	RootCmd.SetErr(&output)
+	RootCmd.SetArgs([]string{"--watch", "0"})
+
+	err := RootCmd.Execute()
+
+	require.ErrorContains(t, err, "must be >= 1 second")
+}
+
+func TestRootCmdWatchFlagRejectsNegativeInterval(t *testing.T) {
+	resetRootCommandState()
+
+	var output bytes.Buffer
+	t.Cleanup(func() {
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	RootCmd.SetErr(&output)
+	RootCmd.SetArgs([]string{"--watch=-1"})
+
+	err := RootCmd.Execute()
+
+	require.ErrorContains(t, err, "must be >= 1 second")
+}
+
+func TestRootCmdWatchFlagRejectsNonIntegerInterval(t *testing.T) {
+	resetRootCommandState()
+
+	var output bytes.Buffer
+	t.Cleanup(func() {
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	RootCmd.SetErr(&output)
+	RootCmd.SetArgs([]string{"--watch", "abc"})
+
+	err := RootCmd.Execute()
+
+	require.ErrorContains(t, err, "invalid argument")
+	require.Contains(t, output.String(), "invalid argument")
+}
+
+func TestRunWatchSleepsAfterEachCompletedRefresh(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	interval := 10 * time.Millisecond
+	var (
+		events     []string
+		runEnds    []time.Time
+		sleepCalls []struct {
+			at       time.Time
+			interval time.Duration
+		}
+	)
+
+	runCount := 0
+	err := runWatch(ctx, interval, func(context.Context) error {
+		events = append(events, "run")
+		time.Sleep(50 * time.Millisecond)
+		runEnds = append(runEnds, time.Now())
+		runCount++
+		if runCount == 2 {
+			cancel()
+		}
+		return nil
+	}, func(ctx context.Context, duration time.Duration) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		events = append(events, "sleep")
+		sleepCalls = append(sleepCalls, struct {
+			at       time.Time
+			interval time.Duration
+		}{
+			at:       time.Now(),
+			interval: duration,
+		})
+		return nil
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, []string{"sleep", "run", "sleep", "run"}, events)
+	require.Len(t, sleepCalls, 2)
+	require.Len(t, runEnds, 2)
+	require.Equal(t, interval, sleepCalls[0].interval)
+	require.Equal(t, interval, sleepCalls[1].interval)
+	require.False(t, sleepCalls[1].at.Before(runEnds[0]))
+}
+
+func TestRunWatchRendersTransientErrorsAndContinues(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	interval := 10 * time.Millisecond
+	outcomes := []error{
+		nil,
+		errors.New("conn refused"),
+		errors.New("api timeout"),
+		nil,
+	}
+
+	var (
+		events   []string
+		runCount int
+	)
+
+	output := captureStdout(t, func() {
+		err := runWatch(ctx, interval, func(context.Context) error {
+			events = append(events, "run")
+			err := outcomes[runCount]
+			runCount++
+			if runCount == len(outcomes) {
+				cancel()
+			}
+			return err
+		}, func(ctx context.Context, duration time.Duration) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			require.Equal(t, interval, duration)
+			events = append(events, "sleep")
+			return nil
+		})
+
+		require.NoError(t, err)
+	})
+
+	require.Equal(t, 4, runCount)
+	require.Equal(t, []string{"sleep", "run", "sleep", "run", "sleep", "run", "sleep", "run"}, events)
+	require.Equal(t, 2, strings.Count(output, "watch refresh failed:"))
+	require.Contains(t, output, "watch refresh failed: conn refused")
+	require.Contains(t, output, "watch refresh failed: api timeout")
+}
+
+func TestRunWatchReevaluatesMutableStateOnEachRefresh(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	interval := 10 * time.Millisecond
+	state := struct {
+		generation int
+	}{generation: 1}
+
+	var (
+		events []string
+		seen   []int
+	)
+
+	err := runWatch(ctx, interval, func(context.Context) error {
+		events = append(events, "run")
+		seen = append(seen, state.generation)
+		if len(seen) == 2 {
+			cancel()
+		}
+		return nil
+	}, func(ctx context.Context, duration time.Duration) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		require.Equal(t, interval, duration)
+		events = append(events, "sleep")
+		if len(seen) == 1 {
+			state.generation = 2
+		}
+		return nil
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, []string{"sleep", "run", "sleep", "run"}, events)
+	require.Equal(t, []int{1, 2}, seen)
+}
+
+func TestRootCmdWatchFirstRefreshFailureReturnsUnderlyingErrorAndSkipsWatchLoop(t *testing.T) {
+	resetRootCommandState()
+
+	originalLoggerOutput := log.StandardLogger().Out
+	originalFormatter := log.StandardLogger().Formatter
+	t.Cleanup(func() {
+		log.SetOutput(originalLoggerOutput)
+		log.SetFormatter(originalFormatter)
+		resetRootCommandState()
+		RootCmd.SetArgs(nil)
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	})
+
+	var (
+		output          bytes.Buffer
+		watchLoopCalled bool
+		expectedErr     = errors.New("first refresh failed")
+	)
+
+	log.SetOutput(io.Discard)
+	log.SetFormatter(&log.TextFormatter{DisableTimestamp: true})
+	handleRootCommandError = func(err error) error {
+		return err
+	}
+	runOnceFunc = func(_ context.Context) error {
+		return expectedErr
+	}
+	runWatchFunc = func(ctx context.Context, interval time.Duration, runOnce func(context.Context) error, sleep func(context.Context, time.Duration) error) error {
+		watchLoopCalled = true
+		return nil
+	}
+
+	RootCmd.SetErr(&output)
+	RootCmd.SetArgs([]string{"--watch"})
+
+	err := RootCmd.Execute()
+
+	require.ErrorIs(t, err, expectedErr)
+	require.False(t, watchLoopCalled)
+}
+
+func TestRenderRefreshErrorMatchesContract(t *testing.T) {
+	start := time.Date(2026, time.June, 26, 10, 15, 0, 0, time.UTC)
+
+	output := captureStdout(t, func() {
+		renderRefreshError(start, errors.New("decorated failure"))
+	})
+
+	require.Equal(t, "\033[2J\033[0;0H[2026-06-26T10:15:00Z] watch refresh failed: decorated failure\n", output)
+}
