@@ -28,7 +28,7 @@ viewnode
 dist/
 
 # AI agent instruction/runtime surfaces
-.github/copilot-instructions.md
+!.github/copilot-instructions.md
 .github/agents/
 .github/prompts/
 .github/skills/
